@@ -1,0 +1,17 @@
+{
+  "name": "kakiage",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:client": "pnpm --filter @kakiage/client run dev",
+    "dev:server": "pnpm --filter @kakiage/server run dev",
+    "build:client": "pnpm --filter @kakiage/client run build",
+    "deploy:server": "pnpm --filter @kakiage/server run deploy",
+    "deploy": "pnpm run build:client && pnpm run deploy:server"
+  },
+  "author": "kq5y",
+  "license": "MIT",
+  "packageManager": "pnpm@10.12.3"
+}
