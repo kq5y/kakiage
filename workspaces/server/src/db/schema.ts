@@ -4,7 +4,7 @@ import { integer, primaryKey, sqliteTable, text, unique } from 'drizzle-orm/sqli
 const commonDatetimes = {
   createdAt: integer('created_at', {mode:"timestamp"}).notNull().default(sql`(unixepoch())`),
   updatedAt: integer('updated_at', {mode:"timestamp"}).notNull().default(sql`(unixepoch())`)
-    .$onUpdate(() => sql`(unixepoch())`),
+    .$onUpdateFn(() => new Date()).$type<Date>(),
 };
 
 export const roles = ['admin', 'user'] as const;
@@ -77,8 +77,8 @@ export const writeupToTags = sqliteTable('writeup_to_tags', {
 export const inviteTokens = sqliteTable('invite_tokens', {
   token: text('token').primaryKey().notNull(),
   createdBy: text('created_by')
-    .notNull()
     .references(() => users.id),
+  role: text('role', { enum: roles }).notNull().default('user'),
   expiresAt: integer('expires_at', {mode:"timestamp"}).notNull().default(sql`(unixepoch() + 86400)`),
   used: integer('used').notNull().default(0),
   ...commonDatetimes,
