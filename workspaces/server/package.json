@@ -6,7 +6,8 @@
     "deploy": "wrangler deploy --minify",
     "cf-typegen": "wrangler types --env-interface CloudflareBindings",
     "db:migrate": "drizzle-kit generate --dialect sqlite --out migrations --schema src/db/schema.ts",
-    "db:apply": "wrangler d1 migrations apply kakiage-db"
+    "db:apply": "wrangler d1 migrations apply kakiage-db",
+    "db:init": "wrangler d1 execute kakiage-db --file initialize.sql"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.4",
