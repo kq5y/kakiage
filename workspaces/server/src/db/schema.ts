@@ -80,6 +80,7 @@ export const inviteTokens = sqliteTable('invite_tokens', {
     .notNull()
     .references(() => users.id),
   expiresAt: integer('expires_at', {mode:"timestamp"}).notNull().default(sql`(unixepoch() + 86400)`),
+  used: integer('used').notNull().default(0),
   ...commonDatetimes,
 });
 
