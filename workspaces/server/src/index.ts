@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 
 import { router as authRouter } from '@/routes/auth';
 import { router as categoriesRouter } from '@/routes/categories';
+import { router as ctfsRouter } from '@/routes/ctfs';
 import { router as tagsRouter } from '@/routes/tags';
 import { router as usersRouter } from '@/routes/users';
 
@@ -11,6 +12,7 @@ app.route('/api/v1/auth', authRouter);
 app.route('/api/v1/users', usersRouter);
 app.route('/api/v1/categories', categoriesRouter);
 app.route('/api/v1/tags', tagsRouter);
+app.route('/api/v1/ctfs', ctfsRouter);
 
 app.notFound((c) => {
   return c.json({ error: 'Not Found' }, 404);
