@@ -17,6 +17,7 @@ export const users = sqliteTable('users', {
   role: text('role', { enum: roles }).notNull().default('user'),
   ...commonDatetimes,
 });
+export type User = typeof users.$inferSelect;
 
 export const categories = sqliteTable('categories', {
   id: integer('id').primaryKey({autoIncrement: true}).notNull(),
@@ -24,12 +25,14 @@ export const categories = sqliteTable('categories', {
   color: text('color').notNull(),
   ...commonDatetimes,
 });
+export type Category = typeof categories.$inferSelect;
 
 export const tags = sqliteTable('tags', {
   id: integer('id').primaryKey({autoIncrement: true}).notNull(),
   name: text('name').notNull().unique(),
   ...commonDatetimes,
 });
+export type Tag = typeof tags.$inferSelect;
 
 export const ctfs = sqliteTable('ctfs', {
   id: integer('id').primaryKey({autoIncrement: true}).notNull(),
@@ -39,6 +42,7 @@ export const ctfs = sqliteTable('ctfs', {
   endAt: integer('end_at', {mode:"timestamp"}).notNull(),
   ...commonDatetimes,
 });
+export type CTF = typeof ctfs.$inferSelect;
 
 export const writeups = sqliteTable('writeups', {
   id: integer('id').primaryKey({autoIncrement: true}).notNull(),
@@ -61,6 +65,7 @@ export const writeups = sqliteTable('writeups', {
 }, (table => [
   unique().on(table.ctfId, table.slug),
 ]));
+export type Writeup = typeof writeups.$inferSelect;
 
 export const writeupToTags = sqliteTable('writeup_to_tags', {
   writeupId: integer('writeup_id')
@@ -73,6 +78,7 @@ export const writeupToTags = sqliteTable('writeup_to_tags', {
 }, (table) => [
   primaryKey({columns: [table.writeupId, table.tagId] }),
 ]);
+export type WriteupToTag = typeof writeupToTags.$inferSelect;
 
 export const inviteTokens = sqliteTable('invite_tokens', {
   token: text('token').primaryKey().notNull(),
@@ -83,6 +89,7 @@ export const inviteTokens = sqliteTable('invite_tokens', {
   used: integer('used').notNull().default(0),
   ...commonDatetimes,
 });
+export type InviteToken = typeof inviteTokens.$inferSelect;
 
 export const usersRelations = relations(users, ({ many }) => ({
   writeups: many(writeups),
