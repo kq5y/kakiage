@@ -45,7 +45,7 @@ export const getDiscordToken = async (env: Bindings, code: string) => {
   return data.access_token;
 }
 
-export const getDiscordUser = async (env: Bindings, token: string) => {
+export const getDiscordUser = async (token: string) => {
   const response = await fetch('https://discord.com/api/users/@me', {
     method: 'GET',
     headers: {

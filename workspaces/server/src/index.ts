@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 
-import { apiRouter } from './routes/api';
+import { apiRouter } from '@/routes/api';
 
 const app = new Hono<Env>();
 

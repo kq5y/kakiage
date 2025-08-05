@@ -1,11 +1,11 @@
-import { eq } from "drizzle-orm";
-import { Hono } from "hono";
-import { deleteCookie, setCookie } from "hono/cookie";
-import { sign } from "hono/jwt";
+import { eq } from 'drizzle-orm';
+import { Hono } from 'hono';
+import { deleteCookie, setCookie } from 'hono/cookie';
+import { sign } from 'hono/jwt';
 
-import { getDB } from "../../db/client";
-import { inviteTokens, users } from "../../db/schema";
-import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from "../../libs/discord";
+import { getDB } from '@/db/client';
+import { inviteTokens, users } from '@/db/schema';
+import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from '@/libs/discord';
 
 const router = new Hono<Env>();
 
@@ -40,7 +40,7 @@ router.get('/callback', async (c) => {
       return c.json({ error: 'Failed to get Discord token' }, 500);
     }
 
-    const discordUser = await getDiscordUser(c.env, token);
+    const discordUser = await getDiscordUser(token);
     if (!discordUser) {
       return c.json({ error: 'Failed to get Discord user' }, 500);
     }
@@ -54,7 +54,7 @@ router.get('/callback', async (c) => {
       const session = await sign({
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
         data: { id: user.id }
-      }, c.env.JWT_SECRET, "HS256");
+      }, c.env.JWT_SECRET, 'HS256');
 
       setCookie(c, 'session', session, {
         httpOnly: true,
@@ -97,7 +97,7 @@ router.get('/callback', async (c) => {
       const session = await sign({
         exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
         data: { id: discordUser.id }
-      }, c.env.JWT_SECRET, "HS256");
+      }, c.env.JWT_SECRET, 'HS256');
 
       setCookie(c, 'session', session, {
         httpOnly: true,
