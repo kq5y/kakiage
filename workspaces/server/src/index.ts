@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 
+import { error, success } from '@/libs/response';
 import { router as authRouter } from '@/routes/auth';
 import { router as categoriesRouter } from '@/routes/categories';
 import { router as ctfsRouter } from '@/routes/ctfs';
@@ -15,7 +16,7 @@ app.route('/api/v1/tags', tagsRouter);
 app.route('/api/v1/ctfs', ctfsRouter);
 
 app.notFound((c) => {
-  return c.json({ error: 'Not Found' }, 404);
+  return c.json(error('Not Found'), 404);
 });
 
 export default app;

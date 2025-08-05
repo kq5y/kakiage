@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { getDB } from '@/db/client';
 import { ctfs } from '@/db/schema';
+import { error, success } from '@/libs/response';
 import { authMiddleware } from '@/middlewares/auth';
 
 const router = new Hono<Env>();
@@ -18,16 +19,16 @@ const ctfBodySchema = z.object({
 });
 
 const validateIdParam = zValidator('param', idParamSchema, (res, c) =>
-  !res.success ? c.json({ error: 'Invalid ID format' }, 400) : undefined
+  !res.success ? c.json(error('Invalid ID format'), 400) : undefined
 );
 const validateCtfBody = zValidator('json', ctfBodySchema, (res, c) =>
-  !res.success ? c.json({ error: 'Invalid JSON format' }, 400) : undefined
+  !res.success ? c.json(error('Invalid JSON format'), 400) : undefined
 );
 
 router.get('/', async (c) => {
   const db = getDB(c.env.DB);
   const list = await db.query.ctfs.findMany();
-  return c.json(list);
+  return c.json(success(list));
 });
 
 router.post('/', authMiddleware(true), validateCtfBody, async (c) => {
@@ -39,7 +40,7 @@ router.post('/', authMiddleware(true), validateCtfBody, async (c) => {
     startAt: new Date(startAt),
     endAt: new Date(endAt),
   }).returning();
-  return c.json(ctf, 201);
+  return c.json(success(ctf), 201);
 });
 
 router.get('/:id', validateIdParam, async (c) => {
@@ -56,9 +57,9 @@ router.get('/:id', validateIdParam, async (c) => {
     },
   });
   if (!ctf) {
-    return c.json({ error: 'CTF not found' }, 404);
+    return c.json(error('CTF not found'), 404);
   }
-  return c.json(ctf);
+  return c.json(success(ctf));
 });
 
 router.patch('/:id', authMiddleware(true), validateIdParam, validateCtfBody, async (c) => {
@@ -72,9 +73,9 @@ router.patch('/:id', authMiddleware(true), validateIdParam, validateCtfBody, asy
     endAt: new Date(endAt),
   }).where(eq(ctfs.id, id)).returning();
   if (!ctf) {
-    return c.json({ error: 'CTF not found' }, 404);
+    return c.json(error('CTF not found'), 404);
   }
-  return c.json(ctf);
+  return c.json(success(ctf));
 });
 
 router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => {
@@ -82,9 +83,9 @@ router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => 
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(ctfs).where(eq(ctfs.id, id)).returning();
   if (deleted.length === 0) {
-    return c.json({ error: 'CTF not found' }, 404);
+    return c.json(error('CTF not found'), 404);
   }
-  return c.json({ success: true });
+  return c.json(success());
 });
 
 export { router };

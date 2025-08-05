@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { getDB } from '@/db/client';
 import { categories } from '@/db/schema';
+import { error, success } from '@/libs/response';
 import { authMiddleware } from '@/middlewares/auth';
 
 const router = new Hono<Env>();
@@ -16,23 +17,23 @@ const categoryBodySchema = z.object({
 });
 
 const validateIdParam = zValidator('param', idParamSchema, (res, c) =>
-  !res.success ? c.json({ error: 'Invalid ID format' }, 400) : undefined
+  !res.success ? c.json(error('Invalid ID format'), 400) : undefined
 );
 const validateCategoryBody = zValidator('json', categoryBodySchema, (res, c) =>
-  !res.success ? c.json({ error: 'Invalid JSON format' }, 400) : undefined
+  !res.success ? c.json(error('Invalid JSON format'), 400) : undefined
 );
 
 router.get('/', async (c) => {
   const db = getDB(c.env.DB);
   const list = await db.query.categories.findMany();
-  return c.json(list);
+  return c.json(success(list));
 });
 
 router.post('/', authMiddleware(true, true), validateCategoryBody, async (c) => {
   const db = getDB(c.env.DB);
   const { name, color } = c.req.valid('json');
   const [ category ] = await db.insert(categories).values({ name, color }).returning();
-  return c.json(category, 201);
+  return c.json(success(category), 201);
 });
 
 router.patch('/:id', authMiddleware(true, true), validateIdParam, validateCategoryBody, async (c) => {
@@ -41,9 +42,9 @@ router.patch('/:id', authMiddleware(true, true), validateIdParam, validateCatego
   const { name, color } = c.req.valid('json');
   const [ category ] = await db.update(categories).set({ name, color }).where(eq(categories.id, id)).returning();
   if (!category) {
-    return c.json({ error: 'Category not found' }, 404);
+    return c.json(error('Category not found'), 404);
   }
-  return c.json(category);
+  return c.json(success(category));
 });
 
 router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => {
@@ -51,9 +52,9 @@ router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => 
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();
   if (deleted.length === 0) {
-    return c.json({ error: 'Category not found' }, 404);
+    return c.json(error('Category not found'), 404);
   }
-  return c.json({ success: true });
+  return c.json(success());
 });
 
 export { router };
