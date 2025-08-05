@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { setCookie } from "hono/cookie";
+import { deleteCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 
 import { getDB } from "../../db/client";
@@ -111,6 +111,14 @@ router.get('/callback', async (c) => {
     console.error('Error during authentication:', error);
     return c.json({ error: 'Authentication failed' }, 500);
   }
+});
+
+router.get('/logout', (c) => {
+  deleteCookie(c, 'session', {
+    httpOnly: true,
+    sameSite: 'lax',
+  });
+  return c.redirect('/');
 });
 
 export { router };
