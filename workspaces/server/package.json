@@ -9,8 +9,10 @@
     "db:init": "wrangler d1 execute kakiage-db --file initialize.sql"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.7.2",
     "drizzle-orm": "^0.44.4",
-    "hono": "^4.8.12"
+    "hono": "^4.8.12",
+    "zod": "^4.0.14"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250805.0",
