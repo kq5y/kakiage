@@ -1,7 +1,9 @@
+import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
 import { sign } from 'hono/jwt';
+import { z } from 'zod';
 
 import { getDB } from '@/db/client';
 import { inviteTokens, users } from '@/db/schema';
@@ -9,23 +11,30 @@ import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from '
 
 const router = new Hono<Env>();
 
-router.post('/login', async (c) => {
-  const body = await c.req.formData();
-  const inviteToken = body.get('inviteToken') || '';
-  if (typeof inviteToken !== 'string') {
-    return c.json({ error: 'Invalid invite token' }, 400);
-  }
+const tokenFormSchema = z.object({
+  inviteToken: z.string().optional(),
+});
+const callbackQuerySchema = z.object({
+  code: z.string(),
+  state: z.string(),
+});
+
+const validateTokenForm = zValidator('form', tokenFormSchema, (res, c) =>
+  !res.success ? c.json({ error: 'Invalid form data' }, 400) : undefined
+);
+const validateCallbackQuery = zValidator('query', callbackQuerySchema, (res, c) =>
+  !res.success ? c.json({ error: 'Missing code or state' }, 400) : undefined
+);
+
+router.post('/login', validateTokenForm, async (c) => {
+  const inviteToken = c.req.valid('form').inviteToken || '';
 
   const redirectUri = makeRedirectUrl(c.env, inviteToken);
   return c.redirect(redirectUri);
 });
 
-router.get('/callback', async (c) => {
-  const code = c.req.query('code');
-  const state = c.req.query('state');
-  if (!code || !state) {
-    return c.json({ error: 'Missing code or state' }, 400);
-  }
+router.get('/callback', validateCallbackQuery, async (c) => {
+  const { code, state } = c.req.valid('query');
 
   let inviteToken: string | undefined;
   try {

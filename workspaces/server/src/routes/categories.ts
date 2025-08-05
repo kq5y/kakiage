@@ -1,3 +1,4 @@
+import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
@@ -5,7 +6,6 @@ import { z } from 'zod';
 import { getDB } from '@/db/client';
 import { categories } from '@/db/schema';
 import { authMiddleware } from '@/middlewares/auth';
-import { zValidator } from '@hono/zod-validator';
 
 const router = new Hono<Env>();
 
