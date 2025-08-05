@@ -27,8 +27,13 @@ router.get('/callback', async (c) => {
     return c.json({ error: 'Missing code or state' }, 400);
   }
 
-  const decodedState = JSON.parse(atob(state));
-  const inviteToken = decodedState.inviteToken;
+  let inviteToken: string | undefined;
+  try {
+    const decodedState = JSON.parse(atob(state));
+    inviteToken = decodedState.inviteToken;
+  } catch (error) {
+    return c.json({ error: 'Invalid state data' }, 400);
+  }
 
   if (typeof inviteToken !== 'string') {
     return c.json({ error: 'Invalid state data' }, 400);
