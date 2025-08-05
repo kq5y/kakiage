@@ -7,8 +7,8 @@ import type { User } from "@/db/schema";
 
 export function authMiddleware<R extends boolean = true>(
   requireAuth: R = true as R,
-  userIds: string[] = [],
-  adminOnly: boolean = false
+  adminOnly: boolean = false,
+  userIds: string[] = []
 ) {
   return createMiddleware<Env & {
     Variables: {
