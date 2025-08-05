@@ -1,5 +1,6 @@
-import { authMiddleware } from '@/middlewares/auth';
 import { Hono } from 'hono';
+
+import { authMiddleware } from '@/middlewares/auth';
 
 const router = new Hono<Env>();
 
