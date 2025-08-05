@@ -27,6 +27,10 @@ const validateCallbackQuery = zValidator('query', callbackQuerySchema, (res, c) 
   !res.success ? c.json(error('Missing code or state'), 400) : undefined
 );
 
+const makeAppUrl = (error?: string): string => {
+  return `/${error ? `?error=${encodeURIComponent(error)}` : ''}`;
+}
+
 router.post('/login', validateTokenForm, async (c) => {
   const inviteToken = c.req.valid('form').inviteToken || '';
 
@@ -42,22 +46,22 @@ router.get('/callback', validateCallbackQuery, async (c) => {
     const decodedState = JSON.parse(atob(state));
     inviteToken = decodedState.inviteToken;
   } catch (e) {
-    return c.json(error('Invalid state data'), 400);
+    return c.redirect(makeAppUrl('Invalid state data'));
   }
 
   if (typeof inviteToken !== 'string') {
-    return c.json(error('Invalid state data'), 400);
+    return c.redirect(makeAppUrl('Invalid state data'));
   }
 
   try {
     const token = await getDiscordToken(c.env, code);
     if (!token) {
-      return c.json(error('Failed to get Discord token'), 500);
+      return c.redirect(makeAppUrl('Failed to get Discord token'));
     }
 
     const discordUser = await getDiscordUser(token);
     if (!discordUser) {
-      return c.json(error('Failed to get Discord user'), 500);
+      return c.redirect(makeAppUrl('Failed to get Discord user'));
     }
 
     const db = getDB(c.env.DB);
@@ -77,11 +81,11 @@ router.get('/callback', validateCallbackQuery, async (c) => {
         maxAge: 60 * 60 * 24,
       });
 
-      return c.redirect('/');
+      return c.redirect(makeAppUrl());
     }
     else {
       if (!inviteToken) {
-        return c.json(error('Invite token is required for new users'), 400);
+        return c.redirect(makeAppUrl('Invite token is required for new users'));
       }
 
       const existInviteToken = await db.query.inviteTokens.findFirst({
@@ -90,7 +94,7 @@ router.get('/callback', validateCallbackQuery, async (c) => {
       });
 
       if (!existInviteToken) {
-        return c.json(error('Invalid or expired invite token'), 400);
+        return c.redirect(makeAppUrl('Invalid or expired invite token'));
       }
 
       const txResult = await db.batch([
@@ -106,7 +110,7 @@ router.get('/callback', validateCallbackQuery, async (c) => {
       ]);
       
       if (!txResult || txResult.length !== 2 || !txResult[1].success) {
-        return c.json(error('Failed to create user or update invite token'), 500);
+        return c.redirect(makeAppUrl('Failed to create user or update invite token'));
       }
 
       const session = await sign({
@@ -124,7 +128,7 @@ router.get('/callback', validateCallbackQuery, async (c) => {
     }
   } catch (e) {
     console.error('Error during authentication:', e);
-    return c.json(error('Authentication failed'), 500);
+    return c.redirect(makeAppUrl('Authentication failed'));
   }
 });
 
@@ -133,7 +137,7 @@ router.get('/logout', (c) => {
     httpOnly: true,
     sameSite: 'lax',
   });
-  return c.redirect('/');
+  return c.redirect(makeAppUrl());
 });
 
 export { router };
