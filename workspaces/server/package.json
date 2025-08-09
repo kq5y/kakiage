@@ -1,12 +1,20 @@
 {
   "name": "@kakiage/server",
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "dev": "wrangler dev",
     "deploy": "wrangler deploy --minify",
     "db:migrate": "drizzle-kit generate --dialect sqlite --out migrations --schema src/db/schema.ts",
     "db:apply": "wrangler d1 migrations apply kakiage-db",
-    "db:init": "wrangler d1 execute kakiage-db --file initialize.sql"
+    "db:init": "wrangler d1 execute kakiage-db --file initialize.sql",
+    "build:rpc": "tsup ./src/rpc.ts --dts --format esm"
+  },
+  "exports": {
+    "./rpc": {
+      "import": "./dist/rpc.js",
+      "types": "./dist/rpc.d.ts"
+    }
   },
   "dependencies": {
     "@hono/zod-validator": "^0.7.2",
@@ -17,6 +25,8 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250805.0",
     "drizzle-kit": "^0.31.4",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
     "wrangler": "^4.27.0"
   }
 }
