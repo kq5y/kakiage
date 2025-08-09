@@ -7,16 +7,14 @@ import { router as ctfsRouter } from '@/routes/ctfs';
 import { router as tagsRouter } from '@/routes/tags';
 import { router as usersRouter } from '@/routes/users';
 
-const app = new Hono<Env>();
-
-app.route('/api/v1/auth', authRouter);
-app.route('/api/v1/users', usersRouter);
-app.route('/api/v1/categories', categoriesRouter);
-app.route('/api/v1/tags', tagsRouter);
-app.route('/api/v1/ctfs', ctfsRouter);
-
-app.notFound((c) => {
-  return c.json(error('Not Found'), 404);
-});
+const app = new Hono<Env>()
+  .route('/api/v1/auth', authRouter)
+  .route('/api/v1/users', usersRouter)
+  .route('/api/v1/categories', categoriesRouter)
+  .route('/api/v1/tags', tagsRouter)
+  .route('/api/v1/ctfs', ctfsRouter)
+  .notFound((c) => {
+    return c.json(error('Not Found'), 404);
+  });
 
 export default app;

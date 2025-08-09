@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { createFactory } from 'hono/factory';
 import { z } from 'zod';
 
 import { getDB } from '@/db/client';
@@ -8,7 +9,7 @@ import { categories } from '@/db/schema';
 import { error, success } from '@/libs/response';
 import { authMiddleware } from '@/middlewares/auth';
 
-const router = new Hono<Env>();
+const factory = createFactory<Env>();
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, 'ID must be numeric') });
 const categoryBodySchema = z.object({
@@ -23,20 +24,20 @@ const validateCategoryBody = zValidator('json', categoryBodySchema, (res, c) =>
   !res.success ? c.json(error('Invalid JSON format'), 400) : undefined
 );
 
-router.get('/', async (c) => {
+const getHandlers = factory.createHandlers(async (c) => {
   const db = getDB(c.env.DB);
   const list = await db.query.categories.findMany();
   return c.json(success(list));
 });
 
-router.post('/', authMiddleware(true, true), validateCategoryBody, async (c) => {
+const postHandlers = factory.createHandlers(authMiddleware(true, true), validateCategoryBody, async (c) => {
   const db = getDB(c.env.DB);
   const { name, color } = c.req.valid('json');
   const [ category ] = await db.insert(categories).values({ name, color }).returning();
   return c.json(success(category), 201);
 });
 
-router.patch('/:id', authMiddleware(true, true), validateIdParam, validateCategoryBody, async (c) => {
+const patchHandlers = factory.createHandlers(authMiddleware(true, true), validateIdParam, validateCategoryBody, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const { name, color } = c.req.valid('json');
@@ -47,7 +48,7 @@ router.patch('/:id', authMiddleware(true, true), validateIdParam, validateCatego
   return c.json(success(category));
 });
 
-router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => {
+const deleteHandlers = factory.createHandlers(authMiddleware(true, true), validateIdParam, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();
@@ -56,5 +57,11 @@ router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => 
   }
   return c.json(success());
 });
+
+const router = new Hono<Env>()
+  .get('/', ...getHandlers)
+  .post('/', ...postHandlers)
+  .patch('/:id', ...patchHandlers)
+  .delete('/:id', ...deleteHandlers);
 
 export { router };

@@ -2,6 +2,7 @@ import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
+import { createFactory } from "hono/factory";
 import { sign } from 'hono/jwt';
 import { z } from 'zod';
 
@@ -10,7 +11,7 @@ import { inviteTokens, users } from '@/db/schema';
 import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from '@/libs/discord';
 import { error } from '@/libs/response';
 
-const router = new Hono<Env>();
+const factory = createFactory<Env>();
 
 const tokenFormSchema = z.object({
   inviteToken: z.string().optional(),
@@ -31,14 +32,14 @@ const makeAppUrl = (error?: string): string => {
   return `/${error ? `?error=${encodeURIComponent(error)}` : ''}`;
 }
 
-router.post('/login', validateTokenForm, async (c) => {
+const postLoginHandlers = factory.createHandlers(validateTokenForm, async (c) => {
   const inviteToken = c.req.valid('form').inviteToken || '';
 
   const redirectUri = makeRedirectUrl(c.env, inviteToken);
   return c.redirect(redirectUri);
 });
 
-router.get('/callback', validateCallbackQuery, async (c) => {
+const postCallbackHandlers = factory.createHandlers(validateCallbackQuery, async (c) => {
   const { code, state } = c.req.valid('query');
 
   let inviteToken: string | undefined;
@@ -132,12 +133,17 @@ router.get('/callback', validateCallbackQuery, async (c) => {
   }
 });
 
-router.get('/logout', (c) => {
+const postLogoutHandlers = factory.createHandlers(async (c) => {
   deleteCookie(c, 'session', {
     httpOnly: true,
     sameSite: 'lax',
   });
   return c.redirect(makeAppUrl());
 });
+
+const router = new Hono<Env>()
+  .post('/login', ...postLoginHandlers)
+  .get('/callback', ...postCallbackHandlers)
+  .get('/logout', ...postLogoutHandlers);
 
 export { router };

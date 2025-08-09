@@ -1,13 +1,17 @@
 import { Hono } from 'hono';
+import { createFactory } from 'hono/factory';
 
 import { success } from '@/libs/response';
 import { authMiddleware } from '@/middlewares/auth';
 
-const router = new Hono<Env>();
+const factory = createFactory<Env>();
 
-router.get('/me', authMiddleware(), (c) => {
+const getMeHandlers = factory.createHandlers(authMiddleware(), (c) => {
   const user = c.get('user');
   return c.json(success(user), 200);
 });
+
+const router = new Hono<Env>()
+  .get('/me', ...getMeHandlers);
 
 export { router };

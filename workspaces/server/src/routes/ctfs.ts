@@ -1,6 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { createFactory } from 'hono/factory';
 import { z } from 'zod';
 
 import { getDB } from '@/db/client';
@@ -8,7 +9,7 @@ import { ctfs } from '@/db/schema';
 import { error, success } from '@/libs/response';
 import { authMiddleware } from '@/middlewares/auth';
 
-const router = new Hono<Env>();
+const factory = createFactory<Env>();
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, 'ID must be numeric') });
 const ctfBodySchema = z.object({
@@ -25,13 +26,13 @@ const validateCtfBody = zValidator('json', ctfBodySchema, (res, c) =>
   !res.success ? c.json(error('Invalid JSON format'), 400) : undefined
 );
 
-router.get('/', async (c) => {
+const getHandlers = factory.createHandlers(async (c) => {
   const db = getDB(c.env.DB);
   const list = await db.query.ctfs.findMany();
   return c.json(success(list));
 });
 
-router.post('/', authMiddleware(true), validateCtfBody, async (c) => {
+const postHandlers = factory.createHandlers(authMiddleware(true), validateCtfBody, async (c) => {
   const db = getDB(c.env.DB);
   const { name, url, startAt, endAt } = c.req.valid('json');
   const [ctf] = await db.insert(ctfs).values({
@@ -43,7 +44,7 @@ router.post('/', authMiddleware(true), validateCtfBody, async (c) => {
   return c.json(success(ctf), 201);
 });
 
-router.get('/:id', validateIdParam, async (c) => {
+const getDetailHandlers = factory.createHandlers(validateIdParam, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const ctf = await db.query.ctfs.findFirst({
@@ -62,7 +63,7 @@ router.get('/:id', validateIdParam, async (c) => {
   return c.json(success(ctf));
 });
 
-router.patch('/:id', authMiddleware(true), validateIdParam, validateCtfBody, async (c) => {
+const patchHandlers = factory.createHandlers(authMiddleware(true), validateIdParam, validateCtfBody, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const { name, url, startAt, endAt } = c.req.valid('json');
@@ -78,7 +79,7 @@ router.patch('/:id', authMiddleware(true), validateIdParam, validateCtfBody, asy
   return c.json(success(ctf));
 });
 
-router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => {
+const deleteHandlers = factory.createHandlers(authMiddleware(true, true), validateIdParam, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(ctfs).where(eq(ctfs.id, id)).returning();
@@ -87,5 +88,12 @@ router.delete('/:id', authMiddleware(true, true), validateIdParam, async (c) => 
   }
   return c.json(success());
 });
+
+const router = new Hono<Env>()
+  .get('/', ...getHandlers)
+  .post('/', ...postHandlers)
+  .get('/:id', ...getDetailHandlers)
+  .patch('/:id', ...patchHandlers)
+  .delete('/:id', ...deleteHandlers);
 
 export { router };
