@@ -17,6 +17,12 @@
       "database_id": "28045659-569e-4cde-91f4-951c6588fc7e",
     }
   ],
+  "r2_buckets": [
+    {
+      "bucket_name": "kakiage-img",
+      "binding": "R2_IMG"
+    }
+  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1

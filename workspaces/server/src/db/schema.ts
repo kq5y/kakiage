@@ -91,6 +91,16 @@ export const inviteTokens = sqliteTable('invite_tokens', {
 });
 export type InviteToken = typeof inviteTokens.$inferSelect;
 
+export const images = sqliteTable('images', {
+  id: text('id').primaryKey().notNull(),
+  originalHash: text('original_hash').notNull().unique(),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id),
+  ...commonDatetimes,
+});
+export type Image = typeof images.$inferSelect;
+
 export const usersRelations = relations(users, ({ many }) => ({
   writeups: many(writeups),
   inviteTokens: many(inviteTokens),
@@ -104,7 +114,7 @@ export const tagsRelations = relations(tags, ({ many }) => ({
   writeupToTags: many(writeupToTags)
 }));
 
-export const ctfsRelations = relations(ctfs, ({ one, many }) => ({
+export const ctfsRelations = relations(ctfs, ({ many }) => ({
   writeups: many(writeups),
 }));
 
@@ -138,6 +148,13 @@ export const writeupToTagsRelations = relations(writeupToTags, ({ one }) => ({
 export const inviteTokensRelations = relations(inviteTokens, ({ one }) => ({
   createdByUser: one(users, {
     fields: [inviteTokens.createdBy],
+    references: [users.id],
+  }),
+}));
+
+export const imagesRelations = relations(images, ({ one }) => ({
+  createdByUser: one(users, {
+    fields: [images.createdBy],
     references: [users.id],
   }),
 }));
