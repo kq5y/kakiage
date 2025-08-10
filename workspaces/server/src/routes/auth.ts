@@ -1,4 +1,3 @@
-import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { deleteCookie, setCookie } from 'hono/cookie';
@@ -9,7 +8,7 @@ import { z } from 'zod';
 import { getDB } from '@/db/client';
 import { inviteTokens, users } from '@/db/schema';
 import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from '@/libs/discord';
-import { error } from '@/libs/response';
+import { withValidates } from '@/wrappers/validate';
 
 const factory = createFactory<Env>();
 
@@ -21,25 +20,18 @@ const callbackQuerySchema = z.object({
   state: z.string(),
 });
 
-const validateTokenForm = zValidator('form', tokenFormSchema, (res, c) =>
-  !res.success ? c.json(error('Invalid form data'), 400) : undefined
-);
-const validateCallbackQuery = zValidator('query', callbackQuerySchema, (res, c) =>
-  !res.success ? c.json(error('Missing code or state'), 400) : undefined
-);
-
 const makeAppUrl = (error?: string): string => {
   return `/${error ? `?error=${encodeURIComponent(error)}` : ''}`;
 }
 
-const postLoginHandlers = factory.createHandlers(validateTokenForm, async (c) => {
+const postLoginHandlers = factory.createHandlers(withValidates({form: tokenFormSchema}, async (c) => {
   const inviteToken = c.req.valid('form').inviteToken || '';
 
   const redirectUri = makeRedirectUrl(c.env, inviteToken);
   return c.redirect(redirectUri);
-});
+}));
 
-const postCallbackHandlers = factory.createHandlers(validateCallbackQuery, async (c) => {
+const postCallbackHandlers = factory.createHandlers(withValidates({query: callbackQuerySchema}, async (c) => {
   const { code, state } = c.req.valid('query');
 
   let inviteToken: string | undefined;
@@ -131,7 +123,7 @@ const postCallbackHandlers = factory.createHandlers(validateCallbackQuery, async
     console.error('Error during authentication:', e);
     return c.redirect(makeAppUrl('Authentication failed'));
   }
-});
+}));
 
 const postLogoutHandlers = factory.createHandlers(async (c) => {
   deleteCookie(c, 'session', {

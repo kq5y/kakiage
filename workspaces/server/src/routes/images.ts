@@ -1,4 +1,3 @@
-import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
@@ -8,7 +7,8 @@ import { getDB } from '@/db/client';
 import { images } from '@/db/schema';
 import { convertImageFromBuffer, hashArrayBufferToHex } from '@/libs/image';
 import { error, success } from '@/libs/response';
-import { authMiddleware } from '@/middlewares/auth';
+import { withAuth } from '@/wrappers/auth';
+import { withValidates } from '@/wrappers/validate';
 
 const MAX_SIZE = 10 * 1024 * 1024;
 
@@ -21,14 +21,7 @@ const imageFormSchema = z.object({
   image: z.instanceof(File).refine((file) => file.size > 0 && file.size < MAX_SIZE && file.type.startsWith('image/'))
 });
 
-const validateIdParam = zValidator('param', idParamSchema, (res, c) =>
-  !res.success ? c.json(error('Invalid ID format'), 400) : undefined
-);
-const validateImageForm = zValidator('form', imageFormSchema, (res, c) =>
-  !res.success ? c.json(error('Invalid image file'), 400) : undefined
-);
-
-const postUploadHandlers = factory.createHandlers(authMiddleware(), validateImageForm, async (c) => {
+const postUploadHandlers = factory.createHandlers(withAuth(withValidates({form: imageFormSchema}, async (c) => {
   const user = c.get('user');
   const db = getDB(c.env.DB);
 
@@ -86,9 +79,9 @@ const postUploadHandlers = factory.createHandlers(authMiddleware(), validateImag
 
   const imagePath = new URL(c.req.url).pathname.replace('/upload', `/${id}`);
   return c.json(success({ id: id, path: imagePath }), 201, {Location: imagePath});
-});
+})));
 
-const getHandlers = factory.createHandlers(validateIdParam, async (c) => {
+const getHandlers = factory.createHandlers(withValidates({param: idParamSchema}, async (c) => {
   const id = c.req.valid('param').id;
 
   const cacheKey = new Request(`${c.req.url}`);
@@ -105,21 +98,23 @@ const getHandlers = factory.createHandlers(validateIdParam, async (c) => {
   const avifImage = await c.env.R2_IMG.get(id);
   if (!avifImage) return c.json(error('Image not found'), 404);
 
-  const arrayBuffer = await avifImage.arrayBuffer();
+  const arrayBuffer: ArrayBuffer = await avifImage.arrayBuffer();
   const etag = imageRow.originalHash;
 
-  const resp = new Response(arrayBuffer, {
-    status: 200,
-    headers: {
-      'Content-Type': avifImage.httpMetadata?.contentType || 'application/octet-stream',
-      'Cache-Control': 'public, max-age=31536000, immutable',
-      'ETag': etag,
-    },
-  });
+  const headers = {
+    'Content-Type': avifImage.httpMetadata?.contentType || 'application/octet-stream',
+    'Cache-Control': 'public, max-age=31536000, immutable',
+    'ETag': etag,
+  };
 
-  c.executionCtx.waitUntil(cache.put(cacheKey, resp.clone()));
-  return resp;
-});
+  c.executionCtx.waitUntil(cache.put(cacheKey, new Response(
+    arrayBuffer, {
+      status: 200,
+      headers,
+    }
+  )));
+  return c.body(arrayBuffer, 200, headers);
+}));
 
 const router = new Hono<Env>()
   .post('/upload', ...postUploadHandlers)

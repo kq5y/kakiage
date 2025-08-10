@@ -1,4 +1,3 @@
-import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
@@ -7,7 +6,8 @@ import { z } from 'zod';
 import { getDB } from '@/db/client';
 import { ctfs } from '@/db/schema';
 import { error, success } from '@/libs/response';
-import { authMiddleware } from '@/middlewares/auth';
+import { withAuth } from '@/wrappers/auth';
+import { withValidates } from '@/wrappers/validate';
 
 const factory = createFactory<Env>();
 
@@ -19,20 +19,13 @@ const ctfBodySchema = z.object({
   endAt: z.number(),
 });
 
-const validateIdParam = zValidator('param', idParamSchema, (res, c) =>
-  !res.success ? c.json(error('Invalid ID format'), 400) : undefined
-);
-const validateCtfBody = zValidator('json', ctfBodySchema, (res, c) =>
-  !res.success ? c.json(error('Invalid JSON format'), 400) : undefined
-);
-
 const getHandlers = factory.createHandlers(async (c) => {
   const db = getDB(c.env.DB);
   const list = await db.query.ctfs.findMany();
-  return c.json(success(list));
+  return c.json(success(list), 200);
 });
 
-const postHandlers = factory.createHandlers(authMiddleware(true), validateCtfBody, async (c) => {
+const postHandlers = factory.createHandlers(withAuth(withValidates({json: ctfBodySchema}, async (c) => {
   const db = getDB(c.env.DB);
   const { name, url, startAt, endAt } = c.req.valid('json');
   const [ctf] = await db.insert(ctfs).values({
@@ -42,9 +35,9 @@ const postHandlers = factory.createHandlers(authMiddleware(true), validateCtfBod
     endAt: new Date(endAt),
   }).returning();
   return c.json(success(ctf), 201);
-});
+})));
 
-const getDetailHandlers = factory.createHandlers(validateIdParam, async (c) => {
+const getDetailHandlers = factory.createHandlers(withValidates({param: idParamSchema}, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const ctf = await db.query.ctfs.findFirst({
@@ -60,10 +53,10 @@ const getDetailHandlers = factory.createHandlers(validateIdParam, async (c) => {
   if (!ctf) {
     return c.json(error('CTF not found'), 404);
   }
-  return c.json(success(ctf));
-});
+  return c.json(success(ctf), 200);
+}));
 
-const patchHandlers = factory.createHandlers(authMiddleware(true), validateIdParam, validateCtfBody, async (c) => {
+const patchHandlers = factory.createHandlers(withAuth(withValidates({param: idParamSchema, json: ctfBodySchema}, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const { name, url, startAt, endAt } = c.req.valid('json');
@@ -76,18 +69,18 @@ const patchHandlers = factory.createHandlers(authMiddleware(true), validateIdPar
   if (!ctf) {
     return c.json(error('CTF not found'), 404);
   }
-  return c.json(success(ctf));
-});
+  return c.json(success(ctf), 200);
+})));
 
-const deleteHandlers = factory.createHandlers(authMiddleware(true, true), validateIdParam, async (c) => {
+const deleteHandlers = factory.createHandlers(withAuth(withValidates({param: idParamSchema}, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(ctfs).where(eq(ctfs.id, id)).returning();
   if (deleted.length === 0) {
     return c.json(error('CTF not found'), 404);
   }
-  return c.json(success());
-});
+  return c.json(success(), 200);
+}), true, ['admin']));
 
 const router = new Hono<Env>()
   .get('/', ...getHandlers)

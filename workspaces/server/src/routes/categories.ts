@@ -1,4 +1,3 @@
-import { zValidator } from '@hono/zod-validator';
 import { eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
@@ -7,7 +6,8 @@ import { z } from 'zod';
 import { getDB } from '@/db/client';
 import { categories } from '@/db/schema';
 import { error, success } from '@/libs/response';
-import { authMiddleware } from '@/middlewares/auth';
+import { withAuth } from '@/wrappers/auth';
+import { withValidates } from '@/wrappers/validate';
 
 const factory = createFactory<Env>();
 
@@ -17,27 +17,20 @@ const categoryBodySchema = z.object({
   color: z.string().regex(/^#([0-9A-F]{3}|[0-9A-F]{6})$/, 'Color must be a valid hex code'),
 });
 
-const validateIdParam = zValidator('param', idParamSchema, (res, c) =>
-  !res.success ? c.json(error('Invalid ID format'), 400) : undefined
-);
-const validateCategoryBody = zValidator('json', categoryBodySchema, (res, c) =>
-  !res.success ? c.json(error('Invalid JSON format'), 400) : undefined
-);
-
 const getHandlers = factory.createHandlers(async (c) => {
   const db = getDB(c.env.DB);
   const list = await db.query.categories.findMany();
-  return c.json(success(list));
+  return c.json(success(list), 200);
 });
 
-const postHandlers = factory.createHandlers(authMiddleware(true, true), validateCategoryBody, async (c) => {
+const postHandlers = factory.createHandlers(withAuth(withValidates({json: categoryBodySchema}, async (c) => {
   const db = getDB(c.env.DB);
   const { name, color } = c.req.valid('json');
   const [ category ] = await db.insert(categories).values({ name, color }).returning();
   return c.json(success(category), 201);
-});
+}), true, ['admin']));
 
-const patchHandlers = factory.createHandlers(authMiddleware(true, true), validateIdParam, validateCategoryBody, async (c) => {
+const patchHandlers = factory.createHandlers(withAuth(withValidates({param: idParamSchema, json: categoryBodySchema}, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const { name, color } = c.req.valid('json');
@@ -45,18 +38,18 @@ const patchHandlers = factory.createHandlers(authMiddleware(true, true), validat
   if (!category) {
     return c.json(error('Category not found'), 404);
   }
-  return c.json(success(category));
-});
+  return c.json(success(category), 200);
+}), true, ['admin']));
 
-const deleteHandlers = factory.createHandlers(authMiddleware(true, true), validateIdParam, async (c) => {
+const deleteHandlers = factory.createHandlers(withAuth(withValidates({param: idParamSchema}, async (c) => {
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();
   if (deleted.length === 0) {
     return c.json(error('Category not found'), 404);
   }
-  return c.json(success());
-});
+  return c.json(success(), 200);
+}), true, ['admin']));
 
 const router = new Hono<Env>()
   .get('/', ...getHandlers)
