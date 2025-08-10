@@ -10,7 +10,7 @@ export type ErrorResponse = {
 
 export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;
 
-export function success<T>(data?: T): SuccessResponse<T> {
+export function success<T = undefined>(data?: T): SuccessResponse<T> {
   return data === undefined ? { success: true } : { success: true, data };
 }
 
