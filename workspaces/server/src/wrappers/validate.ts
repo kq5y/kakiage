@@ -6,6 +6,7 @@ import type { ZodType } from 'zod';
 import z from 'zod';
 
 import { error, JsonErrorResponse } from '@/libs/response';
+import { HasUser } from './auth';
 
 type V<T extends ZodType, Target extends keyof ValidationTargets> = {
   in: { [K in Target]: z.input<T> };
@@ -42,8 +43,9 @@ type InferInputFromSchemaMap<S extends SchemaMap> = Intersect<{
 
 export function withValidates<
   S extends SchemaMap,
+  E extends Env & HasUser<A>,
+  A extends boolean,
   I extends Input,
-  E extends Env = any,
   P extends string = any,
   R extends HandlerResponse<any> = any
 >(
@@ -148,6 +150,6 @@ export function withValidates<
       c.req.addValidatedData(target as keyof ValidationTargets, result.data as any);
     }
 
-    return handler(c, next);
+    return handler(c as unknown as Context<E, P, I & InferInputFromSchemaMap<S>>, next);
   };
 }

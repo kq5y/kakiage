@@ -7,7 +7,7 @@ import { getDB } from '@/db/client';
 import type { Role, User } from '@/db/schema';
 import { error, JsonErrorResponse } from '@/libs/response';
 
-type AuthEnv<E extends Env, A extends boolean = true> = E & {
+export type HasUser<A extends boolean = true> = {
   Variables: {
     user: A extends true ? User : User | null;
   };
@@ -17,16 +17,17 @@ type AsyncHandler<E extends Env, P extends string, I extends Input, R> =
   (c: Context<E, P, I>, next: Next) => R | Promise<R>;
 
 export function withAuth<
+  BaseE extends Env,
+  HandlerE extends BaseE & HasUser<A>,
   I extends Input,
-  E extends Env = any,
   P extends string = any,
   R extends HandlerResponse<any> = any,
   A extends boolean = true
 >(
-  handler: AsyncHandler<AuthEnv<E, A>, P, I, R>,
+  handler: AsyncHandler<HandlerE, P, I, R>,
   requireAuth: A = true as A,
   requireRoles: Role[] = ["admin", "user"]
-): AsyncHandler<AuthEnv<E, A>, P, I, R | JsonErrorResponse<401 | 403>> {
+): AsyncHandler<BaseE, P, I, R | JsonErrorResponse<401 | 403>> {
   return async (c, next) => {
     const token = getCookie(c, 'session');
 
@@ -63,8 +64,8 @@ export function withAuth<
       }
     }
 
-    c.set('user', user);
+    (c as unknown as Context<HandlerE, P, I>).set('user', user);
 
-    return handler(c, next);
+    return handler(c as unknown as Context<HandlerE, P, I>, next);
   };
 }
