@@ -3,12 +3,12 @@ import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
 import { z } from 'zod';
 
+import { AuthError, checkAuth } from '@/checkers/auth';
+import { checkValidates, ValidateError } from '@/checkers/validate';
 import { getDB } from '@/db/client';
 import { images } from '@/db/schema';
 import { convertImageFromBuffer, hashArrayBufferToHex } from '@/libs/image';
 import { error, success } from '@/libs/response';
-import { withAuth } from '@/wrappers/auth';
-import { withValidates } from '@/wrappers/validate';
 
 const MAX_SIZE = 10 * 1024 * 1024;
 
@@ -21,7 +21,17 @@ const imageFormSchema = z.object({
   image: z.instanceof(File).refine((file) => file.size > 0 && file.size < MAX_SIZE && file.type.startsWith('image/'))
 });
 
-const postUploadHandlers = factory.createHandlers(withAuth(withValidates({form: imageFormSchema}, async (c) => {
+const postUploadHandlers = factory.createHandlers(async (_c) => {
+  let c; try {
+    c = await checkAuth(_c, true);
+    c = await checkValidates(c, {form: imageFormSchema});
+  } catch (err) {
+    if (err instanceof AuthError || err instanceof ValidateError) {
+      return _c.json(error(err.message), err.statusCode);
+    }
+    throw err;
+  }
+
   const user = c.get('user');
   const db = getDB(c.env.DB);
 
@@ -79,9 +89,18 @@ const postUploadHandlers = factory.createHandlers(withAuth(withValidates({form: 
 
   const imagePath = new URL(c.req.url).pathname.replace('/upload', `/${id}`);
   return c.json(success({ id: id, path: imagePath }), 201, {Location: imagePath});
-})));
+});
 
-const getHandlers = factory.createHandlers(withValidates({param: idParamSchema}, async (c) => {
+const getHandlers = factory.createHandlers(async (_c) => {
+  let c; try {
+    c = await checkValidates(_c, {param: idParamSchema});
+  } catch (err) {
+    if (err instanceof ValidateError) {
+      return _c.json(error(err.message), err.statusCode);
+    }
+    throw err;
+  }
+
   const id = c.req.valid('param').id;
 
   const cacheKey = new Request(`${c.req.url}`);
@@ -114,7 +133,7 @@ const getHandlers = factory.createHandlers(withValidates({param: idParamSchema},
     }
   )));
   return c.body(arrayBuffer, 200, headers);
-}));
+});
 
 const router = new Hono<Env>()
   .post('/upload', ...postUploadHandlers)

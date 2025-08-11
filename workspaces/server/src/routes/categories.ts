@@ -3,11 +3,11 @@ import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
 import { z } from 'zod';
 
+import { AuthError, checkAuth } from '@/checkers/auth';
+import { checkValidates, ValidateError } from '@/checkers/validate';
 import { getDB } from '@/db/client';
 import { categories } from '@/db/schema';
 import { error, success } from '@/libs/response';
-import { withAuth } from '@/wrappers/auth';
-import { withValidates } from '@/wrappers/validate';
 
 const factory = createFactory<Env>();
 
@@ -23,14 +23,34 @@ const getHandlers = factory.createHandlers(async (c) => {
   return c.json(success(list), 200);
 });
 
-const postHandlers = factory.createHandlers(withAuth(withValidates({json: categoryBodySchema}, async (c) => {
+const postHandlers = factory.createHandlers(async (_c) => {
+  let c; try {
+    c = await checkAuth(_c, true, true);
+    c = await checkValidates(c, {json: categoryBodySchema});
+  } catch (err) {
+    if (err instanceof AuthError || err instanceof ValidateError) {
+      return _c.json(error(err.message), err.statusCode);
+    }
+    throw err;
+  }
+
   const db = getDB(c.env.DB);
   const { name, color } = c.req.valid('json');
   const [ category ] = await db.insert(categories).values({ name, color }).returning();
   return c.json(success(category), 201);
-}), true, ['admin']));
+});
 
-const patchHandlers = factory.createHandlers(withAuth(withValidates({param: idParamSchema, json: categoryBodySchema}, async (c) => {
+const patchHandlers = factory.createHandlers(async (_c) => {
+  let c; try {
+    c = await checkAuth(_c, true, true);
+    c = await checkValidates(c, {param: idParamSchema, json: categoryBodySchema});
+  } catch (err) {
+    if (err instanceof AuthError || err instanceof ValidateError) {
+      return _c.json(error(err.message), err.statusCode);
+    }
+    throw err;
+  }
+
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const { name, color } = c.req.valid('json');
@@ -39,9 +59,19 @@ const patchHandlers = factory.createHandlers(withAuth(withValidates({param: idPa
     return c.json(error('Category not found'), 404);
   }
   return c.json(success(category), 200);
-}), true, ['admin']));
+});
 
-const deleteHandlers = factory.createHandlers(withAuth(withValidates({param: idParamSchema}, async (c) => {
+const deleteHandlers = factory.createHandlers(async (_c) => {
+  let c; try {
+    c = await checkAuth(_c, true, true);
+    c = await checkValidates(c, {param: idParamSchema});
+  } catch (err) {
+    if (err instanceof AuthError || err instanceof ValidateError) {
+      return _c.json(error(err.message), err.statusCode);
+    }
+    throw err;
+  }
+
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();
@@ -49,7 +79,7 @@ const deleteHandlers = factory.createHandlers(withAuth(withValidates({param: idP
     return c.json(error('Category not found'), 404);
   }
   return c.json(success(), 200);
-}), true, ['admin']));
+});
 
 const router = new Hono<Env>()
   .get('/', ...getHandlers)
