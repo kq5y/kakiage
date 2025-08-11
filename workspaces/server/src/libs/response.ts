@@ -1,5 +1,5 @@
 import type { TypedResponse } from "hono";
-import type { ContentfulStatusCode } from "hono/utils/http-status";
+import type { ContentfulStatusCode, RedirectStatusCode } from "hono/utils/http-status";
 import type { InvalidJSONValue, JSONParsed, JSONValue, SimplifyDeepArray } from "hono/utils/types";
 
 export type SuccessResponse<T> = {
@@ -14,6 +14,8 @@ export type ErrorResponse = {
 
 type JSONRespondReturn<T extends JSONValue | SimplifyDeepArray<unknown> | InvalidJSONValue, U extends ContentfulStatusCode> = Response & TypedResponse<SimplifyDeepArray<T> extends JSONValue ? JSONValue extends SimplifyDeepArray<T> ? never : JSONParsed<T> : never, U, "json">;
 export type JsonErrorResponse<U extends ContentfulStatusCode> = JSONRespondReturn<ErrorResponse, U>
+
+export type RedirectResponse<T extends RedirectStatusCode = 302> = Response & TypedResponse<undefined, T, "redirect">
 
 export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;
 

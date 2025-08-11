@@ -3,11 +3,11 @@ import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
 import { z } from 'zod';
 
-import { AuthError, checkAuth } from '@/checkers/auth';
-import { checkValidates, ValidateError } from '@/checkers/validate';
 import { getDB } from '@/db/client';
 import { ctfs } from '@/db/schema';
 import { error, success } from '@/libs/response';
+import { withAuth, withAuthErrorResponse } from '@/middlewares/auth';
+import { withValidates, withValidatesErrorResponse } from '@/middlewares/validate';
 
 const factory = createFactory<Env>();
 
@@ -25,16 +25,8 @@ const getHandlers = factory.createHandlers(async (c) => {
   return c.json(success(list), 200);
 });
 
-const postHandlers = factory.createHandlers(async (_c) => {
-  let c; try {
-    c = await checkAuth(_c, true);
-    c = await checkValidates(c, {json: ctfBodySchema});
-  } catch (err) {
-    if (err instanceof AuthError || err instanceof ValidateError) {
-      return _c.json(error(err.message), err.statusCode);
-    }
-    throw err;
-  }
+const postHandlers = factory.createHandlers(withAuth(true), withValidates({json: ctfBodySchema}), async (c) => {
+  try{} catch{ return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
 
   const db = getDB(c.env.DB);
   const { name, url, startAt, endAt } = c.req.valid('json');
@@ -47,16 +39,8 @@ const postHandlers = factory.createHandlers(async (_c) => {
   return c.json(success(ctf), 201);
 });
 
-const getDetailHandlers = factory.createHandlers(async (_c) => {
-  let c; try {
-    c = await checkAuth(_c, true);
-    c = await checkValidates(c, {param: idParamSchema});
-  } catch (err) {
-    if (err instanceof AuthError || err instanceof ValidateError) {
-      return _c.json(error(err.message), err.statusCode);
-    }
-    throw err;
-  }
+const getDetailHandlers = factory.createHandlers(withAuth(true), withValidates({param: idParamSchema}), async (c) => {
+  try{} catch{ return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
 
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
@@ -76,17 +60,9 @@ const getDetailHandlers = factory.createHandlers(async (_c) => {
   return c.json(success(ctf), 200);
 });
 
-const patchHandlers = factory.createHandlers(async (_c) => {
-  let c; try {
-    c = await checkAuth(_c, true);
-    c = await checkValidates(c, {param: idParamSchema, json: ctfBodySchema});
-  } catch (err) {
-    if (err instanceof AuthError || err instanceof ValidateError) {
-      return _c.json(error(err.message), err.statusCode);
-    }
-    throw err;
-  }
-
+const patchHandlers = factory.createHandlers(withAuth(true), withValidates({param: idParamSchema, json: ctfBodySchema}), async (c) => {
+  try{} catch{ return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
+  
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const { name, url, startAt, endAt } = c.req.valid('json');
@@ -102,17 +78,9 @@ const patchHandlers = factory.createHandlers(async (_c) => {
   return c.json(success(ctf), 200);
 });
 
-const deleteHandlers = factory.createHandlers(async (_c) => {
-  let c; try {
-    c = await checkAuth(_c, true, true);
-    c = await checkValidates(c, {param: idParamSchema});
-  } catch (err) {
-    if (err instanceof AuthError || err instanceof ValidateError) {
-      return _c.json(error(err.message), err.statusCode);
-    }
-    throw err;
-  }
-
+const deleteHandlers = factory.createHandlers(withAuth(true, true), withValidates({param: idParamSchema}), async (c) => {
+  try{} catch{ return null as unknown as withAuthErrorResponse<true> | withValidatesErrorResponse; }
+  
   const db = getDB(c.env.DB);
   const id = Number(c.req.valid('param').id);
   const deleted = await db.delete(ctfs).where(eq(ctfs.id, id)).returning();

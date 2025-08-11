@@ -5,10 +5,10 @@ import { createFactory } from "hono/factory";
 import { sign } from 'hono/jwt';
 import { z } from 'zod';
 
-import { checkValidates, ValidateError } from '@/checkers/validate';
 import { getDB } from '@/db/client';
 import { inviteTokens, users } from '@/db/schema';
 import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from '@/libs/discord';
+import { withValidates, withValidatesRedirectResponse } from '@/middlewares/validate';
 
 const factory = createFactory<Env>();
 
@@ -24,15 +24,8 @@ const makeAppUrl = (error?: string): string => {
   return `/${error ? `?error=${encodeURIComponent(error)}` : ''}`;
 }
 
-const postLoginHandlers = factory.createHandlers(async (_c) => {
-  let c; try {
-    c = await checkValidates(_c, {form: tokenFormSchema});
-  } catch (err) {
-    if (err instanceof ValidateError) {
-      return _c.redirect(makeAppUrl(err.message));
-    }
-    throw err;
-  }
+const postLoginHandlers = factory.createHandlers(withValidates({form: tokenFormSchema}, makeAppUrl), async (c) => {
+  try{} catch{ return null as unknown as withValidatesRedirectResponse; }
 
   const inviteToken = c.req.valid('form').inviteToken || '';
 
@@ -40,15 +33,8 @@ const postLoginHandlers = factory.createHandlers(async (_c) => {
   return c.redirect(redirectUri);
 });
 
-const postCallbackHandlers = factory.createHandlers(async (_c) => {
-  let c; try {
-    c = await checkValidates(_c, {query: callbackQuerySchema});
-  } catch (err) {
-    if (err instanceof ValidateError) {
-      return _c.redirect(makeAppUrl(err.message));
-    }
-    throw err;
-  }
+const postCallbackHandlers = factory.createHandlers(withValidates({query: callbackQuerySchema}, makeAppUrl), async (c) => {
+  try{} catch{ return null as unknown as withValidatesRedirectResponse; }
 
   const { code, state } = c.req.valid('query');
 
