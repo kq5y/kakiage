@@ -321,7 +321,7 @@ const getWriteupContentHandlers = factory.createHandlers(withAuth(false), withVa
   }
 
   const html = await markdownToHtml(writeup.content);
-  return c.html(html, 200);
+  return c.json(success(html), 200);
 });
 
 const patchWriteupHandlers = factory.createHandlers(withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async (c) => {
