@@ -21,6 +21,10 @@
     "@tanstack/router-plugin": "^1.121.2",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
-    "typescript": "^5.7.2"
+    "@unocss/postcss": "^66.4.2",
+    "@unocss/preset-wind3": "^66.4.2",
+    "typescript": "^5.7.2",
+    "unocss": "^66.4.2",
+    "vite": "^7.1.2"
   }
 }

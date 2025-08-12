@@ -1,2 +1,8 @@
 packages:
   - workspaces/*
+
+onlyBuiltDependencies:
+  - core-js
+  - esbuild
+  - sharp
+  - workerd
