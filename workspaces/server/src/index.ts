@@ -7,6 +7,7 @@ import { router as ctfsRouter } from '@/routes/ctfs';
 import { router as imagesRouter } from '@/routes/images';
 import { router as tagsRouter } from '@/routes/tags';
 import { router as usersRouter } from '@/routes/users';
+import { router as writeupsRouter } from '@/routes/writeups';
 
 const app = new Hono<Env>()
   .route('/api/v1/auth', authRouter)
@@ -15,6 +16,7 @@ const app = new Hono<Env>()
   .route('/api/v1/tags', tagsRouter)
   .route('/api/v1/ctfs', ctfsRouter)
   .route('/api/v1/images', imagesRouter)
+  .route('/api/v1/writeups', writeupsRouter)
   .notFound((c) => {
     return c.json(error('Not Found'), 404);
   });

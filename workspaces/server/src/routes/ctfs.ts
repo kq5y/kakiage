@@ -52,6 +52,7 @@ const getDetailHandlers = factory.createHandlers(withAuth(true), withValidates({
           content: false,
           categoryId: false,
           createdBy: false,
+          password: false,
         },
         with: {
           category: true,
