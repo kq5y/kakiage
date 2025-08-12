@@ -45,8 +45,8 @@ export type withValidatesRedirectResponse = RedirectResponse<withValidatesRedire
 export function withValidates<
   E extends Env,
   P extends string,
-  I extends Input,
   S extends SchemaMap,
+  I extends Input = {},
 >(
   schemas: S,
   redirectUrl?: (error?: string) => string

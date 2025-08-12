@@ -25,7 +25,7 @@ export type withAuthErrorResponse<A extends boolean = false> = JsonErrorResponse
 export function withAuth<
   E extends Env,
   P extends string,
-  I extends Input,
+  I extends Input = {},
   L extends boolean = true,
   A extends boolean = false,
 >(
@@ -68,7 +68,7 @@ export function withAuth<
       }
     }
 
-    c.set('user', user as any);
+    c.set('user', user);
     await next();
   });
 }
