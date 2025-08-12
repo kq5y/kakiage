@@ -1,11 +1,31 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+import type { QueryClient } from '@tanstack/react-query';
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
+import { useAuth, type AuthContextType } from '@/hooks/useAuth';
+
+export const Route = createRootRouteWithContext<{
+  auth: AuthContextType,
+  queryClient: QueryClient
+}>()({
+  component: () => {
+    const { isLoading } = useAuth();
+
+    if (isLoading) {
+      return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
+    
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-8">
+          <Outlet />
+        </main>
+        <Footer />
+        <TanStackRouterDevtools />
+      </div>
+    )
+  }
 })

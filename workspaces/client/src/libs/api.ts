@@ -284,6 +284,11 @@ export const getWriteup = async (
       createdAt: new Date(data.data.createdByUser.createdAt),
       updatedAt: new Date(data.data.createdByUser.updatedAt),
     },
+    ctf: {
+      ...data.data.ctf,
+      createdAt: new Date(data.data.ctf.createdAt),
+      updatedAt: new Date(data.data.ctf.updatedAt),
+    }
   };
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
   throw new ApiError("Failed to fetch", res.status);
