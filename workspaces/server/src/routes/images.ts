@@ -38,7 +38,8 @@ const postUploadHandlers = factory.createHandlers(withAuth(true), withValidates(
 
   const existing = await db.query.images.findFirst({ where: eq(images.originalHash, hash) });
   if (existing) {
-    return c.json(success({ id: existing.id, hash: hash }), 200, { 'X-Image-Duplicate': 'true' });
+    const imagePath = new URL(c.req.url).pathname.replace('/upload', `/${existing.id}`);
+    return c.json(success({ id: existing.id, path: imagePath }), 200, { 'X-Image-Duplicate': 'true' });
   }
 
   let convertedFile: File;
