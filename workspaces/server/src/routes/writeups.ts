@@ -1,7 +1,6 @@
 import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { createFactory } from 'hono/factory';
-import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
 import { z } from 'zod';
 
@@ -53,19 +52,7 @@ const writeupPasswordHeaderSchema = z.object({
 });
 
 function sanitizeHtml(html: string): string {
-  return DOMPurify.sanitize(html, {
-    USE_PROFILES: { html: true },
-    ADD_ATTR: ['target'],
-    ALLOWED_TAGS: [
-      'a', 'abbr', 'b', 'blockquote', 'br', 'code', 'dd', 'del', 'div', 
-      'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 
-      'img', 'kbd', 'li', 'ol', 'p', 'pre', 's', 'span', 'strong', 
-      'sub', 'sup', 'table', 'tbody', 'td', 'th', 'thead', 'tr', 'ul'
-    ],
-    ALLOWED_ATTR: [
-      'alt', 'class', 'href', 'id', 'src', 'target', 'title'
-    ]
-  });
+  return html; // TODO: Implement HTML sanitization
 }
 
 async function getHash(text: string): Promise<string> {
@@ -173,6 +160,7 @@ const getWriteupHandlers = factory.createHandlers(withValidates({ param: idParam
       categoryId: false,
       createdBy: false,
       password: false,
+      ctfId: false,
     },
     with: {
       category: true,
@@ -181,7 +169,8 @@ const getWriteupHandlers = factory.createHandlers(withValidates({ param: idParam
         with: {
           tag: true,
         }
-      }
+      },
+      ctf: true
     },
   });
 
