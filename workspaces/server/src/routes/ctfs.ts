@@ -49,7 +49,18 @@ const getDetailHandlers = factory.createHandlers(withAuth(true), withValidates({
     with: {
       writeups: {
         columns: {
-          content: false
+          content: false,
+          categoryId: false,
+          createdBy: false,
+        },
+        with: {
+          category: true,
+          createdByUser: true,
+          writeupToTags: {
+            with: {
+              tag: true,
+            },
+          },
         }
       },
     },
@@ -57,7 +68,15 @@ const getDetailHandlers = factory.createHandlers(withAuth(true), withValidates({
   if (!ctf) {
     return c.json(error('CTF not found'), 404);
   }
-  return c.json(success(ctf), 200);
+  const ctfWithTags = {
+    ...ctf,
+    writeups: (ctf?.writeups ?? []).map(w => ({
+      ...w,
+      tags: (w.writeupToTags ?? []).map(wt => wt.tag),
+      writeupToTags: undefined
+    })),
+  };
+  return c.json(success(ctfWithTags), 200);
 });
 
 const patchHandlers = factory.createHandlers(withAuth(true), withValidates({param: idParamSchema, json: ctfBodySchema}), async (c) => {
