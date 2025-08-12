@@ -11,7 +11,7 @@ class ApiError extends Error {
 
 /* client */
 
-export const apiClient = hcWithType(import.meta.env.API_URL || "");
+export const apiClient = hcWithType(import.meta.env.PUBLIC_API_URL || "");
 
 /* auth */
 
@@ -49,10 +49,10 @@ export const createCategory = async (
 };
 
 export const updateCategory = async (
-  id: string,
+  id: number,
   payload: InferRequestType<typeof apiClient.api.v1.categories[':id']['$patch']>['json']
 ) => {
-  const res = await apiClient.api.v1.categories[':id'].$patch({ param: { id }, json: payload });
+  const res = await apiClient.api.v1.categories[':id'].$patch({ param: { id: id.toString() }, json: payload });
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success) return {
@@ -65,9 +65,9 @@ export const updateCategory = async (
 };
 
 export const deleteCategory = async (
-  id: string
+  id: number
 ) => {
-  const res = await apiClient.api.v1.categories[':id'].$delete({ param: { id } });
+  const res = await apiClient.api.v1.categories[':id'].$delete({ param: { id: id.toString() } });
   const data = await res.json();
   if (res.ok && data.success) return data.success;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
@@ -91,9 +91,9 @@ export const getCtfs = async () => {
 };
 
 export const getCtfDetail = async (
-  id: string
+  id: number
 ) => {
-  const res = await apiClient.api.v1.ctfs[':id'].$get({ param: { id } });
+  const res = await apiClient.api.v1.ctfs[':id'].$get({ param: { id: id.toString() } });
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success) return {
@@ -102,6 +102,26 @@ export const getCtfDetail = async (
     updatedAt: new Date(data.data.updatedAt),
     startAt: new Date(data.data.startAt),
     endAt: new Date(data.data.endAt),
+    writeups: (data.data.writeups ?? []).map(w => ({
+      ...w,
+      createdAt: new Date(w.createdAt),
+      updatedAt: new Date(w.updatedAt),
+      tags: (w.tags ?? []).map(wt => ({
+        ...wt,
+        createdAt: new Date(wt.createdAt),
+        updatedAt: new Date(wt.updatedAt),
+      })),
+      category: {
+        ...w.category,
+        createdAt: new Date(w.category.createdAt),
+        updatedAt: new Date(w.category.updatedAt),
+      },
+      createdByUser: {
+        ...w.createdByUser,
+        createdAt: new Date(w.createdByUser.createdAt),
+        updatedAt: new Date(w.createdByUser.updatedAt),
+      },
+    })),
   };
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
   throw new ApiError("Failed to fetch", res.status);
@@ -125,10 +145,10 @@ export const createCtf = async (
 };
 
 export const updateCtf = async (
-  id: string,
+  id: number,
   payload: InferRequestType<typeof apiClient.api.v1.ctfs[':id']['$patch']>['json']
 ) => {
-  const res = await apiClient.api.v1.ctfs[':id'].$patch({ param: { id }, json: payload });
+  const res = await apiClient.api.v1.ctfs[':id'].$patch({ param: { id: id.toString() }, json: payload });
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success) return {
@@ -143,9 +163,9 @@ export const updateCtf = async (
 };
 
 export const deleteCtf = async (
-  id: string
+  id: number
 ) => {
-  const res = await apiClient.api.v1.ctfs[':id'].$delete({ param: { id } });
+  const res = await apiClient.api.v1.ctfs[':id'].$delete({ param: { id: id.toString() } });
   const data = await res.json();
   if (res.ok && data.success) return data.success;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);

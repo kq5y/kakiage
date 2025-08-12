@@ -1,6 +1,6 @@
 {
-  "short_name": "TanStack App",
-  "name": "Create TanStack App Sample",
+  "short_name": "kakiage",
+  "name": "A web application for publishing CTF writeups",
   "icons": [
     {
       "src": "favicon.ico",
