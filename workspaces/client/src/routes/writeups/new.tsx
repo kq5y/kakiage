@@ -17,10 +17,10 @@ export const Route = createFileRoute('/writeups/new')({
     return {};
   },
   validateSearch: (search: Record<string, unknown>): {
-    ctfId?: string
+    ctfId?: number
   } => {
     return {
-      ctfId: search.ctfId ? String(search.ctfId) : undefined
+      ctfId: (search.ctfId as number) || undefined
     }
   }
 });
@@ -33,7 +33,7 @@ function NewWriteupPage() {
     title: '',
     slug: '',
     content: '',
-    ctfId: ctfIdFromSearch || '',
+    ctfId: ctfIdFromSearch ? ctfIdFromSearch.toString() : '',
     categoryId: '',
     tagIds: [] as string[],
   });

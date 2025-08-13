@@ -47,7 +47,7 @@ function CtfDetailPage() {
             </Link>
             <Link 
               to={`/writeups/new`}
-              search={{ ctfId }}
+              search={{ ctfId: Number(ctfId) }}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Add Writeup
@@ -90,7 +90,7 @@ function CtfDetailPage() {
           <p className="text-gray-500 mb-2">No writeups available for this CTF yet.</p>
           <Link 
             to={`/writeups/new`}
-            search={{ ctfId }}
+            search={{ ctfId: Number(ctfId) }}
             className="text-blue-600 hover:underline"
           >
             Add the first writeup
