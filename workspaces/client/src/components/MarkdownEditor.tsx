@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import { useEffect, useRef, useState } from 'react';
 
 interface MarkdownEditorProps {
   value: string;
@@ -9,7 +11,21 @@ interface MarkdownEditorProps {
 export default function MarkdownEditor({ value, onChange, onImageUpload }: MarkdownEditorProps) {
   const [isPreview, setIsPreview] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [renderedHtml, setRenderedHtml] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  useEffect(() => {
+    (async () => {
+      if (isPreview) {
+        const dirty = await marked(value, {
+          breaks: true,
+          gfm: true,
+        });
+        const html = DOMPurify.sanitize(dirty);
+        setRenderedHtml(html);
+      }
+    })();
+  }, [value, isPreview]);
   
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
@@ -48,28 +64,6 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
     } finally {
       setIsUploading(false);
     }
-  };
-  
-  // Simple markdown to HTML preview (very basic implementation)
-  const renderPreview = () => {
-    // In a real application, you'd use a proper markdown renderer like marked.js
-    // This is just a simplified example
-    let html = value
-      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-      .replace(/\*\*(.*)\*\*/gm, '<strong>$1</strong>')
-      .replace(/\*(.*)\*/gm, '<em>$1</em>')
-      .replace(/!\[(.*?)\]\((.*?)\)/gm, '<img alt="$1" src="$2" style="max-width: 100%;" />')
-      .replace(/\[(.*?)\]\((.*?)\)/gm, '<a href="$2">$1</a>')
-      .replace(/`([^`]+)`/gm, '<code>$1</code>')
-      .replace(/```([\s\S]*?)```/gm, '<pre><code>$1</code></pre>')
-      .replace(/^\s*>\s*(.*)$/gm, '<blockquote>$1</blockquote>')
-      .replace(/^\s*(-|\*)\s(.*)$/gm, '<ul><li>$2</li></ul>')
-      .replace(/^\s*(\d+\.)\s(.*)$/gm, '<ol><li>$2</li></ol>')
-      .replace(/\n/gm, '<br>');
-    
-    return <div dangerouslySetInnerHTML={{ __html: html }} className="prose max-w-none" />;
   };
   
   return (
@@ -114,7 +108,7 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
       
       <div className="min-h-[300px] max-h-[600px]">
         {isPreview ? (
-          <div className="p-4 h-full overflow-auto">{renderPreview()}</div>
+          <div className="p-4 h-full overflow-auto prose max-w-none" dangerouslySetInnerHTML={{ __html: renderedHtml }} />
         ) : (
           <textarea
             value={value}
