@@ -5,11 +5,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev:client": "pnpm --filter @kakiage/client run dev",
-    "dev:server": "pnpm --filter @kakiage/server run dev",
-    "build:client": "pnpm --filter @kakiage/client run build",
-    "deploy:server": "pnpm --filter @kakiage/server run deploy",
-    "deploy": "pnpm run build:client && pnpm run deploy:server"
+    "dev:client": "pnpm --filter client run dev",
+    "dev:server": "pnpm --filter server run dev",
+    "build:client": "pnpm --filter client run build",
+    "build:server": "pnpm --filter server run build:rpc",
+    "build": "pnpm run build:server && pnpm run build:client",
+    "deploy:server": "pnpm --filter server run deploy",
+    "deploy": "pnpm run build && pnpm run deploy:server"
   },
   "author": "kq5y",
   "license": "MIT",
