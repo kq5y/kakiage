@@ -70,7 +70,11 @@ export function Header() {
                     to="/"
                     onClick={(e) => {
                       e.preventDefault();
-                      window.location.href = getLoginLink();
+                      const form = document.createElement("form");
+                      form.method = "POST";
+                      form.action = getLoginLink();
+                      document.body.appendChild(form);
+                      form.submit();
                     }}
                     className="text-gray-700 hover:text-blue-600"
                   >
