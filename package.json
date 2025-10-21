@@ -5,15 +5,35 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev:client": "pnpm --filter client run dev",
-    "dev:server": "pnpm --filter server run dev",
-    "build:client": "pnpm --filter client run build",
-    "build:server": "pnpm --filter server run build:rpc",
-    "build": "pnpm run build:server && pnpm run build:client",
-    "deploy:server": "pnpm --filter server run deploy",
-    "deploy": "pnpm run build && pnpm run deploy:server"
+    "dev": "wireit",
+    "build": "wireit",
+    "deploy": "wireit"
   },
   "author": "kq5y",
   "license": "MIT",
-  "packageManager": "pnpm@10.12.3"
+  "packageManager": "pnpm@10.12.3",
+  "devDependencies": {
+    "wireit": "^0.14.12"
+  },
+  "wireit": {
+    "dev": {
+      "dependencies": [
+        "./workspaces/client:watch",
+        "./workspaces/server:watch:rpc",
+        "./workspaces/server:dev"
+      ]
+    },
+    "build": {
+      "dependencies": [
+        "./workspaces/client:build",
+        "./workspaces/server:build:rpc"
+      ]
+    },
+    "deploy": {
+      "dependencies": [
+        "build",
+        "./workspaces/server:deploy"
+      ]
+    }
+  }
 }

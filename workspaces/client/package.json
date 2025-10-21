@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "rsbuild dev --port 3000",
-    "build": "rsbuild build && tsc --noEmit",
-    "preview": "rsbuild preview"
+    "dev": "wireit",
+    "watch": "wireit",
+    "build": "wireit"
   },
   "dependencies": {
     "@kakiage/server": "workspace:*",
@@ -27,6 +27,33 @@
     "@unocss/preset-wind3": "^66.4.2",
     "typescript": "^5.7.2",
     "unocss": "^66.4.2",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "wireit": "^0.14.12"
+  },
+  "wireit": {
+    "build": {
+      "command": "rsbuild build && tsc --noEmit",
+      "files": [
+        "src/**",
+        "index.html",
+        "uno.config.ts",
+        "tsconfig.json",
+        "rsbuild.config.ts"
+      ],
+      "output": [
+        "dist/**"
+      ]
+    },
+    "watch": {
+      "command": "rsbuild build --watch",
+      "service": true,
+      "files": [
+        "src/**"
+      ]
+    },
+    "dev": {
+      "command": "rsbuild dev --port 3000",
+      "service": true
+    }
   }
 }
