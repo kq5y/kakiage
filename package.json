@@ -31,7 +31,6 @@
     },
     "deploy": {
       "dependencies": [
-        "build",
         "./workspaces/server:deploy"
       ]
     }
