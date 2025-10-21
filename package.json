@@ -18,15 +18,15 @@
   "wireit": {
     "dev": {
       "dependencies": [
-        "./workspaces/client:watch",
         "./workspaces/server:watch:rpc",
+        "./workspaces/client:watch",
         "./workspaces/server:dev"
       ]
     },
     "build": {
       "dependencies": [
-        "./workspaces/client:build",
-        "./workspaces/server:build:rpc"
+        "./workspaces/server:build:rpc",
+        "./workspaces/client:build"
       ]
     },
     "deploy": {

@@ -42,7 +42,11 @@
     },
     "watch:rpc": {
       "command": "tsup ./src/rpc.ts --watch --dts --format esm",
-      "service": true,
+      "service": {
+        "readyWhen": {
+          "lineMatches": ".*DTS.*Build success in \\d+.*"
+        }
+      },
       "files": [
         "src/**"
       ]
@@ -51,8 +55,8 @@
       "command": "wrangler dev",
       "service": true,
       "dependencies": [
-        "../client:watch",
-        "watch:rpc"
+        "watch:rpc",
+        "../client:watch"
       ],
       "files": [
         "../client/dist/**",

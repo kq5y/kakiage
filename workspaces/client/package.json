@@ -42,13 +42,27 @@
       ],
       "output": [
         "dist/**"
+      ],
+      "dependencies": [
+        "../server:build:rpc"
       ]
     },
     "watch": {
       "command": "rsbuild build --watch",
-      "service": true,
+      "service": {
+        "readyWhen": {
+          "lineMatches": ".*ready.*built in.*"
+        }
+      },
       "files": [
-        "src/**"
+        "src/**",
+        "index.html",
+        "uno.config.ts",
+        "tsconfig.json",
+        "rsbuild.config.ts"
+      ],
+      "dependencies": [
+        "../server:watch:rpc"
       ]
     },
     "dev": {
