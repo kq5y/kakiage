@@ -34,14 +34,14 @@
     "build": {
       "command": "rsbuild build && tsc --noEmit",
       "files": [
-        "src/**",
+        "src",
         "index.html",
         "uno.config.ts",
         "tsconfig.json",
         "rsbuild.config.ts"
       ],
       "output": [
-        "dist/**"
+        "dist"
       ],
       "dependencies": [
         "../server:build:rpc"
@@ -55,7 +55,7 @@
         }
       },
       "files": [
-        "src/**",
+        "src",
         "index.html",
         "uno.config.ts",
         "tsconfig.json",

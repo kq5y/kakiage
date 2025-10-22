@@ -34,10 +34,10 @@
     "build:rpc": {
       "command": "tsup ./src/rpc.ts --dts --format esm",
       "files": [
-        "src/**"
+        "src"
       ],
       "output": [
-        "dist/**"
+        "dist"
       ]
     },
     "watch:rpc": {
@@ -48,7 +48,7 @@
         }
       },
       "files": [
-        "src/**"
+        "src"
       ]
     },
     "dev": {
@@ -67,7 +67,7 @@
     "deploy": {
       "command": "wrangler deploy --minify",
       "files": [
-        "dist/**",
+        "dist",
         "wrangler.jsonc"
       ],
       "dependencies": [
