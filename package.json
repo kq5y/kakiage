@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "wireit",
     "build": "wireit",
-    "deploy": "wireit"
+    "deploy": "wireit",
+    "deploy:preview": "wireit"
   },
   "author": "kq5y",
   "license": "MIT",
@@ -32,6 +33,11 @@
     "deploy": {
       "dependencies": [
         "./workspaces/server:deploy"
+      ]
+    },
+    "deploy:preview": {
+      "dependencies": [
+        "./workspaces/server:deploy:preview"
       ]
     }
   }
