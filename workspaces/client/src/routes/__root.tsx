@@ -1,14 +1,14 @@
-import type { QueryClient } from '@tanstack/react-query';
-import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import type { QueryClient } from "@tanstack/react-query";
+import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
-import { Footer } from '@/components/layout/Footer';
-import { Header } from '@/components/layout/Header';
-import { useAuth, type AuthContextType } from '@/hooks/useAuth';
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
+import { useAuth, type AuthContextType } from "@/hooks/useAuth";
 
 export const Route = createRootRouteWithContext<{
-  auth: AuthContextType,
-  queryClient: QueryClient
+  auth: AuthContextType;
+  queryClient: QueryClient;
 }>()({
   component: () => {
     const { isLoading } = useAuth();
@@ -16,7 +16,7 @@ export const Route = createRootRouteWithContext<{
     if (isLoading) {
       return <div className="flex items-center justify-center h-screen">Loading...</div>;
     }
-    
+
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
@@ -26,6 +26,6 @@ export const Route = createRootRouteWithContext<{
         <Footer />
         <TanStackRouterDevtools />
       </div>
-    )
-  }
-})
+    );
+  },
+});

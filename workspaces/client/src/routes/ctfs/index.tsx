@@ -1,21 +1,25 @@
-import { useQuery } from '@tanstack/react-query';
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
-import { useAuth } from '@/hooks/useAuth';
-import { getCtfs } from '@/libs/api';
+import { useAuth } from "@/hooks/useAuth";
+import { getCtfs } from "@/libs/api";
 
-export const Route = createFileRoute('/ctfs/')({
-  component: CtfsPage
+export const Route = createFileRoute("/ctfs/")({
+  component: CtfsPage,
 });
 
 function CtfsPage() {
-  const { data: ctfs, isLoading, error } = useQuery({
-    queryKey: ['ctfs'],
-    queryFn: getCtfs
+  const {
+    data: ctfs,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["ctfs"],
+    queryFn: getCtfs,
   });
 
   const { user } = useAuth();
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === "admin";
 
   if (isLoading) return <div>Loading CTFs...</div>;
   if (error) return <div>Error loading CTFs: {error.message}</div>;
@@ -25,18 +29,15 @@ function CtfsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">CTF Competitions</h1>
         {isAdmin && (
-          <Link 
-            to="/ctfs/new" 
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
+          <Link to="/ctfs/new" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             Add New CTF
           </Link>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {ctfs?.map(ctf => (
-          <Link 
+        {ctfs?.map((ctf) => (
+          <Link
             key={ctf.id}
             to={`/ctfs/$ctfId`}
             params={{ ctfId: ctf.id.toString() }}

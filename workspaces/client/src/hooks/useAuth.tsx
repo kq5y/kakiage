@@ -1,7 +1,7 @@
-import type { User } from '@kakiage/server/rpc';
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import type { User } from "@kakiage/server/rpc";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-import { getLoggedInUser, getLogoutLink } from '@/libs/api';
+import { getLoggedInUser, getLogoutLink } from "@/libs/api";
 
 export type AuthContextType = {
   user: User | null;
@@ -10,7 +10,7 @@ export type AuthContextType = {
   logout: () => Promise<void>;
   setUser: (user: User | null) => void;
   getUser: () => User | null;
-}
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -26,8 +26,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(userData);
       } catch (err) {
         setUser(null);
-        
-        if (err instanceof Error && err.message !== 'Unauthorized') {
+
+        if (err instanceof Error && err.message !== "Unauthorized") {
           setError(err);
         }
       } finally {
@@ -42,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       window.location.href = getLogoutLink();
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed:", err);
       if (err instanceof Error) {
         setError(err);
       }
@@ -52,16 +52,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const getUser = () => user;
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, error, logout, setUser, getUser }}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={{ user, isLoading, error, logout, setUser, getUser }}>{children}</AuthContext.Provider>
   );
 }
 
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
