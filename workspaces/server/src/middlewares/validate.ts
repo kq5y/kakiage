@@ -10,10 +10,12 @@ import { error, JsonErrorResponse, RedirectResponse } from '@/libs/response';
 
 // ----- from hono -----
 
-var jsonRegex = /^application\/([a-z-\.]+\+)?json(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
-var multipartRegex = /^multipart\/form-data(;\s?boundary=[a-zA-Z0-9'"()+_,\-./:=?]+)?$/;
-var urlencodedRegex = /^application\/x-www-form-urlencoded(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
+// https://github.com/honojs/hono/blob/main/src/validator/validator.ts
+const jsonRegex = /^application\/([a-z-\.]+\+)?json(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/
+const multipartRegex = /^multipart\/form-data(;\s?boundary=[a-zA-Z0-9'"()+_,\-./:=?]+)?$/
+const urlencodedRegex = /^application\/x-www-form-urlencoded(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/
 
+// https://github.com/honojs/hono/blob/main/src/utils/buffer.ts
 var bufferToFormData = (arrayBuffer: ArrayBuffer, contentType: string): Promise<FormData> => {
   const response = new Response(arrayBuffer, {
     headers: {
