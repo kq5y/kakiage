@@ -1,7 +1,8 @@
-import { hc, parseResponse, type DetailedError, type InferRequestType } from 'hono/client';
+import { type DetailedError, hc, type InferRequestType, parseResponse } from "hono/client";
 
-import type { Category, CTF, Image, InviteToken, Role, Tag, User, Writeup, WriteupToTag } from '@/db/schema';
-import app from "@/index";
+import type { Category, CTF, Image, InviteToken, Role, Tag, User, Writeup, WriteupToTag } from "@/db/schema";
+
+import type app from "@/index";
 
 export { parseResponse, type DetailedError, type InferRequestType };
 

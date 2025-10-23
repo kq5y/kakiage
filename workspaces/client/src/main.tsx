@@ -1,12 +1,12 @@
-import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { StrictMode } from 'react'
-import ReactDOM from 'react-dom/client'
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { StrictMode } from "react";
+import ReactDOM from "react-dom/client";
 
-import { AuthProvider, useAuth } from './hooks/useAuth.tsx'
-import { routeTree } from './routeTree.gen.ts'
+import { AuthProvider, useAuth } from "./hooks/useAuth.tsx";
+import { routeTree } from "./routeTree.gen.ts";
 
-import './styles.css'
+import "./styles.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,30 +20,31 @@ const queryClient = new QueryClient({
 const router = createRouter({
   routeTree,
   context: {
-    auth: undefined!, // Will be set in the AuthProvider
+    // biome-ignore lint/style/noNonNullAssertion: Will be set in the AuthProvider
+    auth: undefined!,
     queryClient,
   },
-  defaultPreload: 'intent',
+  defaultPreload: "intent",
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 1000 * 60 * 5,
 });
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
-    router: typeof router
+    router: typeof router;
   }
 }
 
 function InnerApp() {
   const auth = useAuth();
   const queryClient = useQueryClient();
-  return <RouterProvider router={router} context={{ auth, queryClient }} />
+  return <RouterProvider router={router} context={{ auth, queryClient }} />;
 }
 
-const rootElement = document.getElementById('app')
+const rootElement = document.getElementById("app");
 if (rootElement && !rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement)
+  const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
@@ -52,5 +53,5 @@ if (rootElement && !rootElement.innerHTML) {
         </AuthProvider>
       </QueryClientProvider>
     </StrictMode>,
-  )
+  );
 }
