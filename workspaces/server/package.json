@@ -9,7 +9,9 @@
     "build:rpc": "wireit",
     "watch:rpc": "wireit",
     "db:migrate": "wireit",
-    "db:apply": "wireit"
+    "db:apply": "wireit",
+    "format": "wireit",
+    "lint": "wireit"
   },
   "exports": {
     "./rpc": {
@@ -24,6 +26,7 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.7",
     "@cloudflare/workers-types": "^4.20251014.0",
     "drizzle-kit": "^0.31.5",
     "tsup": "^8.5.0",
@@ -90,6 +93,12 @@
     },
     "db:apply": {
       "command": "wrangler d1 migrations apply kakiage-db"
+    },
+    "format": {
+      "command": "biome format --write"
+    },
+    "lint": {
+      "command": "biome lint --write"
     }
   }
 }

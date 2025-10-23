@@ -8,12 +8,15 @@
     "dev": "wireit",
     "build": "wireit",
     "deploy": "wireit",
-    "deploy:preview": "wireit"
+    "deploy:preview": "wireit",
+    "format": "wireit",
+    "lint": "wireit"
   },
   "author": "kq5y",
   "license": "MIT",
   "packageManager": "pnpm@10.12.3",
   "devDependencies": {
+    "@biomejs/biome": "2.2.7",
     "wireit": "^0.14.12"
   },
   "wireit": {
@@ -38,6 +41,18 @@
     "deploy:preview": {
       "dependencies": [
         "./workspaces/server:deploy:preview"
+      ]
+    },
+    "format": {
+      "dependencies": [
+        "./workspaces/server:format",
+        "./workspaces/client:format"
+      ]
+    },
+    "lint": {
+      "dependencies": [
+        "./workspaces/server:lint",
+        "./workspaces/client:lint"
       ]
     }
   }

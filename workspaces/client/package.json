@@ -5,7 +5,9 @@
   "scripts": {
     "dev": "wireit",
     "watch": "wireit",
-    "build": "wireit"
+    "build": "wireit",
+    "format": "wireit",
+    "lint": "wireit"
   },
   "dependencies": {
     "@kakiage/server": "workspace:*",
@@ -18,6 +20,7 @@
     "react-dom": "^19.2.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.2.7",
     "@rsbuild/core": "^1.5.17",
     "@rsbuild/plugin-react": "^1.4.1",
     "@tanstack/router-plugin": "^1.133.21",
@@ -68,6 +71,12 @@
     "dev": {
       "command": "rsbuild dev --port 3000",
       "service": true
+    },
+    "format": {
+      "command": "biome format --write"
+    },
+    "lint": {
+      "command": "biome lint --write"
     }
   }
 }
