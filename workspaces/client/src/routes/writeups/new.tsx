@@ -110,82 +110,78 @@ function NewWriteupPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="title" className="block mb-2 font-medium">
+          <label className="block mb-2 font-medium">
             Title <span className="text-red-500">*</span>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border rounded-md"
+            />
           </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={formData.title}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border rounded-md"
-          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="ctfId" className="block mb-2 font-medium">
+            <label className="block mb-2 font-medium">
               CTF <span className="text-red-500">*</span>
+              <select
+                name="ctfId"
+                value={formData.ctfId}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                <option value="">Select CTF</option>
+                {ctfs?.map((ctf) => (
+                  <option key={ctf.id} value={ctf.id}>
+                    {ctf.name}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              id="ctfId"
-              name="ctfId"
-              value={formData.ctfId}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            >
-              <option value="">Select CTF</option>
-              {ctfs?.map((ctf) => (
-                <option key={ctf.id} value={ctf.id}>
-                  {ctf.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div>
-            <label htmlFor="categoryId" className="block mb-2 font-medium">
+            <label className="block mb-2 font-medium">
               Category <span className="text-red-500">*</span>
+              <select
+                name="categoryId"
+                value={formData.categoryId}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              >
+                {categories?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </label>
-            <select
-              id="categoryId"
-              name="categoryId"
-              value={formData.categoryId}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            >
-              {categories?.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
         <div>
-          <label htmlFor="tags" className="block mb-2 font-medium">
+          <label className="block mb-2 font-medium">
             Tags
+            <select
+              name="tags"
+              multiple
+              value={formData.tagIds}
+              onChange={handleTagChange}
+              className="w-full px-3 py-2 border rounded-md"
+              size={4}
+            >
+              {tags?.map((tag) => (
+                <option key={tag.id} value={tag.id}>
+                  {tag.name}
+                </option>
+              ))}
+            </select>
           </label>
-          <select
-            id="tags"
-            name="tags"
-            multiple
-            value={formData.tagIds}
-            onChange={handleTagChange}
-            className="w-full px-3 py-2 border rounded-md"
-            size={4}
-          >
-            {tags?.map((tag) => (
-              <option key={tag.id} value={tag.id}>
-                {tag.name}
-              </option>
-            ))}
-          </select>
           <p className="text-sm text-gray-500 mt-1">Hold Ctrl (or Cmd) to select multiple tags</p>
         </div>
 

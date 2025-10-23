@@ -90,6 +90,7 @@ function WriteupDetailPage() {
       </div>
 
       <div className="prose max-w-none">
+        {/** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */}
         <div dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
       </div>
     </div>

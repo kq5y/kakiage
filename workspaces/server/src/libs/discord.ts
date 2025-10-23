@@ -10,7 +10,7 @@ export const makeRedirectUrl = (env: Bindings, inviteToken: string) => {
 
 export const getAvatarUrl = (discordUser: { avatar: string | null; id: string }) => {
   if (!discordUser.avatar) {
-    return `https://cdn.discordapp.com/embed/avatars/${parseInt(discordUser.id) % 5}.png`;
+    return `https://cdn.discordapp.com/embed/avatars/${parseInt(discordUser.id, 10) % 5}.png`;
   }
   return `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}`;
 };

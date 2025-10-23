@@ -2,7 +2,7 @@ import { hcWithType, type InferRequestType } from "@kakiage/server/rpc";
 
 class ApiError extends Error {
   status?: number;
-  body?: any;
+  body?: unknown;
   constructor(message: string, status?: number) {
     super(message);
     this.status = status;
@@ -179,7 +179,7 @@ export const uploadImage = async (payload: InferRequestType<typeof apiClient.api
   throw new ApiError("Failed to fetch", res.status);
 };
 
-export const getImageUrl = (id: string) => "/api/v1/images/" + id;
+export const getImageUrl = (id: string) => `/api/v1/images/${id}`;
 
 /* tags */
 

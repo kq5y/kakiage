@@ -1,7 +1,7 @@
-import { getCtfDetail, updateCtf } from "@/libs/api";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { getCtfDetail, updateCtf } from "@/libs/api";
 
 export const Route = createFileRoute("/ctfs/$ctfId/edit")({
   component: EditCtfPage,
@@ -76,65 +76,61 @@ function EditCtfPage() {
 
       <form onSubmit={handleSubmit} className="max-w-2xl">
         <div className="mb-4">
-          <label htmlFor="name" className="block mb-2 font-medium">
+          <label className="block mb-2 font-medium">
             CTF Name <span className="text-red-500">*</span>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="w-full px-3 py-2 border rounded-md"
+            />
           </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="w-full px-3 py-2 border rounded-md"
-          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label htmlFor="startAt" className="block mb-2 font-medium">
+            <label className="block mb-2 font-medium">
               Start Date <span className="text-red-500">*</span>
+              <input
+                type="datetime-local"
+                name="startAt"
+                value={formData.startAt}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
             </label>
-            <input
-              type="datetime-local"
-              id="startAt"
-              name="startAt"
-              value={formData.startAt}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            />
           </div>
 
           <div>
-            <label htmlFor="endAt" className="block mb-2 font-medium">
+            <label className="block mb-2 font-medium">
               End Date <span className="text-red-500">*</span>
+              <input
+                type="datetime-local"
+                name="endAt"
+                value={formData.endAt}
+                onChange={handleChange}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
             </label>
-            <input
-              type="datetime-local"
-              id="endAt"
-              name="endAt"
-              value={formData.endAt}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            />
           </div>
         </div>
 
         <div className="mb-6">
-          <label htmlFor="url" className="block mb-2 font-medium">
+          <label className="block mb-2 font-medium">
             CTF URL
+            <input
+              type="url"
+              name="url"
+              value={formData.url}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-md"
+              placeholder="https://example.com"
+            />
           </label>
-          <input
-            type="url"
-            id="url"
-            name="url"
-            value={formData.url}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
-            placeholder="https://example.com"
-          />
         </div>
 
         <div className="flex gap-3">

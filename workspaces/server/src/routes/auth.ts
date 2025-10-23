@@ -35,7 +35,7 @@ const router = new Hono<Env>()
     try {
       const decodedState = JSON.parse(atob(state));
       inviteToken = decodedState.inviteToken;
-    } catch (e) {
+    } catch (_e) {
       return c.redirect(makeAppUrl("Invalid state data"));
     }
 

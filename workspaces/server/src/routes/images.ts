@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { createFactory } from "hono/factory";
 import { z } from "zod";
 
 import { getDB } from "@/db/client";

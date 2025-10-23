@@ -1,8 +1,8 @@
-import { createCategory, deleteCategory, getCategories, updateCategory } from "@/libs/api";
 import type { Category } from "@kakiage/server/rpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { createCategory, deleteCategory, getCategories, updateCategory } from "@/libs/api";
 
 export const Route = createFileRoute("/categories/")({
   component: CategoriesPage,
@@ -96,33 +96,31 @@ function CategoriesPage() {
         <h2 className="text-xl font-semibold mb-4">Create New Category</h2>
         <form onSubmit={handleCreateSubmit} className="space-y-4">
           <div>
-            <label htmlFor="new-name" className="block mb-1 font-medium">
+            <label className="block mb-1 font-medium">
               Category Name <span className="text-red-500">*</span>
+              <input
+                type="text"
+                name="name"
+                value={newCategory.name}
+                onChange={handleNewCategoryChange}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
             </label>
-            <input
-              type="text"
-              id="new-name"
-              name="name"
-              value={newCategory.name}
-              onChange={handleNewCategoryChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            />
           </div>
 
           <div>
-            <label htmlFor="new-color" className="block mb-1 font-medium">
+            <label className="block mb-1 font-medium">
               Color
+              <input
+                type="text"
+                name="color"
+                value={newCategory.color}
+                onChange={handleNewCategoryChange}
+                required
+                className="w-full px-3 py-2 border rounded-md"
+              />
             </label>
-            <input
-              type="text"
-              id="new-color"
-              name="color"
-              value={newCategory.color}
-              onChange={handleNewCategoryChange}
-              required
-              className="w-full px-3 py-2 border rounded-md"
-            />
           </div>
 
           <button
@@ -204,25 +202,32 @@ function CategoriesPage() {
                     {editingCategory?.id === category.id ? (
                       <div className="space-x-2">
                         <button
+                          type="button"
                           onClick={handleUpdateSubmit}
                           disabled={updateCategoryMutation.isPending}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Save
                         </button>
-                        <button onClick={() => setEditingCategory(null)} className="text-gray-600 hover:text-gray-900">
+                        <button
+                          type="button"
+                          onClick={() => setEditingCategory(null)}
+                          className="text-gray-600 hover:text-gray-900"
+                        >
                           Cancel
                         </button>
                       </div>
                     ) : (
                       <div className="space-x-2">
                         <button
+                          type="button"
                           onClick={() => setEditingCategory(category)}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
                           Edit
                         </button>
                         <button
+                          type="button"
                           onClick={() => confirmDelete(category)}
                           disabled={deleteCategoryMutation.isPending}
                           className="text-red-600 hover:text-red-900"

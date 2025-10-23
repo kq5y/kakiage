@@ -8,250 +8,253 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as WriteupsIndexRouteImport } from "./routes/writeups/index";
-import { Route as CtfsIndexRouteImport } from "./routes/ctfs/index";
-import { Route as CategoriesIndexRouteImport } from "./routes/categories/index";
-import { Route as WriteupsNewRouteImport } from "./routes/writeups/new";
-import { Route as WriteupsWriteupIdRouteImport } from "./routes/writeups/$writeupId";
-import { Route as CtfsNewRouteImport } from "./routes/ctfs/new";
-import { Route as CtfsCtfIdRouteImport } from "./routes/ctfs/$ctfId";
-import { Route as WriteupsWriteupIdEditRouteImport } from "./routes/writeups/$writeupId.edit";
-import { Route as CtfsCtfIdEditRouteImport } from "./routes/ctfs/$ctfId.edit";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as WriteupsIndexRouteImport } from './routes/writeups/index'
+import { Route as CtfsIndexRouteImport } from './routes/ctfs/index'
+import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
+import { Route as WriteupsNewRouteImport } from './routes/writeups/new'
+import { Route as WriteupsWriteupIdRouteImport } from './routes/writeups/$writeupId'
+import { Route as CtfsNewRouteImport } from './routes/ctfs/new'
+import { Route as CtfsCtfIdRouteImport } from './routes/ctfs/$ctfId'
+import { Route as WriteupsWriteupIdEditRouteImport } from './routes/writeups/$writeupId.edit'
+import { Route as CtfsCtfIdEditRouteImport } from './routes/ctfs/$ctfId.edit'
 
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const WriteupsIndexRoute = WriteupsIndexRouteImport.update({
-  id: "/writeups/",
-  path: "/writeups/",
+  id: '/writeups/',
+  path: '/writeups/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CtfsIndexRoute = CtfsIndexRouteImport.update({
-  id: "/ctfs/",
-  path: "/ctfs/",
+  id: '/ctfs/',
+  path: '/ctfs/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CategoriesIndexRoute = CategoriesIndexRouteImport.update({
-  id: "/categories/",
-  path: "/categories/",
+  id: '/categories/',
+  path: '/categories/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const WriteupsNewRoute = WriteupsNewRouteImport.update({
-  id: "/writeups/new",
-  path: "/writeups/new",
+  id: '/writeups/new',
+  path: '/writeups/new',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const WriteupsWriteupIdRoute = WriteupsWriteupIdRouteImport.update({
-  id: "/writeups/$writeupId",
-  path: "/writeups/$writeupId",
+  id: '/writeups/$writeupId',
+  path: '/writeups/$writeupId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CtfsNewRoute = CtfsNewRouteImport.update({
-  id: "/ctfs/new",
-  path: "/ctfs/new",
+  id: '/ctfs/new',
+  path: '/ctfs/new',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const CtfsCtfIdRoute = CtfsCtfIdRouteImport.update({
-  id: "/ctfs/$ctfId",
-  path: "/ctfs/$ctfId",
+  id: '/ctfs/$ctfId',
+  path: '/ctfs/$ctfId',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const WriteupsWriteupIdEditRoute = WriteupsWriteupIdEditRouteImport.update({
-  id: "/edit",
-  path: "/edit",
+  id: '/edit',
+  path: '/edit',
   getParentRoute: () => WriteupsWriteupIdRoute,
-} as any);
+} as any)
 const CtfsCtfIdEditRoute = CtfsCtfIdEditRouteImport.update({
-  id: "/edit",
-  path: "/edit",
+  id: '/edit',
+  path: '/edit',
   getParentRoute: () => CtfsCtfIdRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/ctfs/$ctfId": typeof CtfsCtfIdRouteWithChildren;
-  "/ctfs/new": typeof CtfsNewRoute;
-  "/writeups/$writeupId": typeof WriteupsWriteupIdRouteWithChildren;
-  "/writeups/new": typeof WriteupsNewRoute;
-  "/categories": typeof CategoriesIndexRoute;
-  "/ctfs": typeof CtfsIndexRoute;
-  "/writeups": typeof WriteupsIndexRoute;
-  "/ctfs/$ctfId/edit": typeof CtfsCtfIdEditRoute;
-  "/writeups/$writeupId/edit": typeof WriteupsWriteupIdEditRoute;
+  '/': typeof IndexRoute
+  '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
+  '/ctfs/new': typeof CtfsNewRoute
+  '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
+  '/writeups/new': typeof WriteupsNewRoute
+  '/categories': typeof CategoriesIndexRoute
+  '/ctfs': typeof CtfsIndexRoute
+  '/writeups': typeof WriteupsIndexRoute
+  '/ctfs/$ctfId/edit': typeof CtfsCtfIdEditRoute
+  '/writeups/$writeupId/edit': typeof WriteupsWriteupIdEditRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/ctfs/$ctfId": typeof CtfsCtfIdRouteWithChildren;
-  "/ctfs/new": typeof CtfsNewRoute;
-  "/writeups/$writeupId": typeof WriteupsWriteupIdRouteWithChildren;
-  "/writeups/new": typeof WriteupsNewRoute;
-  "/categories": typeof CategoriesIndexRoute;
-  "/ctfs": typeof CtfsIndexRoute;
-  "/writeups": typeof WriteupsIndexRoute;
-  "/ctfs/$ctfId/edit": typeof CtfsCtfIdEditRoute;
-  "/writeups/$writeupId/edit": typeof WriteupsWriteupIdEditRoute;
+  '/': typeof IndexRoute
+  '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
+  '/ctfs/new': typeof CtfsNewRoute
+  '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
+  '/writeups/new': typeof WriteupsNewRoute
+  '/categories': typeof CategoriesIndexRoute
+  '/ctfs': typeof CtfsIndexRoute
+  '/writeups': typeof WriteupsIndexRoute
+  '/ctfs/$ctfId/edit': typeof CtfsCtfIdEditRoute
+  '/writeups/$writeupId/edit': typeof WriteupsWriteupIdEditRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/ctfs/$ctfId": typeof CtfsCtfIdRouteWithChildren;
-  "/ctfs/new": typeof CtfsNewRoute;
-  "/writeups/$writeupId": typeof WriteupsWriteupIdRouteWithChildren;
-  "/writeups/new": typeof WriteupsNewRoute;
-  "/categories/": typeof CategoriesIndexRoute;
-  "/ctfs/": typeof CtfsIndexRoute;
-  "/writeups/": typeof WriteupsIndexRoute;
-  "/ctfs/$ctfId/edit": typeof CtfsCtfIdEditRoute;
-  "/writeups/$writeupId/edit": typeof WriteupsWriteupIdEditRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
+  '/ctfs/new': typeof CtfsNewRoute
+  '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
+  '/writeups/new': typeof WriteupsNewRoute
+  '/categories/': typeof CategoriesIndexRoute
+  '/ctfs/': typeof CtfsIndexRoute
+  '/writeups/': typeof WriteupsIndexRoute
+  '/ctfs/$ctfId/edit': typeof CtfsCtfIdEditRoute
+  '/writeups/$writeupId/edit': typeof WriteupsWriteupIdEditRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/ctfs/$ctfId"
-    | "/ctfs/new"
-    | "/writeups/$writeupId"
-    | "/writeups/new"
-    | "/categories"
-    | "/ctfs"
-    | "/writeups"
-    | "/ctfs/$ctfId/edit"
-    | "/writeups/$writeupId/edit";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/ctfs/$ctfId'
+    | '/ctfs/new'
+    | '/writeups/$writeupId'
+    | '/writeups/new'
+    | '/categories'
+    | '/ctfs'
+    | '/writeups'
+    | '/ctfs/$ctfId/edit'
+    | '/writeups/$writeupId/edit'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/ctfs/$ctfId"
-    | "/ctfs/new"
-    | "/writeups/$writeupId"
-    | "/writeups/new"
-    | "/categories"
-    | "/ctfs"
-    | "/writeups"
-    | "/ctfs/$ctfId/edit"
-    | "/writeups/$writeupId/edit";
+    | '/'
+    | '/ctfs/$ctfId'
+    | '/ctfs/new'
+    | '/writeups/$writeupId'
+    | '/writeups/new'
+    | '/categories'
+    | '/ctfs'
+    | '/writeups'
+    | '/ctfs/$ctfId/edit'
+    | '/writeups/$writeupId/edit'
   id:
-    | "__root__"
-    | "/"
-    | "/ctfs/$ctfId"
-    | "/ctfs/new"
-    | "/writeups/$writeupId"
-    | "/writeups/new"
-    | "/categories/"
-    | "/ctfs/"
-    | "/writeups/"
-    | "/ctfs/$ctfId/edit"
-    | "/writeups/$writeupId/edit";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/ctfs/$ctfId'
+    | '/ctfs/new'
+    | '/writeups/$writeupId'
+    | '/writeups/new'
+    | '/categories/'
+    | '/ctfs/'
+    | '/writeups/'
+    | '/ctfs/$ctfId/edit'
+    | '/writeups/$writeupId/edit'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  CtfsCtfIdRoute: typeof CtfsCtfIdRouteWithChildren;
-  CtfsNewRoute: typeof CtfsNewRoute;
-  WriteupsWriteupIdRoute: typeof WriteupsWriteupIdRouteWithChildren;
-  WriteupsNewRoute: typeof WriteupsNewRoute;
-  CategoriesIndexRoute: typeof CategoriesIndexRoute;
-  CtfsIndexRoute: typeof CtfsIndexRoute;
-  WriteupsIndexRoute: typeof WriteupsIndexRoute;
+  IndexRoute: typeof IndexRoute
+  CtfsCtfIdRoute: typeof CtfsCtfIdRouteWithChildren
+  CtfsNewRoute: typeof CtfsNewRoute
+  WriteupsWriteupIdRoute: typeof WriteupsWriteupIdRouteWithChildren
+  WriteupsNewRoute: typeof WriteupsNewRoute
+  CategoriesIndexRoute: typeof CategoriesIndexRoute
+  CtfsIndexRoute: typeof CtfsIndexRoute
+  WriteupsIndexRoute: typeof WriteupsIndexRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/writeups/": {
-      id: "/writeups/";
-      path: "/writeups";
-      fullPath: "/writeups";
-      preLoaderRoute: typeof WriteupsIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ctfs/": {
-      id: "/ctfs/";
-      path: "/ctfs";
-      fullPath: "/ctfs";
-      preLoaderRoute: typeof CtfsIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/categories/": {
-      id: "/categories/";
-      path: "/categories";
-      fullPath: "/categories";
-      preLoaderRoute: typeof CategoriesIndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/writeups/new": {
-      id: "/writeups/new";
-      path: "/writeups/new";
-      fullPath: "/writeups/new";
-      preLoaderRoute: typeof WriteupsNewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/writeups/$writeupId": {
-      id: "/writeups/$writeupId";
-      path: "/writeups/$writeupId";
-      fullPath: "/writeups/$writeupId";
-      preLoaderRoute: typeof WriteupsWriteupIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ctfs/new": {
-      id: "/ctfs/new";
-      path: "/ctfs/new";
-      fullPath: "/ctfs/new";
-      preLoaderRoute: typeof CtfsNewRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/ctfs/$ctfId": {
-      id: "/ctfs/$ctfId";
-      path: "/ctfs/$ctfId";
-      fullPath: "/ctfs/$ctfId";
-      preLoaderRoute: typeof CtfsCtfIdRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/writeups/$writeupId/edit": {
-      id: "/writeups/$writeupId/edit";
-      path: "/edit";
-      fullPath: "/writeups/$writeupId/edit";
-      preLoaderRoute: typeof WriteupsWriteupIdEditRouteImport;
-      parentRoute: typeof WriteupsWriteupIdRoute;
-    };
-    "/ctfs/$ctfId/edit": {
-      id: "/ctfs/$ctfId/edit";
-      path: "/edit";
-      fullPath: "/ctfs/$ctfId/edit";
-      preLoaderRoute: typeof CtfsCtfIdEditRouteImport;
-      parentRoute: typeof CtfsCtfIdRoute;
-    };
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/writeups/': {
+      id: '/writeups/'
+      path: '/writeups'
+      fullPath: '/writeups'
+      preLoaderRoute: typeof WriteupsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ctfs/': {
+      id: '/ctfs/'
+      path: '/ctfs'
+      fullPath: '/ctfs'
+      preLoaderRoute: typeof CtfsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/categories/': {
+      id: '/categories/'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/writeups/new': {
+      id: '/writeups/new'
+      path: '/writeups/new'
+      fullPath: '/writeups/new'
+      preLoaderRoute: typeof WriteupsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/writeups/$writeupId': {
+      id: '/writeups/$writeupId'
+      path: '/writeups/$writeupId'
+      fullPath: '/writeups/$writeupId'
+      preLoaderRoute: typeof WriteupsWriteupIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ctfs/new': {
+      id: '/ctfs/new'
+      path: '/ctfs/new'
+      fullPath: '/ctfs/new'
+      preLoaderRoute: typeof CtfsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ctfs/$ctfId': {
+      id: '/ctfs/$ctfId'
+      path: '/ctfs/$ctfId'
+      fullPath: '/ctfs/$ctfId'
+      preLoaderRoute: typeof CtfsCtfIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/writeups/$writeupId/edit': {
+      id: '/writeups/$writeupId/edit'
+      path: '/edit'
+      fullPath: '/writeups/$writeupId/edit'
+      preLoaderRoute: typeof WriteupsWriteupIdEditRouteImport
+      parentRoute: typeof WriteupsWriteupIdRoute
+    }
+    '/ctfs/$ctfId/edit': {
+      id: '/ctfs/$ctfId/edit'
+      path: '/edit'
+      fullPath: '/ctfs/$ctfId/edit'
+      preLoaderRoute: typeof CtfsCtfIdEditRouteImport
+      parentRoute: typeof CtfsCtfIdRoute
+    }
   }
 }
 
 interface CtfsCtfIdRouteChildren {
-  CtfsCtfIdEditRoute: typeof CtfsCtfIdEditRoute;
+  CtfsCtfIdEditRoute: typeof CtfsCtfIdEditRoute
 }
 
 const CtfsCtfIdRouteChildren: CtfsCtfIdRouteChildren = {
   CtfsCtfIdEditRoute: CtfsCtfIdEditRoute,
-};
+}
 
-const CtfsCtfIdRouteWithChildren = CtfsCtfIdRoute._addFileChildren(CtfsCtfIdRouteChildren);
+const CtfsCtfIdRouteWithChildren = CtfsCtfIdRoute._addFileChildren(
+  CtfsCtfIdRouteChildren,
+)
 
 interface WriteupsWriteupIdRouteChildren {
-  WriteupsWriteupIdEditRoute: typeof WriteupsWriteupIdEditRoute;
+  WriteupsWriteupIdEditRoute: typeof WriteupsWriteupIdEditRoute
 }
 
 const WriteupsWriteupIdRouteChildren: WriteupsWriteupIdRouteChildren = {
   WriteupsWriteupIdEditRoute: WriteupsWriteupIdEditRoute,
-};
+}
 
-const WriteupsWriteupIdRouteWithChildren = WriteupsWriteupIdRoute._addFileChildren(WriteupsWriteupIdRouteChildren);
+const WriteupsWriteupIdRouteWithChildren =
+  WriteupsWriteupIdRoute._addFileChildren(WriteupsWriteupIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -262,5 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   CategoriesIndexRoute: CategoriesIndexRoute,
   CtfsIndexRoute: CtfsIndexRoute,
   WriteupsIndexRoute: WriteupsIndexRoute,
-};
-export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>();
+}
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()

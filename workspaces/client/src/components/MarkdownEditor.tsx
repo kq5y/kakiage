@@ -104,6 +104,7 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
         {isPreview ? (
           <div
             className="p-4 h-full overflow-auto prose max-w-none"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized above
             dangerouslySetInnerHTML={{ __html: renderedHtml }}
           />
         ) : (

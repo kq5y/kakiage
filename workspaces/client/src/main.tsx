@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 
@@ -20,7 +20,8 @@ const queryClient = new QueryClient({
 const router = createRouter({
   routeTree,
   context: {
-    auth: undefined!, // Will be set in the AuthProvider
+    // biome-ignore lint/style/noNonNullAssertion: Will be set in the AuthProvider
+    auth: undefined!,
     queryClient,
   },
   defaultPreload: "intent",

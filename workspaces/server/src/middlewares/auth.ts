@@ -5,7 +5,7 @@ import { verify } from "hono/jwt";
 
 import { getDB } from "@/db/client";
 import type { User } from "@/db/schema";
-import { error, JsonErrorResponse } from "@/libs/response";
+import { error, type JsonErrorResponse } from "@/libs/response";
 
 export type HasUser<L extends boolean = true, A extends boolean = false> = {
   Variables: {
@@ -20,11 +20,12 @@ export type HasUser<L extends boolean = true, A extends boolean = false> = {
 };
 
 type withAuthErrorResponse<A extends boolean = false> = JsonErrorResponse<A extends true ? 401 | 403 : 401>;
-type withAuthResponse<A extends boolean = false> = withAuthErrorResponse<A> | void;
+type withAuthResponse<A extends boolean = false> = withAuthErrorResponse<A> | undefined;
 
 export function withAuth<
   E extends Env,
   P extends string,
+  // biome-ignore lint/complexity/noBannedTypes: from hono
   I extends Input = {},
   L extends boolean = true,
   A extends boolean = false,
@@ -36,7 +37,7 @@ export function withAuth<
     if (token) {
       try {
         const decoded = await verify(token, c.env.JWT_SECRET, "HS256");
-        userId = (decoded.data as any)?.id ?? null;
+        userId = (decoded.data as { id?: string })?.id ?? null;
       } catch (err) {
         console.error("JWT verification failed:", err);
         deleteCookie(c, "session");

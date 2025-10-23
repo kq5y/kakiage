@@ -2,18 +2,18 @@ import type { Input } from "hono";
 import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import type { ValidationTargets } from "hono/types";
-
+import type { BodyData } from "hono/utils/body";
 import type { ZodType } from "zod";
 import z from "zod";
 
-import { error, JsonErrorResponse, RedirectResponse } from "@/libs/response";
+import { error, type JsonErrorResponse, type RedirectResponse } from "@/libs/response";
 
 // ----- from hono -----
 
 // https://github.com/honojs/hono/blob/main/src/validator/validator.ts
-const jsonRegex = /^application\/([a-z-\.]+\+)?json(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
+const jsonRegex = /^application\/([a-z-.]+\+)?json(;\s*[a-zA-Z0-9-]+=([^;]+))*$/;
 const multipartRegex = /^multipart\/form-data(;\s?boundary=[a-zA-Z0-9'"()+_,\-./:=?]+)?$/;
-const urlencodedRegex = /^application\/x-www-form-urlencoded(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
+const urlencodedRegex = /^application\/x-www-form-urlencoded(;\s*[a-zA-Z0-9-]+=([^;]+))*$/;
 
 // https://github.com/honojs/hono/blob/main/src/utils/buffer.ts
 var bufferToFormData = (arrayBuffer: ArrayBuffer, contentType: string): Promise<FormData> => {
@@ -34,7 +34,7 @@ type V<T extends ZodType, Target extends keyof ValidationTargets> = {
 type SchemaMap = {
   [K in keyof ValidationTargets]?: ZodType;
 };
-type Intersect<T> = (T extends any ? (x: T) => void : never) extends (x: infer R) => void ? R : never;
+type Intersect<T> = (T extends unknown ? (x: T) => void : never) extends (x: infer R) => void ? R : never;
 type InferInputFromSchemaMap<S extends SchemaMap> = Intersect<
   {
     [K in keyof S]: S[K] extends ZodType ? V<S[K], K & keyof ValidationTargets> : never;
@@ -44,12 +44,13 @@ type InferInputFromSchemaMap<S extends SchemaMap> = Intersect<
 type withValidatesErrorResponse<R> = R extends (error?: string) => string
   ? RedirectResponse<302>
   : JsonErrorResponse<400>;
-type withValidatesResponse<R> = withValidatesErrorResponse<R> | void;
+type withValidatesResponse<R> = withValidatesErrorResponse<R> | undefined;
 
 export function withValidates<
   E extends Env,
   P extends string,
   S extends SchemaMap,
+  // biome-ignore lint/complexity/noBannedTypes: from hono
   I extends Input = {},
   R extends ((error?: string) => string) | undefined = undefined,
 >(schemas: S, redirectUrlFn?: R) {
@@ -77,7 +78,7 @@ export function withValidates<
           }
           try {
             value = await c.req.json();
-          } catch (err) {
+          } catch (_err) {
             return makeResponse("Malformed JSON");
           }
           break;
@@ -86,7 +87,7 @@ export function withValidates<
           if (!contentType || !(multipartRegex.test(contentType) || urlencodedRegex.test(contentType))) {
             break;
           }
-          let formData;
+          let formData: FormData;
           if (c.req.bodyCache.formData) {
             formData = await c.req.bodyCache.formData;
           } else {
@@ -94,16 +95,17 @@ export function withValidates<
               const arrayBuffer = await c.req.arrayBuffer();
               formData = await bufferToFormData(arrayBuffer, contentType);
               c.req.bodyCache.formData = formData;
-            } catch (err) {
+            } catch (_err) {
               return makeResponse("Malformed form data");
             }
           }
-          const form: any = {};
-          formData.forEach((value2: any, key: string) => {
+          const form: BodyData<{ all: true }> = {};
+          formData.forEach((value2, key) => {
             if (key.endsWith("[]")) {
-              (form[key] ??= []).push(value2);
+              // biome-ignore lint/suspicious/noAssignInExpressions: from hono
+              ((form[key] ??= []) as unknown[]).push(value2);
             } else if (Array.isArray(form[key])) {
-              form[key].push(value2);
+              (form[key] as unknown[]).push(value2);
             } else if (key in form) {
               form[key] = [form[key], value2];
             } else {
@@ -151,7 +153,7 @@ export function withValidates<
         return makeResponse("Invalid input");
       }
 
-      c.req.addValidatedData(target as keyof ValidationTargets, result.data as any);
+      c.req.addValidatedData(target as keyof ValidationTargets, result.data as never);
     }
 
     await next();
