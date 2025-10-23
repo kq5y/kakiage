@@ -10,10 +10,12 @@ import { error, JsonErrorResponse, RedirectResponse } from '@/libs/response';
 
 // ----- from hono -----
 
-var jsonRegex = /^application\/([a-z-\.]+\+)?json(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
-var multipartRegex = /^multipart\/form-data(;\s?boundary=[a-zA-Z0-9'"()+_,\-./:=?]+)?$/;
-var urlencodedRegex = /^application\/x-www-form-urlencoded(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/;
+// https://github.com/honojs/hono/blob/main/src/validator/validator.ts
+const jsonRegex = /^application\/([a-z-\.]+\+)?json(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/
+const multipartRegex = /^multipart\/form-data(;\s?boundary=[a-zA-Z0-9'"()+_,\-./:=?]+)?$/
+const urlencodedRegex = /^application\/x-www-form-urlencoded(;\s*[a-zA-Z0-9\-]+\=([^;]+))*$/
 
+// https://github.com/honojs/hono/blob/main/src/utils/buffer.ts
 var bufferToFormData = (arrayBuffer: ArrayBuffer, contentType: string): Promise<FormData> => {
   const response = new Response(arrayBuffer, {
     headers: {
@@ -37,24 +39,25 @@ type InferInputFromSchemaMap<S extends SchemaMap> = Intersect<{
   [K in keyof S]: S[K] extends ZodType ? V<S[K], K & keyof ValidationTargets> : never
 }[keyof S]>;
 
-type withValidatesErrorCode = 400;
-export type withValidatesErrorResponse = JsonErrorResponse<withValidatesErrorCode>;
-type withValidatesRedirectCode = 302;
-export type withValidatesRedirectResponse = RedirectResponse<withValidatesRedirectCode>;
+type withValidatesErrorResponse<R> = R extends (error?: string) => string
+  ? RedirectResponse<302>
+  : JsonErrorResponse<400>;
+type withValidatesResponse<R> = withValidatesErrorResponse<R> | void;
 
 export function withValidates<
   E extends Env,
   P extends string,
   S extends SchemaMap,
   I extends Input = {},
+  R extends ((error?: string) => string) | undefined = undefined,
 >(
   schemas: S,
-  redirectUrl?: (error?: string) => string
+  redirectUrlFn?: R
 ) {
-  return createMiddleware<E, P, I & InferInputFromSchemaMap<S>>(async (c, next) => {
+  return createMiddleware<E, P, I & InferInputFromSchemaMap<S>, withValidatesResponse<R>>(async (c, next) => {
     const makeResponse = (message: string) => {
-      if (redirectUrl) {
-        return c.redirect(redirectUrl(message));
+      if (redirectUrlFn) {
+        return c.redirect(redirectUrlFn(message));
       }
       return c.json(error(message), 400);
     }

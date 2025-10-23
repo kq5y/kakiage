@@ -79,8 +79,8 @@ importers:
         specifier: ^0.44.6
         version: 0.44.6(@cloudflare/workers-types@4.20251014.0)
       hono:
-        specifier: 4.9.12
-        version: 4.9.12
+        specifier: ^4.10.2
+        version: 4.10.2
       marked:
         specifier: ^16.4.1
         version: 16.4.1
@@ -1753,8 +1753,8 @@ packages:
     resolution: {integrity: sha512-ax7ZYomf6jqPTQ4+XCpUGyXKHk5WweS+e05MBO4/y3WJ5RkmPXNKvX+bx1behVILVwr6JSQvZAku021CHPXG3Q==}
     engines: {node: '>=10'}
 
-  hono@4.9.12:
-    resolution: {integrity: sha512-SrTC0YxqPwnN7yKa8gg/giLyQ2pILCKoideIHbYbFQlWZjYt68D2A4Ae1hehO/aDQ6RmTcpqOV/O2yBtMzx/VQ==}
+  hono@4.10.2:
+    resolution: {integrity: sha512-p6fyzl+mQo6uhESLxbF5WlBOAJMDh36PljwlKtP5V1v09NxlqGru3ShK+4wKhSuhuYf8qxMmrivHOa/M7q0sMg==}
     engines: {node: '>=16.9.0'}
 
   html-entities@2.6.0:
@@ -3877,7 +3877,7 @@ snapshots:
     dependencies:
       duplexer: 0.1.2
 
-  hono@4.9.12: {}
+  hono@4.10.2: {}
 
   html-entities@2.6.0: {}
 

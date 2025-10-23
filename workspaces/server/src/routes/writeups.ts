@@ -1,16 +1,13 @@
 import { and, eq } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { createFactory } from 'hono/factory';
 import { marked } from 'marked';
 import { z } from 'zod';
 
 import { getDB } from '@/db/client';
 import { tags, writeupToTags, writeups } from '@/db/schema';
 import { error, success } from '@/libs/response';
-import { withAuth, withAuthErrorResponse } from '@/middlewares/auth';
-import { withValidates, withValidatesErrorResponse } from '@/middlewares/validate';
-
-const factory = createFactory<Env>();
+import { withAuth } from '@/middlewares/auth';
+import { withValidates } from '@/middlewares/validate';
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, 'ID must be numeric') });
 const writeupSearchQuerySchema = z.object({
@@ -65,359 +62,319 @@ const markdownToHtml = async (markdown: string) => {
   return sanitizeHtml(dirty);
 }
 
-const getWriteupsHandlers = factory.createHandlers(withValidates({ query: writeupSearchQuerySchema }), async (c) => {
-  try{} catch{ return null as unknown as withValidatesErrorResponse; }
-  
-  const db = getDB(c.env.DB);
-  const { q, categoryId, tag, pageSize, page, sortKey, sortOrder } = c.req.valid('query');
+const router = new Hono<Env>()
+  .get('/', withValidates({ query: writeupSearchQuerySchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const { q, categoryId, tag, pageSize, page, sortKey, sortOrder } = c.req.valid('query');
 
-  let writeupIds: number[] | undefined;
-  if (tag) {
-    const tagRecord = await db.query.tags.findFirst({
-      where: (tags, { eq }) => eq(tags.name, tag)
-    });
-    if (!tagRecord) {
-      return c.json(error('Tag not found'), 404);
-    }
-    const writeupsByTagRecords = await db.query.writeupToTags.findMany({
-      where: (writeupToTags, { eq }) => eq(writeupToTags.tagId, tagRecord.id)
-    });
-    writeupIds = writeupsByTagRecords.map(record => record.writeupId);
-    if (writeupIds.length === 0) {
-      return c.json(error('No writeups found for this tag'), 404);
-    }
-  }
-
-  const writeupsList = await db.query.writeups.findMany({
-    limit: pageSize || 10,
-    offset: ((page || 1) - 1) * (pageSize || 10),
-    orderBy: (writeups, { asc, desc }) => [sortOrder === 'asc' ? asc(writeups[sortKey || 'createdAt']) : desc(writeups[sortKey || 'createdAt'])],
-    where: (writeups, { and, eq, like, inArray }) => and(
-      q ? like(writeups.title, `%${q}%`) : undefined,
-      categoryId ? eq(writeups.categoryId, categoryId) : undefined,
-      writeupIds ? inArray(writeups.id, writeupIds) : undefined
-    ),
-    columns: {
-      content: false,
-      categoryId: false,
-      createdBy: false,
-      password: false,
-    },
-    with: {
-      category: true,
-      createdByUser: true,
-      writeupToTags: {
-        with: {
-          tag: true,
-        }
+    let writeupIds: number[] | undefined;
+    if (tag) {
+      const tagRecord = await db.query.tags.findFirst({
+        where: (tags, { eq }) => eq(tags.name, tag)
+      });
+      if (!tagRecord) {
+        return c.json(error('Tag not found'), 404);
       }
-    },
-  });
+      const writeupsByTagRecords = await db.query.writeupToTags.findMany({
+        where: (writeupToTags, { eq }) => eq(writeupToTags.tagId, tagRecord.id)
+      });
+      writeupIds = writeupsByTagRecords.map(record => record.writeupId);
+      if (writeupIds.length === 0) {
+        return c.json(error('No writeups found for this tag'), 404);
+      }
+    }
 
-  const formattedWriteups = writeupsList.map(w => ({
-    ...w,
-    tags: w.writeupToTags.map(wt => wt.tag),
-    writeupToTags: undefined
-  }));
-  return c.json(success(formattedWriteups), 200);
-});
-
-const postWriteupHandlers = factory.createHandlers(withAuth(true), withValidates({ json: writeupCreateBodySchema }), async (c) => {
-  try{} catch{ return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
-
-  const db = getDB(c.env.DB);
-  const { title, slug, ctfId, categoryId, points, solvers, password } = c.req.valid('json');
-  const user = c.get('user');
-
-  const [ writeup ] = await db.insert(writeups).values({
-    title,
-    slug,
-    ctfId,
-    content: '',
-    categoryId: categoryId,
-    points: points,
-    solvers: solvers,
-    password: password ? await getHash(password) : undefined,
-    createdBy: user.id,
-  }).returning();
-
-  return c.json(success({
-    ...writeup,
-    password: undefined,
-  }), 201);
-});
-
-const getWriteupHandlers = factory.createHandlers(withValidates({ param: idParamSchema }), async (c) => {
-  try{} catch{ return null as unknown as withValidatesErrorResponse; }
-
-  const db = getDB(c.env.DB);
-  const id = Number(c.req.valid('param').id);
-
-  const writeup = await db.query.writeups.findFirst({
-    where: (writeups, { eq }) => eq(writeups.id, id),
-    columns: {
-      content: false,
-      categoryId: false,
-      createdBy: false,
-      password: false,
-      ctfId: false,
-    },
-    with: {
-      category: true,
-      createdByUser: true,
-      writeupToTags: {
-        with: {
-          tag: true,
+    const writeupsList = await db.query.writeups.findMany({
+      limit: pageSize || 10,
+      offset: ((page || 1) - 1) * (pageSize || 10),
+      orderBy: (writeups, { asc, desc }) => [sortOrder === 'asc' ? asc(writeups[sortKey || 'createdAt']) : desc(writeups[sortKey || 'createdAt'])],
+      where: (writeups, { and, eq, like, inArray }) => and(
+        q ? like(writeups.title, `%${q}%`) : undefined,
+        categoryId ? eq(writeups.categoryId, categoryId) : undefined,
+        writeupIds ? inArray(writeups.id, writeupIds) : undefined
+      ),
+      columns: {
+        content: false,
+        categoryId: false,
+        createdBy: false,
+        password: false,
+      },
+      with: {
+        category: true,
+        createdByUser: true,
+        writeupToTags: {
+          with: {
+            tag: true,
+          }
         }
       },
-      ctf: true
-    },
-  });
+    });
 
-  if (!writeup) {
-    return c.json(error('Writeup not found'), 404);
-  }
+    const formattedWriteups = writeupsList.map(w => ({
+      ...w,
+      tags: w.writeupToTags.map(wt => wt.tag),
+      writeupToTags: undefined
+    }));
+    return c.json(success(formattedWriteups), 200);
+  })
+  .post('/', withAuth(true), withValidates({ json: writeupCreateBodySchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const { title, slug, ctfId, categoryId, points, solvers, password } = c.req.valid('json');
+    const user = c.get('user');
 
-  const formattedWriteup = {
-    ...writeup,
-    tags: writeup.writeupToTags.map(wt => wt.tag),
-    writeupToTags: undefined
-  };
+    const [writeup] = await db.insert(writeups).values({
+      title,
+      slug,
+      ctfId,
+      content: '',
+      categoryId: categoryId,
+      points: points,
+      solvers: solvers,
+      password: password ? await getHash(password) : undefined,
+      createdBy: user.id,
+    }).returning();
 
-  return c.json(success(formattedWriteup), 200);
-});
+    return c.json(success({
+      ...writeup,
+      password: undefined,
+    }), 201);
+  })
+  .get('/:id', withValidates({ param: idParamSchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const id = Number(c.req.valid('param').id);
 
-const getWriteupTagsHandlers = factory.createHandlers(withValidates({ param: idParamSchema }), async (c) => {
-  try{} catch{ return null as unknown as withValidatesErrorResponse; }
+    const writeup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id),
+      columns: {
+        content: false,
+        categoryId: false,
+        createdBy: false,
+        password: false,
+        ctfId: false,
+      },
+      with: {
+        category: true,
+        createdByUser: true,
+        writeupToTags: {
+          with: {
+            tag: true,
+          }
+        },
+        ctf: true
+      },
+    });
 
-  const db = getDB(c.env.DB);
-  const id = Number(c.req.valid('param').id);
+    if (!writeup) {
+      return c.json(error('Writeup not found'), 404);
+    }
 
-  const writeup = await db.query.writeups.findFirst({
-    where: (writeups, { eq }) => eq(writeups.id, id),
-    with: {
-      writeupToTags: {
-        with: {
-          tag: true,
+    const formattedWriteup = {
+      ...writeup,
+      tags: writeup.writeupToTags.map(wt => wt.tag),
+      writeupToTags: undefined
+    };
+
+    return c.json(success(formattedWriteup), 200);
+  })
+  .get('/:id/tags', withValidates({ param: idParamSchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const id = Number(c.req.valid('param').id);
+
+    const writeup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id),
+      with: {
+        writeupToTags: {
+          with: {
+            tag: true,
+          }
+        }
+      },
+      columns: {
+        content: false,
+        categoryId: false,
+        createdBy: false,
+      },
+    });
+
+    if (!writeup) {
+      return c.json(error('Writeup not found'), 404);
+    }
+
+    const writeupTags = writeup.writeupToTags.map(wt => wt.tag);
+    return c.json(success(writeupTags), 200);
+  })
+  .post('/:id/tags', withAuth(true), withValidates({ param: idParamSchema, json: writeupTagPostSchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const id = Number(c.req.valid('param').id);
+    const { name } = c.req.valid('json');
+    const user = c.get('user');
+
+    const existingWriteup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id),
+    });
+
+    if (!existingWriteup) {
+      return c.json(error('Writeup not found'), 404);
+    }
+
+    if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
+      return c.json(error('Unauthorized'), 403);
+    }
+
+    let existingTags = await db.query.tags.findFirst({
+      where: (tags, { eq }) => eq(tags.name, name)
+    });
+
+    if (!existingTags) {
+      const [newTag] = await db.insert(tags).values({ name }).returning();
+      existingTags = newTag;
+    }
+
+    await db.insert(writeupToTags).values(
+      { writeupId: id, tagId: existingTags.id }
+    ).onConflictDoNothing();
+
+    return c.json(success(existingTags), 201);
+  })
+  .delete('/:id/tags', withAuth(true), withValidates({ param: idParamSchema, json: writeupTagDeleteSchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const id = Number(c.req.valid('param').id);
+    const { id: tagId } = c.req.valid('json');
+    const user = c.get('user');
+
+    const existingWriteup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id),
+    });
+
+    if (!existingWriteup) {
+      return c.json(error('Writeup not found'), 404);
+    }
+
+    if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
+      return c.json(error('Unauthorized'), 403);
+    }
+
+    await db.delete(writeupToTags).where(and(
+      eq(writeupToTags.writeupId, id),
+      eq(writeupToTags.tagId, tagId)
+    )).execute();
+
+    return c.json(success(), 200);
+  })
+  .get('/:id/content', withAuth(false), withValidates({ param: idParamSchema, header: writeupPasswordHeaderSchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const user = c.get('user');
+    const id = Number(c.req.valid('param').id);
+    const password = c.req.valid('header')['x-password'];
+
+    const writeup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id)
+    });
+
+    if (!writeup) {
+      return c.json(error('Writeup not found'), 404);
+    }
+
+    if (writeup.password) {
+      if (!(user && (user.id === writeup.createdBy || user.role === 'admin'))) {
+        if (!password) {
+          return c.json(error('Unauthorized'), 403);
+        }
+        const hash = await getHash(password);
+        if (hash !== writeup.password) {
+          return c.json(error('Unauthorized'), 403);
         }
       }
-    },
-    columns: {
-      content: false,
-      categoryId: false,
-      createdBy: false,
-    },
-  });
-
-  if (!writeup) {
-    return c.json(error('Writeup not found'), 404);
-  }
-
-  const writeupTags = writeup.writeupToTags.map(wt => wt.tag);
-  return c.json(success(writeupTags), 200);
-});
-
-const postWriteupTagsHandlers = factory.createHandlers(withAuth(true), withValidates({ param: idParamSchema, json: writeupTagPostSchema }), async (c) => {
-  try {} catch { return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
-
-  const db = getDB(c.env.DB);
-  const id = Number(c.req.valid('param').id);
-  const { name } = c.req.valid('json');
-  const user = c.get('user');
-
-  const existingWriteup = await db.query.writeups.findFirst({
-    where: (writeups, { eq }) => eq(writeups.id, id),
-  });
-
-  if (!existingWriteup) {
-    return c.json(error('Writeup not found'), 404);
-  }
-
-  if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
-    return c.json(error('Unauthorized'), 403);
-  }
-
-  let existingTags = await db.query.tags.findFirst({
-    where: (tags, { eq }) => eq(tags.name, name)
-  });
-
-  if (!existingTags) {
-    const [ newTag ] = await db.insert(tags).values({ name }).returning();
-    existingTags = newTag;
-  }
-
-  await db.insert(writeupToTags).values(
-    { writeupId: id, tagId: existingTags.id }
-  ).onConflictDoNothing();
-
-  return c.json(success(existingTags), 201);
-});
-
-const deleteWriteupTagsHandlers = factory.createHandlers(withAuth(true), withValidates({ param: idParamSchema, json: writeupTagDeleteSchema }), async (c) => {
-  try {} catch { return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
-
-  const db = getDB(c.env.DB);
-  const id = Number(c.req.valid('param').id);
-  const { id: tagId } = c.req.valid('json');
-  const user = c.get('user');
-
-  const existingWriteup = await db.query.writeups.findFirst({
-    where: (writeups, { eq }) => eq(writeups.id, id),
-  });
-
-  if (!existingWriteup) {
-    return c.json(error('Writeup not found'), 404);
-  }
-
-  if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
-    return c.json(error('Unauthorized'), 403);
-  }
-
-  await db.delete(writeupToTags).where(and(
-    eq(writeupToTags.writeupId, id),
-    eq(writeupToTags.tagId, tagId)
-  )).execute();
-
-  return c.json(success(), 200);
-});
-
-const getWriteupContentHandlers = factory.createHandlers(withAuth(false), withValidates({ param: idParamSchema, header: writeupPasswordHeaderSchema }), async (c) => {
-  try{} catch{ return null as unknown as withValidatesErrorResponse; }
-
-  const db = getDB(c.env.DB);
-  const user = c.get('user');
-  const id = Number(c.req.valid('param').id);
-  const password = c.req.valid('header')['x-password'];
-
-  const writeup = await db.query.writeups.findFirst({
-    where: (writeups, { eq }) => eq(writeups.id, id)
-  });
-
-  if (!writeup) {
-    return c.json(error('Writeup not found'), 404);
-  }
-
-  if (writeup.password) {
-    if (!(user && (user.id === writeup.createdBy || user.role === 'admin'))) {
-      if (!password) {
-        return c.json(error('Unauthorized'), 403);
-      }
-      const hash = await getHash(password);
-      if (hash !== writeup.password) {
-        return c.json(error('Unauthorized'), 403);
-      }
     }
-  }
 
-  const html = await markdownToHtml(writeup.content);
-  return c.json(success(html), 200);
-});
+    const html = await markdownToHtml(writeup.content);
+    return c.json(success(html), 200);
+  })
+  .patch('/:id', withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const id = Number(c.req.valid('param').id);
+    const { title, categoryId, points, solvers, password } = c.req.valid('json');
+    const user = c.get('user');
 
-const patchWriteupHandlers = factory.createHandlers(withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async (c) => {
-  try {} catch { return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
+    const existingWriteup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id),
+    });
 
-  const db = getDB(c.env.DB);
-  const id = Number(c.req.valid('param').id);
-  const { title, categoryId, points, solvers, password } = c.req.valid('json');
-  const user = c.get('user');
+    if (!existingWriteup) {
+      return c.json(error('Writeup not found'), 404);
+    }
 
-  const existingWriteup = await db.query.writeups.findFirst({
-    where: (writeups, { eq }) => eq(writeups.id, id),
+    if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
+      return c.json(error('Unauthorized'), 403);
+    }
+
+    const [writeup] = await db.update(writeups).set({
+      title,
+      categoryId,
+      points,
+      solvers,
+      password: password ? await getHash(password) : undefined,
+    }).where(eq(writeups.id, id)).returning();
+    if (!writeup) {
+      return c.json(error('Failed to update writeup'), 500);
+    }
+
+    return c.json(success({
+      ...writeup,
+      password: undefined,
+    }), 200);
+  })
+  .patch('/:id/content', withAuth(true), withValidates({ param: idParamSchema, json: writeupContentSchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const id = Number(c.req.valid('param').id);
+    const { content } = c.req.valid('json');
+    const user = c.get('user');
+
+    const existingWriteup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id),
+    });
+
+    if (!existingWriteup) {
+      return c.json(error('Writeup not found'), 404);
+    }
+
+    if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
+      return c.json(error('Unauthorized'), 403);
+    }
+
+    const [writeup] = await db.update(writeups).set({
+      content
+    }).where(eq(writeups.id, id)).returning();
+    if (!writeup) {
+      return c.json(error('Failed to update writeup'), 500);
+    }
+
+    return c.json(success({
+      ...writeup,
+      password: undefined,
+    }), 200);
+  })
+  .delete('/:id', withAuth(true), withValidates({ param: idParamSchema }), async (c) => {
+    const db = getDB(c.env.DB);
+    const id = Number(c.req.valid('param').id);
+    const user = c.get('user');
+
+    const existingWriteup = await db.query.writeups.findFirst({
+      where: eq(writeups.id, id),
+    });
+
+    if (!existingWriteup) {
+      return c.json(error('Writeup not found'), 404);
+    }
+
+    if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
+      return c.json(error('Unauthorized'), 403);
+    }
+
+    await db.delete(writeupToTags).where(eq(writeupToTags.writeupId, id)).execute();
+    await db.delete(writeups).where(eq(writeups.id, id)).execute();
+
+    return c.json(success(), 200);
   });
-
-  if (!existingWriteup) {
-    return c.json(error('Writeup not found'), 404);
-  }
-
-  if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
-    return c.json(error('Unauthorized'), 403);
-  }
-
-  const [ writeup ] = await db.update(writeups).set({
-    title,
-    categoryId,
-    points,
-    solvers,
-    password: password ? await getHash(password) : undefined,
-  }).where(eq(writeups.id, id)).returning();
-  if (!writeup) {
-    return c.json(error('Failed to update writeup'), 500);
-  }
-
-  return c.json(success({
-    ...writeup,
-    password: undefined,
-  }), 200);
-});
-
-const patchWriteupContentHandlers = factory.createHandlers(withAuth(true), withValidates({ param: idParamSchema, json: writeupContentSchema }), async (c) => {
-  try {} catch { return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
-
-  const db = getDB(c.env.DB);
-  const id = Number(c.req.valid('param').id);
-  const { content } = c.req.valid('json');
-  const user = c.get('user');
-
-  const existingWriteup = await db.query.writeups.findFirst({
-    where: (writeups, { eq }) => eq(writeups.id, id),
-  });
-
-  if (!existingWriteup) {
-    return c.json(error('Writeup not found'), 404);
-  }
-
-  if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
-    return c.json(error('Unauthorized'), 403);
-  }
-
-  const [writeup] = await db.update(writeups).set({
-    content
-  }).where(eq(writeups.id, id)).returning();
-  if (!writeup) {
-    return c.json(error('Failed to update writeup'), 500);
-  }
-
-  return c.json(success({
-    ...writeup,
-    password: undefined,
-  }), 200);
-});
-
-const deleteWriteupHandlers = factory.createHandlers(withAuth(true), withValidates({ param: idParamSchema }), async (c) => {
-  try {} catch { return null as unknown as withAuthErrorResponse | withValidatesErrorResponse; }
-
-  const db = getDB(c.env.DB);
-  const id = Number(c.req.valid('param').id);
-  const user = c.get('user');
-
-  const existingWriteup = await db.query.writeups.findFirst({
-    where: eq(writeups.id, id),
-  });
-
-  if (!existingWriteup) {
-    return c.json(error('Writeup not found'), 404);
-  }
-
-  if (!(user.role === 'admin' || user.id === existingWriteup.createdBy)) {
-    return c.json(error('Unauthorized'), 403);
-  }
-
-  await db.delete(writeupToTags).where(eq(writeupToTags.writeupId, id)).execute();
-  await db.delete(writeups).where(eq(writeups.id, id)).execute();
-
-  return c.json(success(), 200);
-});
-
-const router = new Hono<Env>()
-  .get('/', ...getWriteupsHandlers)
-  .post('/', ...postWriteupHandlers)
-  .get('/:id', ...getWriteupHandlers)
-  .get('/:id/tags', ...getWriteupTagsHandlers)
-  .post('/:id/tags', ...postWriteupTagsHandlers)
-  .delete('/:id/tags', ...deleteWriteupTagsHandlers)
-  .get('/:id/content', ...getWriteupContentHandlers)
-  .patch('/:id', ...patchWriteupHandlers)
-  .patch('/:id/content', ...patchWriteupContentHandlers)
-  .delete('/:id', ...deleteWriteupHandlers);
 
 export { router };

@@ -13,14 +13,15 @@ export type HasUser<
 > = {
   Variables: {
     user: L extends true
-      ? (A extends true ? (User & { role: 'admin' }) : User)
-      : (A extends true ? (User & { role: 'admin' } | null) : User | null);
+    ? (A extends true ? (User & { role: 'admin' }) : User)
+    : (A extends true ? (User & { role: 'admin' } | null) : User | null);
   };
 };
 
-export type withAuthErrorResponse<A extends boolean = false> = JsonErrorResponse<
+type withAuthErrorResponse<A extends boolean = false> = JsonErrorResponse<
   A extends true ? 401 | 403 : 401
 >;
+type withAuthResponse<A extends boolean = false> = withAuthErrorResponse<A> | void;
 
 export function withAuth<
   E extends Env,
@@ -32,7 +33,7 @@ export function withAuth<
   requireAuth: L = true as L,
   requireAdmin: A = false as A
 ) {
-  return createMiddleware<E & HasUser<L, A>, P, I>(async (c, next) => {
+  return createMiddleware<E & HasUser<L, A>, P, I, withAuthResponse<A>>(async (c, next) => {
     const token = getCookie(c, 'session');
 
     let userId: string | null = null;
@@ -49,7 +50,7 @@ export function withAuth<
     if (requireAuth && !userId) {
       return c.json(error('Unauthorized'), 401);
     }
-    
+
     let user: User | null = null;
     if (userId) {
       const db = getDB(c.env.DB);
