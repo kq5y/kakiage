@@ -44,16 +44,10 @@
       ]
     },
     "format": {
-      "dependencies": [
-        "./workspaces/server:format",
-        "./workspaces/client:format"
-      ]
+      "command": "biome format --write"
     },
     "lint": {
-      "dependencies": [
-        "./workspaces/server:lint",
-        "./workspaces/client:lint"
-      ]
+      "command": "biome lint --write"
     }
   }
 }

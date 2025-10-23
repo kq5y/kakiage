@@ -4,5 +4,12 @@
   "extends": "//",
   "files": {
     "includes": ["src/**", "*.ts"]
+  },
+  "linter": {
+    "rules": {
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      }
+    }
   }
 }
