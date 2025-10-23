@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "wireit",
     "deploy": "wireit",
+    "deploy:preview": "wireit",
     "build:rpc": "wireit",
     "watch:rpc": "wireit",
     "db:migrate": "wireit",
@@ -66,6 +67,16 @@
     },
     "deploy": {
       "command": "wrangler deploy --minify",
+      "files": [
+        "dist",
+        "wrangler.jsonc"
+      ],
+      "dependencies": [
+        "../../:build"
+      ]
+    },
+    "deploy:preview": {
+      "command": "wrangler versions upload --minify",
       "files": [
         "dist",
         "wrangler.jsonc"
