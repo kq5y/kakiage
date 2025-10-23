@@ -26,14 +26,14 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251014.0",
     "drizzle-kit": "^0.31.5",
-    "tsup": "^8.5.0",
+    "tsdown": "^0.15.9",
     "typescript": "^5.9.3",
     "wireit": "^0.14.12",
     "wrangler": "^4.44.0"
   },
   "wireit": {
     "build:rpc": {
-      "command": "tsup ./src/rpc.ts --dts --format esm",
+      "command": "tsdown ./src/rpc.ts --dts --format esm",
       "files": [
         "src"
       ],
@@ -42,10 +42,10 @@
       ]
     },
     "watch:rpc": {
-      "command": "tsup ./src/rpc.ts --watch --dts --format esm",
+      "command": "tsdown ./src/rpc.ts --watch ./src --dts --format esm",
       "service": {
         "readyWhen": {
-          "lineMatches": ".*DTS.*Build success in \\d+.*"
+          "lineMatches": ".*Build complete in.*"
         }
       },
       "files": [
