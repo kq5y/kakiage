@@ -16,8 +16,6 @@ export type JsonErrorResponse<U extends ContentfulStatusCode> = JSONRespondRetur
 
 export type RedirectResponse<T extends RedirectStatusCode = 302> = Response & TypedResponse<undefined, T, "redirect">
 
-export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse;
-
 export function success<T = undefined>(data?: T): SuccessResponse<T> {
   return (data === undefined ? ({ success: true } as SuccessResponse<T>) : ({ success: true, data } as SuccessResponse<T>));
 }
