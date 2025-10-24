@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WriteupsIndexRouteImport } from './routes/writeups/index'
 import { Route as CtfsIndexRouteImport } from './routes/ctfs/index'
@@ -20,6 +21,11 @@ import { Route as CtfsCtfIdRouteImport } from './routes/ctfs/$ctfId'
 import { Route as WriteupsWriteupIdEditRouteImport } from './routes/writeups/$writeupId.edit'
 import { Route as CtfsCtfIdEditRouteImport } from './routes/ctfs/$ctfId.edit'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -73,6 +79,7 @@ const CtfsCtfIdEditRoute = CtfsCtfIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
   '/ctfs/new': typeof CtfsNewRoute
   '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
@@ -85,6 +92,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
   '/ctfs/new': typeof CtfsNewRoute
   '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
@@ -98,6 +106,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
   '/ctfs/new': typeof CtfsNewRoute
   '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
@@ -112,6 +121,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
     | '/ctfs/$ctfId'
     | '/ctfs/new'
     | '/writeups/$writeupId'
@@ -124,6 +134,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
     | '/ctfs/$ctfId'
     | '/ctfs/new'
     | '/writeups/$writeupId'
@@ -136,6 +147,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/login'
     | '/ctfs/$ctfId'
     | '/ctfs/new'
     | '/writeups/$writeupId'
@@ -149,6 +161,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
   CtfsCtfIdRoute: typeof CtfsCtfIdRouteWithChildren
   CtfsNewRoute: typeof CtfsNewRoute
   WriteupsWriteupIdRoute: typeof WriteupsWriteupIdRouteWithChildren
@@ -160,6 +173,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -258,6 +278,7 @@ const WriteupsWriteupIdRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
   CtfsCtfIdRoute: CtfsCtfIdRouteWithChildren,
   CtfsNewRoute: CtfsNewRoute,
   WriteupsWriteupIdRoute: WriteupsWriteupIdRouteWithChildren,

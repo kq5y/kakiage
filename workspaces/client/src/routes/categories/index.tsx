@@ -1,16 +1,20 @@
 import type { Category } from "@kakiage/server/rpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { createCategory, deleteCategory, getCategories, updateCategory } from "@/libs/api";
 
 export const Route = createFileRoute("/categories/")({
   component: CategoriesPage,
   beforeLoad: async ({ context }) => {
-    const user = context.auth.getUser();
+    await context.auth.ensureLoaded();
 
-    if (!user || user.role !== "admin") {
-      throw new Error("You must be an admin to access this page");
+    const user = context.auth.getUser();
+    if (!user) {
+      throw redirect({ to: "/login" });
+    }
+    if (user.role !== "admin") {
+      throw redirect({ to: "/" });
     }
 
     return {};
