@@ -3,6 +3,10 @@ import { useState } from "react";
 
 import { getLoginLink } from "@/libs/api";
 
+type LoginSearchParams = {
+  error?: string;
+};
+
 export const Route = createFileRoute("/login")({
   component: LoginPage,
   beforeLoad: async ({ context }) => {
@@ -14,6 +18,11 @@ export const Route = createFileRoute("/login")({
     }
 
     return {};
+  },
+  validateSearch: (search: Record<string, unknown>): LoginSearchParams => {
+    return {
+      error: (search.error as string) || undefined,
+    };
   },
 });
 
@@ -41,6 +50,7 @@ function DiscordButton({ text, ...params }: { text: string } & React.ButtonHTMLA
 }
 
 function LoginPage() {
+  const { error } = Route.useSearch();
   const [inviteToken, setInviteToken] = useState("");
   const handleChangeInviteToken = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInviteToken(e.target.value);
@@ -51,6 +61,17 @@ function LoginPage() {
         <h1 className="text-3xl font-bold text-center text-gray-800">kakiage</h1>
       </div>
       <div className="px-6 p-b-4 space-y-2">
+        {error && (
+          <div
+            className="bg-red-100 border-0 border-l-4 border-red-500 border-solid text-red-700 px-4 py-1 rounded-md"
+            role="alert"
+          >
+            <p>
+              <b>Error: </b>
+              {decodeURIComponent(error)}
+            </p>
+          </div>
+        )}
         <section>
           <h2 className="text-xl font-semibold text-center text-gray-700 mb-5">Login</h2>
           <form action={getLoginLink()} method="POST">
