@@ -18,7 +18,10 @@ const callbackQuerySchema = z.object({
 });
 
 const makeAppUrl = (error?: string): string => {
-  return `/${error ? `?error=${encodeURIComponent(error)}` : ""}`;
+  if (error) {
+    return `/login?error=${encodeURIComponent(error)}`;
+  }
+  return "/";
 };
 
 const router = new Hono<Env>()
