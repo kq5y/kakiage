@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import { useAuth } from "@/hooks/useAuth";
-import { getLoginLink } from "@/libs/api";
 
 export function Header() {
   const { user, logout, isLoading } = useAuth();
@@ -70,18 +69,7 @@ export function Header() {
                     </div>
                   </div>
                 ) : (
-                  <Link
-                    to="/"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const form = document.createElement("form");
-                      form.method = "POST";
-                      form.action = getLoginLink();
-                      document.body.appendChild(form);
-                      form.submit();
-                    }}
-                    className="text-gray-700 hover:text-blue-600"
-                  >
+                  <Link to="/login" className="text-gray-700 hover:text-blue-600">
                     Login
                   </Link>
                 )}
