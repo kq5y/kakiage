@@ -1,9 +1,9 @@
-import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 
-import { AuthProvider, useAuth } from "./hooks/useAuth.tsx";
+import { AuthProvider, authService } from "./hooks/useAuth.tsx";
 import { routeTree } from "./routeTree.gen.ts";
 
 import "./styles.css";
@@ -20,8 +20,7 @@ const queryClient = new QueryClient({
 const router = createRouter({
   routeTree,
   context: {
-    // biome-ignore lint/style/noNonNullAssertion: Will be set in the AuthProvider
-    auth: undefined!,
+    auth: authService,
     queryClient,
   },
   defaultPreload: "intent",
@@ -34,12 +33,14 @@ declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
+  interface RouterContext {
+    auth: typeof authService;
+    queryClient: typeof queryClient;
+  }
 }
 
 function InnerApp() {
-  const auth = useAuth();
-  const queryClient = useQueryClient();
-  return <RouterProvider router={router} context={{ auth, queryClient }} />;
+  return <RouterProvider router={router} />;
 }
 
 const rootElement = document.getElementById("app");

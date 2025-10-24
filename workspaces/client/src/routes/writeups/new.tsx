@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 
 import MarkdownEditor from "@/components/MarkdownEditor";
@@ -8,10 +8,11 @@ import { createWriteup, getCategories, getCtfs, getTags, uploadImage } from "@/l
 export const Route = createFileRoute("/writeups/new")({
   component: NewWriteupPage,
   beforeLoad: async ({ context }) => {
-    const user = context.auth.getUser();
+    await context.auth.ensureLoaded();
 
+    const user = context.auth.getUser();
     if (!user) {
-      throw new Error("You must be logged in to create a writeup");
+      throw redirect({ to: "/login" });
     }
 
     return {};

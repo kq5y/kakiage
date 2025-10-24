@@ -1,15 +1,20 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+
 import { getCtfDetail, updateCtf } from "@/libs/api";
 
 export const Route = createFileRoute("/ctfs/$ctfId/edit")({
   component: EditCtfPage,
   beforeLoad: async ({ context, params }) => {
-    const user = context.auth.getUser();
+    await context.auth.ensureLoaded();
 
-    if (!user || user.role !== "admin") {
-      throw new Error("You must be an admin to access this page");
+    const user = context.auth.getUser();
+    if (!user) {
+      throw redirect({ to: "/login" });
+    }
+    if (user.role !== "admin") {
+      throw redirect({ to: "/ctfs/$ctfId", params: { ctfId: params.ctfId } });
     }
 
     return { ctfId: params.ctfId };
