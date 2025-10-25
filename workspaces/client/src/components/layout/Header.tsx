@@ -18,7 +18,7 @@ export function Header() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <Link to="/" className="text-2xl font-bold text-blue-600">
-            Kakiage
+            kakiage
           </Link>
 
           <nav className="flex items-center space-x-6">
