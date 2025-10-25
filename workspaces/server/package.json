@@ -18,9 +18,9 @@
     }
   },
   "dependencies": {
+    "@kakiage/processor": "workspace:*",
     "drizzle-orm": "^0.44.6",
     "hono": "^4.10.2",
-    "marked": "^16.4.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -57,11 +57,12 @@
       "service": true,
       "dependencies": [
         "watch:rpc",
+        "../processor:build",
         "../client:watch"
       ],
       "files": [
-        "../client/dist/**",
-        "src/**",
+        "../client/dist",
+        "src",
         "wrangler.jsonc"
       ]
     },
