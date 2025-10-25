@@ -1,5 +1,4 @@
-import DOMPurify from "dompurify";
-import { marked } from "marked";
+import { markdownToHtml } from "@kakiage/processor";
 import { useEffect, useRef, useState } from "react";
 
 interface MarkdownEditorProps {
@@ -17,11 +16,7 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
   useEffect(() => {
     (async () => {
       if (isPreview) {
-        const dirty = await marked(value, {
-          breaks: true,
-          gfm: true,
-        });
-        const html = DOMPurify.sanitize(dirty);
+        const html = await markdownToHtml(value);
         setRenderedHtml(html);
       }
     })();

@@ -1,10 +1,10 @@
+import { markdownToHtml } from "@kakiage/processor";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { marked } from "marked";
 import { z } from "zod";
 
 import { getDB } from "@/db/client";
-import { tags, writeupToTags, writeups } from "@/db/schema";
+import { tags, writeups, writeupToTags } from "@/db/schema";
 import { error, success } from "@/libs/response";
 import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
@@ -51,21 +51,12 @@ const writeupPasswordHeaderSchema = z.object({
   "x-password": z.string().min(1).optional(),
 });
 
-function sanitizeHtml(html: string): string {
-  return html; // TODO: Implement HTML sanitization
-}
-
 async function getHash(text: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(hashBuffer))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
-
-const markdownToHtml = async (markdown: string) => {
-  const dirty = await marked.parse(markdown, { gfm: true, breaks: true });
-  return sanitizeHtml(dirty);
-};
 
 const router = new Hono<Env>()
   .get("/", withValidates({ query: writeupSearchQuerySchema }), async (c) => {

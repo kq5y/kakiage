@@ -9,11 +9,10 @@
   },
   "dependencies": {
     "@kakiage/server": "workspace:*",
+    "@kakiage/processor": "workspace:*",
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-router": "^1.133.21",
     "@tanstack/react-router-devtools": "^1.133.21",
-    "dompurify": "^3.3.0",
-    "marked": "^16.4.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -44,7 +43,8 @@
         "dist"
       ],
       "dependencies": [
-        "../server:build:rpc"
+        "../server:build:rpc",
+        "../processor:build"
       ]
     },
     "watch": {
@@ -62,7 +62,8 @@
         "rsbuild.config.ts"
       ],
       "dependencies": [
-        "../server:watch:rpc"
+        "../server:watch:rpc",
+        "../processor:build"
       ]
     },
     "dev": {

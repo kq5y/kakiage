@@ -22,6 +22,7 @@
   "wireit": {
     "dev": {
       "dependencies": [
+        "./workspaces/processor:build",
         "./workspaces/server:watch:rpc",
         "./workspaces/client:watch",
         "./workspaces/server:dev"
@@ -29,6 +30,7 @@
     },
     "build": {
       "dependencies": [
+        "./workspaces/processor:build",
         "./workspaces/server:build:rpc",
         "./workspaces/client:build"
       ]
