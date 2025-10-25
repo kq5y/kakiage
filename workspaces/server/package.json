@@ -39,6 +39,9 @@
       ],
       "output": [
         "dist"
+      ],
+      "dependencies": [
+        "../processor:build"
       ]
     },
     "watch:rpc": {
@@ -50,6 +53,9 @@
       },
       "files": [
         "src"
+      ],
+      "dependencies": [
+        "../processor:build"
       ]
     },
     "dev": {
