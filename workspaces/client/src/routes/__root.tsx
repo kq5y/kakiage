@@ -20,7 +20,7 @@ export const Route = createRootRouteWithContext<{
     return (
       <div className="min-h-screen flex flex-col">
         <Header />
-        <main className="flex-grow flex flex-col items-center">
+        <main className="flex-grow flex flex-col items-center py-2">
           <Outlet />
         </main>
         <Footer />
