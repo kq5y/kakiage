@@ -198,6 +198,24 @@ function CategoriesPage() {
         </button>
       </div>
 
+      {createCategoryMutation.isError && (
+        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
+          Error creating category: {createCategoryMutation.error.message}
+        </div>
+      )}
+
+      {updateCategoryMutation.isError && (
+        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
+          Error updating category: {updateCategoryMutation.error.message}
+        </div>
+      )}
+
+      {deleteCategoryMutation.isError && (
+        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
+          Error deleting category: {deleteCategoryMutation.error.message}
+        </div>
+      )}
+
       {formMode === "add" && (
         <CategoryForm
           mode="add"
@@ -285,18 +303,6 @@ function CategoriesPage() {
           </tbody>
         </table>
       </div>
-
-      {updateCategoryMutation.isError && (
-        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
-          Error updating category: {updateCategoryMutation.error.message}
-        </div>
-      )}
-
-      {deleteCategoryMutation.isError && (
-        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
-          Error deleting category: {deleteCategoryMutation.error.message}
-        </div>
-      )}
     </div>
   );
 }
