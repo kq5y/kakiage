@@ -11,7 +11,7 @@ import { withValidates } from "@/middlewares/validate";
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
 const categoryBodySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  color: z.string().regex(/^#([0-9A-F]{3}|[0-9A-F]{6})$/, "Color must be a valid hex code"),
+  color: z.string().regex(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/, "Color must be a valid hex code"),
 });
 
 const router = new Hono<Env>()
@@ -24,8 +24,8 @@ const router = new Hono<Env>()
     const db = getDB(c.env.DB);
     const { name, color } = c.req.valid("json");
     try {
-    const [category] = await db.insert(categories).values({ name, color }).returning();
-    return c.json(success(category), 201);
+      const [category] = await db.insert(categories).values({ name, color }).returning();
+      return c.json(success(category), 201);
     } catch (e) {
       if (e instanceof DrizzleQueryError) {
         if (e.cause?.message.includes("UNIQUE constraint failed: categories.name")) {
@@ -41,11 +41,11 @@ const router = new Hono<Env>()
     const id = Number(c.req.valid("param").id);
     const { name, color } = c.req.valid("json");
     try {
-    const [category] = await db.update(categories).set({ name, color }).where(eq(categories.id, id)).returning();
-    if (!category) {
-      return c.json(error("Category not found"), 404);
-    }
-    return c.json(success(category), 200);
+      const [category] = await db.update(categories).set({ name, color }).where(eq(categories.id, id)).returning();
+      if (!category) {
+        return c.json(error("Category not found"), 404);
+      }
+      return c.json(success(category), 200);
     } catch (e) {
       if (e instanceof DrizzleQueryError) {
         if (e.cause?.message.includes("UNIQUE constraint failed: categories.name")) {
