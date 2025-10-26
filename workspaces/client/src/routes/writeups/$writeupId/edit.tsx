@@ -16,7 +16,7 @@ import {
 
 export const Route = createFileRoute("/writeups/$writeupId/edit")({
   component: EditWriteupPage,
-  beforeLoad: async ({ context, params }) => {
+  beforeLoad: async ({ context }) => {
     await context.auth.ensureLoaded();
 
     const user = context.auth.getUser();
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
       throw redirect({ to: "/login" });
     }
 
-    return { writeupId: params.writeupId };
+    return {};
   },
 });
 

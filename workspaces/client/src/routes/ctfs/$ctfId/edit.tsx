@@ -17,7 +17,7 @@ export const Route = createFileRoute("/ctfs/$ctfId/edit")({
       throw redirect({ to: "/ctfs/$ctfId", params: { ctfId: params.ctfId } });
     }
 
-    return { ctfId: params.ctfId };
+    return {};
   },
 });
 
