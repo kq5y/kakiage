@@ -11,7 +11,7 @@ import { withValidates } from "@/middlewares/validate";
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
 const ctfBodySchema = z.object({
   name: z.string().min(1, "Name is required"),
-  url: z.url().optional(),
+  url: z.url(),
   startAt: z.number(),
   endAt: z.number(),
 });
