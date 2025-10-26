@@ -8,19 +8,16 @@ interface MarkdownEditorProps {
 }
 
 export default function MarkdownEditor({ value, onChange, onImageUpload }: MarkdownEditorProps) {
-  const [isPreview, setIsPreview] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [renderedHtml, setRenderedHtml] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     (async () => {
-      if (isPreview) {
-        const html = await markdownToHtml(value);
-        setRenderedHtml(html);
-      }
+      const html = await markdownToHtml(value);
+      setRenderedHtml(html);
     })();
-  }, [value, isPreview]);
+  }, [value]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
@@ -40,7 +37,6 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
     try {
       const imageUrl = await onImageUpload(file);
 
-      // Insert image markdown at cursor position or at the end
       const textArea = document.querySelector("textarea");
       const cursorPos = textArea?.selectionStart || value.length;
       const textBefore = value.substring(0, cursorPos);
@@ -49,7 +45,6 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
       const imageMarkdown = `![${file.name}](${imageUrl})`;
       onChange(`${textBefore}\n${imageMarkdown}\n${textAfter}`);
 
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -62,55 +57,41 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
   };
 
   return (
-    <div className="border rounded-md overflow-hidden">
-      <div className="bg-gray-100 px-4 py-2 flex justify-between items-center border-b">
-        <div className="flex space-x-2">
-          <button
-            type="button"
-            onClick={handleImageButtonClick}
-            disabled={isPreview || isUploading}
-            className="text-gray-600 hover:text-gray-900 disabled:text-gray-400"
-            title="Upload image"
-          >
-            {isUploading ? "Uploading..." : "Image"}
-          </button>
-          <input ref={fileInputRef} type="file" hidden accept="image/*" onChange={handleImageUpload} />
-        </div>
-
-        <div className="flex rounded overflow-hidden border">
-          <button
-            type="button"
-            onClick={() => setIsPreview(false)}
-            className={`px-3 py-1 ${!isPreview ? "bg-white" : "bg-gray-100"}`}
-          >
-            Edit
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsPreview(true)}
-            className={`px-3 py-1 ${isPreview ? "bg-white" : "bg-gray-100"}`}
-          >
-            Preview
-          </button>
-        </div>
-      </div>
-
-      <div className="min-h-[300px] max-h-[600px]">
-        {isPreview ? (
-          <div
-            className="p-4 h-full overflow-auto prose max-w-none"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized above
-            dangerouslySetInnerHTML={{ __html: renderedHtml }}
-          />
-        ) : (
+    <div className="flex-1 overflow-hidden w-full h-full grid grid-cols-2">
+      <div className="w-full h-full border-r border-gray-300 overflow-hidden">
+        <div className="w-full h-full flex flex-col">
+          <div className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-600">
+            <span>Editor</span>
+            <button
+              type="button"
+              onClick={handleImageButtonClick}
+              disabled={isUploading}
+              className="px-3 py-1 bg-gray-200 text-black rounded hover:bg-gray-300 disabled:opacity-50"
+            >
+              {isUploading ? "Uploading..." : "Upload Image"}
+            </button>
+            <input ref={fileInputRef} type="file" hidden accept="image/*" onChange={handleImageUpload} />
+          </div>
           <textarea
+            name="content"
             value={value}
             onChange={handleTextChange}
-            className="w-full h-full p-4 resize-none focus:outline-none"
-            placeholder="Write your content in markdown format..."
-            rows={12}
+            className="w-full h-full flex-grow p-3 font-mono text-base leading-relaxed bg-white outline-none resize-none overflow-y-auto"
+            spellCheck="false"
           />
-        )}
+        </div>
+      </div>
+      <div className="w-full h-full overflow-hidden">
+        <div className="w-full h-full flex flex-col bg-gray-50">
+          <div className="flex items-center justify-between p-3 bg-gray-100 border-b border-gray-200 text-sm font-medium text-gray-600">
+            <span>Preview</span>
+          </div>
+          <div
+            className="w-full h-full flex-grow p-3 overflow-y-auto prose prose-indigo lg:prose-lg max-w-none"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized content
+            dangerouslySetInnerHTML={{ __html: renderedHtml }}
+          />
+        </div>
       </div>
     </div>
   );
