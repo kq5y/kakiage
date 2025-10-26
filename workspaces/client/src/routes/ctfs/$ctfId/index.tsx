@@ -4,7 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { getCtfDetail } from "@/libs/api";
 
-export const Route = createFileRoute("/ctfs/$ctfId")({
+export const Route = createFileRoute("/ctfs/$ctfId/")({
   component: CtfDetailPage,
 });
 

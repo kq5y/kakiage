@@ -4,7 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { getWriteup, getWriteupContent } from "@/libs/api";
 
-export const Route = createFileRoute("/writeups/$writeupId")({
+export const Route = createFileRoute("/writeups/$writeupId/")({
   component: WriteupDetailPage,
 });
 
