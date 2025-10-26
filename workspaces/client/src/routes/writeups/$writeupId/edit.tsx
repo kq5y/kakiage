@@ -104,8 +104,8 @@ function EditWriteupPage() {
         ...data,
         categoryId: Number(data.categoryId),
       }),
-    onSuccess: () => {
-      // After updating metadata, update content
+    onSuccess: async (data, _variables, _onMutateResult, context) => {
+      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId.toString()] });
       updateContentMutation.mutate(content);
     },
   });

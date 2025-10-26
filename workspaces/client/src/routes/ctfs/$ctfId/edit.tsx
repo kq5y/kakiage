@@ -53,7 +53,8 @@ function EditCtfPage() {
 
   const updateCtfMutation = useMutation({
     mutationFn: (data: Parameters<typeof updateCtf>[1]) => updateCtf(Number(ctfId), data),
-    onSuccess: () => {
+    onSuccess: async (_data, _variables, _onMutateResult, context) => {
+      await context.client.invalidateQueries({ queryKey: ["ctfs", ctfId] });
       navigate({ to: `/ctfs/$ctfId`, params: { ctfId } });
     },
   });

@@ -77,7 +77,8 @@ function NewWriteupPage() {
 
   const createWriteupMutation = useMutation({
     mutationFn: createWriteup,
-    onSuccess: (data) => {
+    onSuccess: async (data, _variables, _onMutateResult, context) => {
+      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId.toString()] });
       navigate({ to: `/writeups/$writeupId`, params: { writeupId: data.id.toString() } });
     },
   });
