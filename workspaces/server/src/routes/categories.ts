@@ -1,5 +1,5 @@
 import { DrizzleQueryError, eq } from "drizzle-orm";
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { z } from "zod";
 
 import { getDB } from "@/db/client";
@@ -14,6 +14,14 @@ const categoryBodySchema = z.object({
   color: z.string().regex(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/, "Color must be a valid hex code"),
 });
 
+const handleCategoryDbError = (c: Context, e: unknown, action: "create" | "update") => {
+  if (e instanceof DrizzleQueryError && e.cause?.message.includes("UNIQUE constraint failed: categories.name")) {
+    return c.json(error("Category name already exists"), 400);
+  }
+  console.error(`Failed to ${action} category:`, e);
+  return c.json(error(`Failed to ${action} category`), 500);
+};
+
 const router = new Hono<Env>()
   .get("/", async (c) => {
     const db = getDB(c.env.DB);
@@ -27,13 +35,7 @@ const router = new Hono<Env>()
       const [category] = await db.insert(categories).values({ name, color }).returning();
       return c.json(success(category), 201);
     } catch (e) {
-      if (e instanceof DrizzleQueryError) {
-        if (e.cause?.message.includes("UNIQUE constraint failed: categories.name")) {
-          return c.json(error("Category name already exists"), 400);
-        }
-      }
-      console.error("Failed to create category:", e);
-      return c.json(error("Failed to create category"), 500);
+      return handleCategoryDbError(c, e, "create");
     }
   })
   .patch("/:id", withAuth(true, true), withValidates({ param: idParamSchema, json: categoryBodySchema }), async (c) => {
@@ -47,13 +49,7 @@ const router = new Hono<Env>()
       }
       return c.json(success(category), 200);
     } catch (e) {
-      if (e instanceof DrizzleQueryError) {
-        if (e.cause?.message.includes("UNIQUE constraint failed: categories.name")) {
-          return c.json(error("Category name already exists"), 400);
-        }
-      }
-      console.error("Failed to update category:", e);
-      return c.json(error("Failed to update category"), 500);
+      return handleCategoryDbError(c, e, "update");
     }
   })
   .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async (c) => {
