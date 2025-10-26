@@ -2,6 +2,7 @@ import type { Category } from "@kakiage/server/rpc";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
+
 import { createCategory, deleteCategory, getCategories, updateCategory } from "@/libs/api";
 
 export const Route = createFileRoute("/categories/")({
@@ -21,6 +22,97 @@ export const Route = createFileRoute("/categories/")({
   },
 });
 
+function CategoryForm<T>({
+  mode,
+  data,
+  handleChange,
+  handleSubmit,
+  saveMutation,
+  onCancel,
+  onDelete,
+  deleteMutation,
+}: {
+  mode: "add" | "edit";
+  data: { name: string; color: string };
+  handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleSubmit: (e: React.FormEvent) => void;
+  saveMutation: ReturnType<typeof useMutation<Category, Error, T, unknown>>;
+  onCancel: () => void;
+  onDelete?: () => void;
+  deleteMutation?: ReturnType<typeof useMutation<true, Error, number, unknown>>;
+}) {
+  return (
+    <div className="p-6 bg-gray-50">
+      <h3 className="text-xl font-semibold mb-4">{mode === "add" ? "Create Category" : "Edit Category"}</h3>
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Name
+            <input
+              type="text"
+              name="name"
+              value={data.name}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
+            />
+          </label>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Color
+            <div className="flex items-center space-x-3">
+              <input
+                type="color"
+                name="color"
+                value={data.color}
+                onChange={handleChange}
+                className="w-12 h-10 p-1 border border-gray-300 rounded-lg cursor-pointer"
+              />
+              <input
+                type="text"
+                name="color"
+                value={data.color}
+                onChange={handleChange}
+                placeholder="#xxxxxx"
+                pattern="^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                className="w-full sm:w-40 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono"
+                required
+              />
+            </div>
+          </label>
+        </div>
+        <div className="flex justify-end items-center space-x-3 pt-2">
+          {mode === "edit" && (
+            <button
+              type="button"
+              onClick={onDelete}
+              disabled={deleteMutation?.isPending}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow mr-auto text-base"
+            >
+              Delete
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-base"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saveMutation.isPending}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow text-base"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function CategoriesPage() {
   const queryClient = useQueryClient();
   const {
@@ -32,10 +124,11 @@ function CategoriesPage() {
     queryFn: getCategories,
   });
 
+  const [formMode, setFormMode] = useState<"add" | "edit" | "closed">("closed");
+
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [newCategory, setNewCategory] = useState({ name: "", color: "" });
 
-  // Mutations
   const createCategoryMutation = useMutation({
     mutationFn: createCategory,
     onSuccess: () => {
@@ -59,10 +152,10 @@ function CategoriesPage() {
     },
   });
 
-  // Handlers
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createCategoryMutation.mutate(newCategory);
+    setFormMode("closed");
   };
 
   const handleUpdateSubmit = (e: React.FormEvent) => {
@@ -92,161 +185,106 @@ function CategoriesPage() {
   if (error) return <div>Error loading categories: {error.message}</div>;
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Manage Categories</h1>
-
-      {/* Create New Category */}
-      <div className="mb-8 p-4 border rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Create New Category</h2>
-        <form onSubmit={handleCreateSubmit} className="space-y-4">
-          <div>
-            <label className="block mb-1 font-medium">
-              Category Name <span className="text-red-500">*</span>
-              <input
-                type="text"
-                name="name"
-                value={newCategory.name}
-                onChange={handleNewCategoryChange}
-                required
-                className="w-full px-3 py-2 border rounded-md"
-              />
-            </label>
-          </div>
-
-          <div>
-            <label className="block mb-1 font-medium">
-              Color
-              <input
-                type="text"
-                name="color"
-                value={newCategory.color}
-                onChange={handleNewCategoryChange}
-                required
-                className="w-full px-3 py-2 border rounded-md"
-              />
-            </label>
-          </div>
-
-          <button
-            type="submit"
-            disabled={createCategoryMutation.isPending}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
-          >
-            {createCategoryMutation.isPending ? "Creating..." : "Create Category"}
-          </button>
-
-          {createCategoryMutation.isError && (
-            <div className="p-3 bg-red-100 text-red-700 rounded">Error: {createCategoryMutation.error.message}</div>
-          )}
-        </form>
+    <div className="max-w-lg w-full">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold text-gray-800 mb-3">Manage Categories</h1>
+        <button
+          type="button"
+          onClick={() => setFormMode("add")}
+          disabled={formMode === "add"}
+          className="px-5 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-default text-base"
+        >
+          Add
+        </button>
       </div>
 
-      {/* Categories List */}
-      <h2 className="text-xl font-semibold mb-4">Existing Categories</h2>
+      {formMode === "add" && (
+        <CategoryForm
+          mode="add"
+          data={newCategory}
+          handleChange={handleNewCategoryChange}
+          handleSubmit={handleCreateSubmit}
+          saveMutation={createCategoryMutation}
+          onCancel={() => {
+            setFormMode("closed");
+            setNewCategory({ name: "", color: "" });
+          }}
+        />
+      )}
 
-      {categories?.length === 0 ? (
-        <div className="text-center py-8 border rounded-lg">
-          <p className="text-gray-500">No categories available. Create your first category above.</p>
-        </div>
-      ) : (
-        <div className="border rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+      <div className="mt-4 rounded-lg overflow-hidden shadow-md border border-gray-200">
+        <table className="w-full min-w-max text-left bg-white">
+          <thead className="bg-gray-100 border-0 border-b border-gray-300 border-solid">
+            <tr>
+              <th className="p-4 font-semibold text-gray-700">ID</th>
+              <th className="p-4"></th>
+              <th className="p-4 font-semibold text-gray-700">Name</th>
+              <th className="p-4 font-semibold text-gray-700 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {categories?.length === 0 && (
               <tr>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Description
-                </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  Actions
-                </th>
+                <td colSpan={4} className="p-4 text-center text-gray-500">
+                  No categories available.
+                </td>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {categories?.map((category) => (
-                <tr key={category.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {editingCategory?.id === category.id ? (
-                      <input
-                        type="text"
-                        name="name"
-                        value={editingCategory.name}
-                        onChange={handleEditChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    ) : (
-                      <div className="text-sm font-medium text-gray-900">{category.name}</div>
-                    )}
+            )}
+            {categories?.map((category) => (
+              <>
+                <tr
+                  key={category.id}
+                  className={`border-b border-gray-200 transition-colors ${formMode === "edit" && editingCategory?.id === category.id ? "bg-blue-50" : "hover:bg-gray-50"}`}
+                >
+                  <td className="p-4 text-gray-600 font-mono">{category.id}</td>
+                  <td className="p-4">
+                    <div
+                      className="w-6 h-6 rounded-full border border-gray-300"
+                      style={{ backgroundColor: category.color }}
+                      title={category.color}
+                    ></div>
                   </td>
-                  <td className="px-6 py-4">
-                    {editingCategory?.id === category.id ? (
-                      <input
-                        type="text"
-                        name="color"
-                        value={editingCategory.color}
-                        onChange={handleEditChange}
-                        className="w-full px-2 py-1 border rounded"
-                      />
-                    ) : (
-                      <div className="text-sm text-gray-500">{category.color}</div>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {editingCategory?.id === category.id ? (
-                      <div className="space-x-2">
-                        <button
-                          type="button"
-                          onClick={handleUpdateSubmit}
-                          disabled={updateCategoryMutation.isPending}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setEditingCategory(null)}
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="space-x-2">
-                        <button
-                          type="button"
-                          onClick={() => setEditingCategory(category)}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => confirmDelete(category)}
-                          disabled={deleteCategoryMutation.isPending}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    )}
+                  <td className="p-4 text-gray-900 font-medium">{category.name}</td>
+                  <td className="p-4 text-right">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormMode("edit");
+                          setEditingCategory(category);
+                        }}
+                        disabled={formMode === "edit" && editingCategory?.id === category.id}
+                        className="px-3 py-1 bg-yellow-500 text-white text-sm rounded-md hover:bg-yellow-600 disabled:bg-yellow-300 transition-colors disabled:cursor-default"
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                {formMode === "edit" && editingCategory?.id === category.id && (
+                  <tr className="border-b border-gray-200">
+                    <td colSpan={4} className="p-0 bg-gray-50">
+                      <CategoryForm
+                        data={category}
+                        mode="edit"
+                        handleChange={handleEditChange}
+                        handleSubmit={handleUpdateSubmit}
+                        saveMutation={updateCategoryMutation}
+                        onCancel={() => {
+                          setFormMode("closed");
+                          setEditingCategory(null);
+                        }}
+                        onDelete={() => confirmDelete(category)}
+                        deleteMutation={deleteCategoryMutation}
+                      />
+                    </td>
+                  </tr>
+                )}
+              </>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       {updateCategoryMutation.isError && (
         <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
