@@ -87,7 +87,7 @@ function EditCtfPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-2 font-medium">
-            Name
+            Name <span className="text-red-500">*</span>
             <input
               type="text"
               name="name"
@@ -102,7 +102,7 @@ function EditCtfPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block mb-2 font-medium">
-              Start Date
+              Start Date <span className="text-red-500">*</span>
               <input
                 type="datetime-local"
                 name="startAt"
@@ -116,7 +116,7 @@ function EditCtfPage() {
 
           <div>
             <label className="block mb-2 font-medium">
-              End Date
+              End Date <span className="text-red-500">*</span>
               <input
                 type="datetime-local"
                 name="endAt"
@@ -131,7 +131,7 @@ function EditCtfPage() {
 
         <div>
           <label className="block mb-2 font-medium">
-            URL
+            URL <span className="text-red-500">*</span>
             <input
               type="url"
               name="url"

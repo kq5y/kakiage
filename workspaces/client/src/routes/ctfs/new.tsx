@@ -63,7 +63,7 @@ function NewCtfPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-2 font-medium">
-            Name
+            Name <span className="text-red-500">*</span>
             <input
               type="text"
               name="name"
@@ -78,7 +78,7 @@ function NewCtfPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block mb-2 font-medium">
-              Start Date
+              Start Date <span className="text-red-500">*</span>
               <input
                 type="datetime-local"
                 name="startAt"
@@ -92,7 +92,7 @@ function NewCtfPage() {
 
           <div>
             <label className="block mb-2 font-medium">
-              End Date
+              End Date <span className="text-red-500">*</span>
               <input
                 type="datetime-local"
                 name="endAt"
@@ -107,14 +107,14 @@ function NewCtfPage() {
 
         <div>
           <label className="block mb-2 font-medium">
-            URL
+            URL <span className="text-red-500">*</span>
             <input
               type="url"
               name="url"
               value={formData.url}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="https://example.com"
             />
           </label>

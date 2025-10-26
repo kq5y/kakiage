@@ -47,7 +47,7 @@ function CategoryForm<T>({
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Name
+            Name <span className="text-red-500">*</span>
             <input
               type="text"
               name="name"
@@ -60,7 +60,7 @@ function CategoryForm<T>({
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Color
+            Color <span className="text-red-500">*</span>
             <div className="flex items-center space-x-3">
               <input
                 type="color"
