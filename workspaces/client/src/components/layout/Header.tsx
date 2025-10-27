@@ -17,7 +17,7 @@ export function Header() {
     <header className="bg-white shadow">
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-3">
-          <Link to="/" className="text-2xl font-bold text-black">
+          <Link to="/" className="text-2xl font-bold">
             kakiage
           </Link>
 
@@ -60,7 +60,7 @@ export function Header() {
                     >
                       <div className="block w-full text-left text-base px-4 py-3 text-gray-500 bg-transparent hover:bg-gray-200 border-0 border-b border-gray-300 border-solid">
                         <div>
-                          <span className="font-medium text-black">{user.name}</span> ({user.role})
+                          <span className="font-medium">{user.name}</span> ({user.role})
                         </div>
                       </div>
                       <button

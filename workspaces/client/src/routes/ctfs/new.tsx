@@ -54,7 +54,7 @@ function NewCtfPage() {
 
   return (
     <div className="max-w-lg w-full">
-      <h1 className="text-3xl font-bold text-gray-800 mb-3">Create New CTF</h1>
+      <h1 className="text-3xl font-bold mb-3">Create New CTF</h1>
 
       {createCtfMutation.isError && (
         <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">Error: {createCtfMutation.error.message}</div>

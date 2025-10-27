@@ -49,7 +49,7 @@ function CtfDetailPage() {
   return (
     <div className="max-w-lg w-full">
       <div className="flex justify-between items-center mb-2">
-        <h1 className="text-3xl font-bold text-gray-800 mb-3">{ctf.name}</h1>
+        <h1 className="text-3xl font-bold mb-3">{ctf.name}</h1>
         {isAdmin && (
           <Link
             to={`/ctfs/$ctfId/edit`}
