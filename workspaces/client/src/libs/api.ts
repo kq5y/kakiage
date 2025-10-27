@@ -256,7 +256,10 @@ export const createWriteup = async (payload: InferRequestType<typeof apiClient.a
 };
 
 export const getWriteup = async (id: number, includeContent: boolean = false) => {
-  const res = await apiClient.api.v1.writeups[":id"].$get({ param: { id: id.toString() }, query: { content: includeContent ? "true" : undefined } });
+  const res = await apiClient.api.v1.writeups[":id"].$get({
+    param: { id: id.toString() },
+    query: { content: includeContent ? "true" : undefined },
+  });
   const data = await res.json();
   if (res.ok && data.success)
     return {

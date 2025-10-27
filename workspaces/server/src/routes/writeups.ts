@@ -20,7 +20,10 @@ const writeupsSearchQuerySchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional(),
 });
 const writeupQuerySchema = z.object({
-  content: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
+  content: z
+    .enum(["true", "false"])
+    .transform((value) => value === "true")
+    .optional(),
 });
 const writeupCreateBodySchema = z.object({
   title: z.string().min(1),

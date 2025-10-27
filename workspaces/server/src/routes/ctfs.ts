@@ -31,8 +31,8 @@ const router = new Hono<Env>()
       limit: pageSize || 10,
       offset: ((page || 1) - 1) * (pageSize || 10),
       orderBy: (ctfs, { desc, asc }) => [
-        sortOrder === "asc" ? asc(ctfs[sortKey || "startAt"]) : desc(ctfs[sortKey || "startAt"])
-      ]
+        sortOrder === "asc" ? asc(ctfs[sortKey || "startAt"]) : desc(ctfs[sortKey || "startAt"]),
+      ],
     });
     return c.json(success(list), 200);
   })
