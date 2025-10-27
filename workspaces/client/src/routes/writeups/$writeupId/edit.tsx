@@ -4,14 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import MarkdownEditor from "@/components/MarkdownEditor";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  getCategories,
-  getWriteup,
-  getWriteupContent,
-  updateWriteup,
-  updateWriteupContent,
-  uploadImage,
-} from "@/libs/api";
+import { getCategories, getWriteup, updateWriteup, updateWriteupContent, uploadImage } from "@/libs/api";
 
 export const Route = createFileRoute("/writeups/$writeupId/edit")({
   component: EditWriteupPage,
@@ -42,8 +35,8 @@ function EditWriteupPage() {
   const [originalAuthorId, setOriginalAuthorId] = useState("");
 
   const { data: writeup, isLoading: isLoadingWriteup } = useQuery({
-    queryKey: ["writeups", writeupId],
-    queryFn: () => getWriteup(Number(writeupId)),
+    queryKey: ["writeups", writeupId, { includeContent: true }],
+    queryFn: () => getWriteup(Number(writeupId), true),
   });
 
   useEffect(() => {
@@ -53,18 +46,9 @@ function EditWriteupPage() {
       categoryId: String(writeup.category.id),
       tagIds: writeup.tags?.map((tag) => String(tag.id)) || [],
     });
+    setContent(writeup.content || "");
     setOriginalAuthorId(writeup.createdByUser.id);
   }, [writeup]);
-
-  const { data: rawContent, isLoading: isLoadingContent } = useQuery({
-    queryKey: ["writeups", writeupId, "raw-content"],
-    queryFn: () => getWriteupContent(Number(writeupId)),
-  });
-
-  useEffect(() => {
-    if (rawContent == null) return;
-    setContent(rawContent);
-  }, [rawContent]);
 
   const { data: categories } = useQuery({
     queryKey: ["categories"],
@@ -95,13 +79,15 @@ function EditWriteupPage() {
       }),
     onSuccess: async (data, _variables, _onMutateResult, context) => {
       await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId.toString()] });
+      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId] });
       updateContentMutation.mutate(content);
     },
   });
 
   const updateContentMutation = useMutation({
     mutationFn: (content: string) => updateWriteupContent(Number(writeupId), { content }),
-    onSuccess: () => {
+    onSuccess: async (_data, _variables, _onMutateResult, context) => {
+      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "content"] });
       navigate({ to: `/writeups/$writeupId`, params: { writeupId } });
     },
   });
@@ -120,7 +106,7 @@ function EditWriteupPage() {
     updateWriteupMutation.mutate(formData);
   };
 
-  if (isLoadingWriteup || isLoadingContent) return <div>Loading writeup...</div>;
+  if (isLoadingWriteup) return <div>Loading writeup...</div>;
 
   return (
     <div className="max-w-dvw w-full flex-grow flex flex-col">

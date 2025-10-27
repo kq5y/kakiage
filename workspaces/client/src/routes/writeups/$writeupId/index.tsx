@@ -17,7 +17,7 @@ function WriteupDetailPage() {
     isLoading: isLoadingWriteup,
     error: writeupError,
   } = useQuery({
-    queryKey: ["writeups", writeupId],
+    queryKey: ["writeups", writeupId, { includeContent: false }],
     queryFn: () => getWriteup(Number(writeupId)),
   });
 
