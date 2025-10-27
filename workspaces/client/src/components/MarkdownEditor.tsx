@@ -1,6 +1,8 @@
 import { markdownToHtml } from "@kakiage/processor";
 import { useEffect, useRef, useState } from "react";
 
+import "@/assets/article.scss";
+
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
@@ -87,7 +89,7 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
             <span>Preview</span>
           </div>
           <div
-            className="w-full h-full flex-grow p-3 overflow-y-auto prose prose-indigo lg:prose-lg max-w-none"
+            className="w-full h-full flex-grow p-3 overflow-y-auto max-w-none article"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized content
             dangerouslySetInnerHTML={{ __html: renderedHtml }}
           />
