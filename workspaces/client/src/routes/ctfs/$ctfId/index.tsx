@@ -4,9 +4,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { getCtfDetail } from "@/libs/api";
 
-export const Route = createFileRoute("/ctfs/$ctfId")({
+export const Route = createFileRoute("/ctfs/$ctfId/")({
   component: CtfDetailPage,
 });
+
+const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+};
 
 function CtfDetailPage() {
   const { ctfId } = Route.useParams();
@@ -26,7 +34,6 @@ function CtfDetailPage() {
   if (error) return <div>Error loading CTF: {error.message}</div>;
   if (!ctf) return <div>CTF not found</div>;
 
-  // Group writeups by category
   const writeupsByCategory = ctf.writeups?.reduce(
     (acc, writeup) => {
       const categoryId = writeup.category.id;
@@ -40,26 +47,17 @@ function CtfDetailPage() {
   );
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">{ctf.name}</h1>
+    <div className="max-w-lg w-full">
+      <div className="flex justify-between items-center mb-2">
+        <h1 className="text-3xl font-bold mb-3">{ctf.name}</h1>
         {isAdmin && (
-          <div className="space-x-2">
-            <Link
-              to={`/ctfs/$ctfId/edit`}
-              params={{ ctfId }}
-              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-            >
-              Edit CTF
-            </Link>
-            <Link
-              to={`/writeups/new`}
-              search={{ ctfId: Number(ctfId) }}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Add Writeup
-            </Link>
-          </div>
+          <Link
+            to={`/ctfs/$ctfId/edit`}
+            params={{ ctfId }}
+            className="px-5 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-700 transition-colors text-base"
+          >
+            Edit
+          </Link>
         )}
       </div>
 
@@ -67,11 +65,11 @@ function CtfDetailPage() {
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <h3 className="font-medium text-gray-700">Start Date</h3>
-            <p>{new Date(ctf.startAt).toLocaleString()}</p>
+            <p>{new Date(ctf.startAt).toLocaleString(undefined, DATE_OPTIONS)}</p>
           </div>
           <div>
             <h3 className="font-medium text-gray-700">End Date</h3>
-            <p>{new Date(ctf.endAt).toLocaleString()}</p>
+            <p>{new Date(ctf.endAt).toLocaleString(undefined, DATE_OPTIONS)}</p>
           </div>
         </div>
 
@@ -85,14 +83,20 @@ function CtfDetailPage() {
         )}
       </div>
 
-      <h2 className="text-2xl font-bold mb-4">Writeups</h2>
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-2xl font-bold mb-4">Writeups</h2>
+        <Link
+          to={`/writeups/new`}
+          search={{ ctfId: Number(ctfId) }}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors text-base"
+        >
+          Add
+        </Link>
+      </div>
 
       {!writeupsByCategory || Object.keys(writeupsByCategory).length === 0 ? (
         <div className="text-center py-8 border rounded-lg">
           <p className="text-gray-500 mb-2">No writeups available for this CTF yet.</p>
-          <Link to={`/writeups/new`} search={{ ctfId: Number(ctfId) }} className="text-blue-600 hover:underline">
-            Add the first writeup
-          </Link>
         </div>
       ) : (
         <div className="space-y-8">

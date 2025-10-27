@@ -17,7 +17,7 @@ export const Route = createFileRoute("/ctfs/$ctfId/edit")({
       throw redirect({ to: "/ctfs/$ctfId", params: { ctfId: params.ctfId } });
     }
 
-    return { ctfId: params.ctfId };
+    return {};
   },
 });
 
@@ -53,7 +53,8 @@ function EditCtfPage() {
 
   const updateCtfMutation = useMutation({
     mutationFn: (data: Parameters<typeof updateCtf>[1]) => updateCtf(Number(ctfId), data),
-    onSuccess: () => {
+    onSuccess: async (_data, _variables, _onMutateResult, context) => {
+      await context.client.invalidateQueries({ queryKey: ["ctfs", ctfId] });
       navigate({ to: `/ctfs/$ctfId`, params: { ctfId } });
     },
   });
@@ -76,25 +77,29 @@ function EditCtfPage() {
   if (error) return <div>Error loading CTF: {error.message}</div>;
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Edit CTF: {ctf?.name}</h1>
+    <div className="max-w-lg w-full">
+      <h1 className="text-3xl font-bold mb-3">Edit CTF</h1>
 
-      <form onSubmit={handleSubmit} className="max-w-2xl">
-        <div className="mb-4">
+      {updateCtfMutation.isError && (
+        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">Error: {updateCtfMutation.error.message}</div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
           <label className="block mb-2 font-medium">
-            CTF Name <span className="text-red-500">*</span>
+            Name <span className="text-red-500">*</span>
             <input
               type="text"
               name="name"
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </label>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block mb-2 font-medium">
               Start Date <span className="text-red-500">*</span>
@@ -104,7 +109,7 @@ function EditCtfPage() {
                 value={formData.startAt}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </label>
           </div>
@@ -118,47 +123,44 @@ function EditCtfPage() {
                 value={formData.endAt}
                 onChange={handleChange}
                 required
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </label>
           </div>
         </div>
 
-        <div className="mb-6">
+        <div>
           <label className="block mb-2 font-medium">
-            CTF URL
+            URL <span className="text-red-500">*</span>
             <input
               type="url"
               name="url"
               value={formData.url}
               onChange={handleChange}
-              className="w-full px-3 py-2 border rounded-md"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              required
               placeholder="https://example.com"
             />
           </label>
         </div>
 
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            disabled={updateCtfMutation.isPending}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-300"
-          >
-            {updateCtfMutation.isPending ? "Saving..." : "Save Changes"}
-          </button>
-
+        <div className="flex justify-end items-center space-x-3 pt-2">
           <button
             type="button"
             onClick={() => navigate({ to: "/ctfs/$ctfId", params: { ctfId } })}
-            className="px-4 py-2 border rounded hover:bg-gray-100"
+            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-base"
           >
             Cancel
           </button>
-        </div>
 
-        {updateCtfMutation.isError && (
-          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">Error: {updateCtfMutation.error.message}</div>
-        )}
+          <button
+            type="submit"
+            disabled={updateCtfMutation.isPending}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-default shadow text-base"
+          >
+            {updateCtfMutation.isPending ? "Saving..." : "Save"}
+          </button>
+        </div>
       </form>
     </div>
   );

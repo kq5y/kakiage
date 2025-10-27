@@ -8,8 +8,8 @@
     "build": "wireit"
   },
   "dependencies": {
-    "@kakiage/server": "workspace:*",
     "@kakiage/processor": "workspace:*",
+    "@kakiage/server": "workspace:*",
     "@tanstack/react-query": "^5.90.5",
     "@tanstack/react-router": "^1.133.21",
     "@tanstack/react-router-devtools": "^1.133.21",
@@ -19,6 +19,7 @@
   "devDependencies": {
     "@rsbuild/core": "^1.5.17",
     "@rsbuild/plugin-react": "^1.4.1",
+    "@rsbuild/plugin-sass": "^1.4.0",
     "@tanstack/router-plugin": "^1.133.21",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",

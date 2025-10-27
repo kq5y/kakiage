@@ -4,7 +4,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { getWriteup, getWriteupContent } from "@/libs/api";
 
-export const Route = createFileRoute("/writeups/$writeupId")({
+import "@/assets/article.scss";
+
+export const Route = createFileRoute("/writeups/$writeupId/")({
   component: WriteupDetailPage,
 });
 
@@ -17,7 +19,7 @@ function WriteupDetailPage() {
     isLoading: isLoadingWriteup,
     error: writeupError,
   } = useQuery({
-    queryKey: ["writeups", writeupId],
+    queryKey: ["writeups", writeupId, { includeContent: false }],
     queryFn: () => getWriteup(Number(writeupId)),
   });
 
@@ -41,15 +43,15 @@ function WriteupDetailPage() {
   if (!writeup) return <div>Writeup not found</div>;
 
   return (
-    <div>
-      <div className="mb-8">
-        <div className="flex justify-between items-start mb-2">
-          <h1 className="text-3xl font-bold">{writeup.title}</h1>
+    <div className="max-w-xl w-full">
+      <div className="mb-4">
+        <div className="flex justify-between items-center mb-2">
+          <h1 className="text-3xl font-bold mb-3">{writeup.title}</h1>
           {canEdit && (
             <Link
               to={`/writeups/$writeupId/edit`}
               params={{ writeupId }}
-              className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-base"
             >
               Edit
             </Link>
@@ -91,7 +93,7 @@ function WriteupDetailPage() {
 
       <div className="prose max-w-none">
         {/** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */}
-        <div dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
+        <div className="article" dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
       </div>
     </div>
   );

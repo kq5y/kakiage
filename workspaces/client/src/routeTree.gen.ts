@@ -15,11 +15,11 @@ import { Route as WriteupsIndexRouteImport } from './routes/writeups/index'
 import { Route as CtfsIndexRouteImport } from './routes/ctfs/index'
 import { Route as CategoriesIndexRouteImport } from './routes/categories/index'
 import { Route as WriteupsNewRouteImport } from './routes/writeups/new'
-import { Route as WriteupsWriteupIdRouteImport } from './routes/writeups/$writeupId'
 import { Route as CtfsNewRouteImport } from './routes/ctfs/new'
-import { Route as CtfsCtfIdRouteImport } from './routes/ctfs/$ctfId'
-import { Route as WriteupsWriteupIdEditRouteImport } from './routes/writeups/$writeupId.edit'
-import { Route as CtfsCtfIdEditRouteImport } from './routes/ctfs/$ctfId.edit'
+import { Route as WriteupsWriteupIdIndexRouteImport } from './routes/writeups/$writeupId/index'
+import { Route as CtfsCtfIdIndexRouteImport } from './routes/ctfs/$ctfId/index'
+import { Route as WriteupsWriteupIdEditRouteImport } from './routes/writeups/$writeupId/edit'
+import { Route as CtfsCtfIdEditRouteImport } from './routes/ctfs/$ctfId/edit'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -51,124 +51,126 @@ const WriteupsNewRoute = WriteupsNewRouteImport.update({
   path: '/writeups/new',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WriteupsWriteupIdRoute = WriteupsWriteupIdRouteImport.update({
-  id: '/writeups/$writeupId',
-  path: '/writeups/$writeupId',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const CtfsNewRoute = CtfsNewRouteImport.update({
   id: '/ctfs/new',
   path: '/ctfs/new',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CtfsCtfIdRoute = CtfsCtfIdRouteImport.update({
-  id: '/ctfs/$ctfId',
-  path: '/ctfs/$ctfId',
+const WriteupsWriteupIdIndexRoute = WriteupsWriteupIdIndexRouteImport.update({
+  id: '/writeups/$writeupId/',
+  path: '/writeups/$writeupId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CtfsCtfIdIndexRoute = CtfsCtfIdIndexRouteImport.update({
+  id: '/ctfs/$ctfId/',
+  path: '/ctfs/$ctfId/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WriteupsWriteupIdEditRoute = WriteupsWriteupIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => WriteupsWriteupIdRoute,
+  id: '/writeups/$writeupId/edit',
+  path: '/writeups/$writeupId/edit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CtfsCtfIdEditRoute = CtfsCtfIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => CtfsCtfIdRoute,
+  id: '/ctfs/$ctfId/edit',
+  path: '/ctfs/$ctfId/edit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
   '/ctfs/new': typeof CtfsNewRoute
-  '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
   '/writeups/new': typeof WriteupsNewRoute
   '/categories': typeof CategoriesIndexRoute
   '/ctfs': typeof CtfsIndexRoute
   '/writeups': typeof WriteupsIndexRoute
   '/ctfs/$ctfId/edit': typeof CtfsCtfIdEditRoute
   '/writeups/$writeupId/edit': typeof WriteupsWriteupIdEditRoute
+  '/ctfs/$ctfId': typeof CtfsCtfIdIndexRoute
+  '/writeups/$writeupId': typeof WriteupsWriteupIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
   '/ctfs/new': typeof CtfsNewRoute
-  '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
   '/writeups/new': typeof WriteupsNewRoute
   '/categories': typeof CategoriesIndexRoute
   '/ctfs': typeof CtfsIndexRoute
   '/writeups': typeof WriteupsIndexRoute
   '/ctfs/$ctfId/edit': typeof CtfsCtfIdEditRoute
   '/writeups/$writeupId/edit': typeof WriteupsWriteupIdEditRoute
+  '/ctfs/$ctfId': typeof CtfsCtfIdIndexRoute
+  '/writeups/$writeupId': typeof WriteupsWriteupIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
-  '/ctfs/$ctfId': typeof CtfsCtfIdRouteWithChildren
   '/ctfs/new': typeof CtfsNewRoute
-  '/writeups/$writeupId': typeof WriteupsWriteupIdRouteWithChildren
   '/writeups/new': typeof WriteupsNewRoute
   '/categories/': typeof CategoriesIndexRoute
   '/ctfs/': typeof CtfsIndexRoute
   '/writeups/': typeof WriteupsIndexRoute
   '/ctfs/$ctfId/edit': typeof CtfsCtfIdEditRoute
   '/writeups/$writeupId/edit': typeof WriteupsWriteupIdEditRoute
+  '/ctfs/$ctfId/': typeof CtfsCtfIdIndexRoute
+  '/writeups/$writeupId/': typeof WriteupsWriteupIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
-    | '/ctfs/$ctfId'
     | '/ctfs/new'
-    | '/writeups/$writeupId'
     | '/writeups/new'
     | '/categories'
     | '/ctfs'
     | '/writeups'
     | '/ctfs/$ctfId/edit'
     | '/writeups/$writeupId/edit'
+    | '/ctfs/$ctfId'
+    | '/writeups/$writeupId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
-    | '/ctfs/$ctfId'
     | '/ctfs/new'
-    | '/writeups/$writeupId'
     | '/writeups/new'
     | '/categories'
     | '/ctfs'
     | '/writeups'
     | '/ctfs/$ctfId/edit'
     | '/writeups/$writeupId/edit'
+    | '/ctfs/$ctfId'
+    | '/writeups/$writeupId'
   id:
     | '__root__'
     | '/'
     | '/login'
-    | '/ctfs/$ctfId'
     | '/ctfs/new'
-    | '/writeups/$writeupId'
     | '/writeups/new'
     | '/categories/'
     | '/ctfs/'
     | '/writeups/'
     | '/ctfs/$ctfId/edit'
     | '/writeups/$writeupId/edit'
+    | '/ctfs/$ctfId/'
+    | '/writeups/$writeupId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
-  CtfsCtfIdRoute: typeof CtfsCtfIdRouteWithChildren
   CtfsNewRoute: typeof CtfsNewRoute
-  WriteupsWriteupIdRoute: typeof WriteupsWriteupIdRouteWithChildren
   WriteupsNewRoute: typeof WriteupsNewRoute
   CategoriesIndexRoute: typeof CategoriesIndexRoute
   CtfsIndexRoute: typeof CtfsIndexRoute
   WriteupsIndexRoute: typeof WriteupsIndexRoute
+  CtfsCtfIdEditRoute: typeof CtfsCtfIdEditRoute
+  WriteupsWriteupIdEditRoute: typeof WriteupsWriteupIdEditRoute
+  CtfsCtfIdIndexRoute: typeof CtfsCtfIdIndexRoute
+  WriteupsWriteupIdIndexRoute: typeof WriteupsWriteupIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -215,13 +217,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WriteupsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/writeups/$writeupId': {
-      id: '/writeups/$writeupId'
-      path: '/writeups/$writeupId'
-      fullPath: '/writeups/$writeupId'
-      preLoaderRoute: typeof WriteupsWriteupIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/ctfs/new': {
       id: '/ctfs/new'
       path: '/ctfs/new'
@@ -229,63 +224,49 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CtfsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ctfs/$ctfId': {
-      id: '/ctfs/$ctfId'
+    '/writeups/$writeupId/': {
+      id: '/writeups/$writeupId/'
+      path: '/writeups/$writeupId'
+      fullPath: '/writeups/$writeupId'
+      preLoaderRoute: typeof WriteupsWriteupIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ctfs/$ctfId/': {
+      id: '/ctfs/$ctfId/'
       path: '/ctfs/$ctfId'
       fullPath: '/ctfs/$ctfId'
-      preLoaderRoute: typeof CtfsCtfIdRouteImport
+      preLoaderRoute: typeof CtfsCtfIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/writeups/$writeupId/edit': {
       id: '/writeups/$writeupId/edit'
-      path: '/edit'
+      path: '/writeups/$writeupId/edit'
       fullPath: '/writeups/$writeupId/edit'
       preLoaderRoute: typeof WriteupsWriteupIdEditRouteImport
-      parentRoute: typeof WriteupsWriteupIdRoute
+      parentRoute: typeof rootRouteImport
     }
     '/ctfs/$ctfId/edit': {
       id: '/ctfs/$ctfId/edit'
-      path: '/edit'
+      path: '/ctfs/$ctfId/edit'
       fullPath: '/ctfs/$ctfId/edit'
       preLoaderRoute: typeof CtfsCtfIdEditRouteImport
-      parentRoute: typeof CtfsCtfIdRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface CtfsCtfIdRouteChildren {
-  CtfsCtfIdEditRoute: typeof CtfsCtfIdEditRoute
-}
-
-const CtfsCtfIdRouteChildren: CtfsCtfIdRouteChildren = {
-  CtfsCtfIdEditRoute: CtfsCtfIdEditRoute,
-}
-
-const CtfsCtfIdRouteWithChildren = CtfsCtfIdRoute._addFileChildren(
-  CtfsCtfIdRouteChildren,
-)
-
-interface WriteupsWriteupIdRouteChildren {
-  WriteupsWriteupIdEditRoute: typeof WriteupsWriteupIdEditRoute
-}
-
-const WriteupsWriteupIdRouteChildren: WriteupsWriteupIdRouteChildren = {
-  WriteupsWriteupIdEditRoute: WriteupsWriteupIdEditRoute,
-}
-
-const WriteupsWriteupIdRouteWithChildren =
-  WriteupsWriteupIdRoute._addFileChildren(WriteupsWriteupIdRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
-  CtfsCtfIdRoute: CtfsCtfIdRouteWithChildren,
   CtfsNewRoute: CtfsNewRoute,
-  WriteupsWriteupIdRoute: WriteupsWriteupIdRouteWithChildren,
   WriteupsNewRoute: WriteupsNewRoute,
   CategoriesIndexRoute: CategoriesIndexRoute,
   CtfsIndexRoute: CtfsIndexRoute,
   WriteupsIndexRoute: WriteupsIndexRoute,
+  CtfsCtfIdEditRoute: CtfsCtfIdEditRoute,
+  WriteupsWriteupIdEditRoute: WriteupsWriteupIdEditRoute,
+  CtfsCtfIdIndexRoute: CtfsCtfIdIndexRoute,
+  WriteupsWriteupIdIndexRoute: WriteupsWriteupIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

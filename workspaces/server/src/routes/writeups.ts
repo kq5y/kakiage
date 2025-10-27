@@ -10,7 +10,7 @@ import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
-const writeupSearchQuerySchema = z.object({
+const writeupsSearchQuerySchema = z.object({
   q: z.string().min(1).max(100).optional(),
   categoryId: z.number().min(1).optional(),
   tag: z.string().min(1).max(100).optional(),
@@ -18,6 +18,9 @@ const writeupSearchQuerySchema = z.object({
   page: z.number().min(1).optional(),
   sortKey: z.enum(["createdAt", "updatedAt"]).optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
+});
+const writeupQuerySchema = z.object({
+  content: z.enum(["true", "false"]).transform((value) => value === "true").optional(),
 });
 const writeupCreateBodySchema = z.object({
   title: z.string().min(1),
@@ -59,7 +62,7 @@ async function getHash(text: string): Promise<string> {
 }
 
 const router = new Hono<Env>()
-  .get("/", withValidates({ query: writeupSearchQuerySchema }), async (c) => {
+  .get("/", withValidates({ query: writeupsSearchQuerySchema }), async (c) => {
     const db = getDB(c.env.DB);
     const { q, categoryId, tag, pageSize, page, sortKey, sortOrder } = c.req.valid("query");
 
@@ -144,14 +147,14 @@ const router = new Hono<Env>()
       201,
     );
   })
-  .get("/:id", withValidates({ param: idParamSchema }), async (c) => {
+  .get("/:id", withValidates({ param: idParamSchema, query: writeupQuerySchema }), async (c) => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
+    const { content: includeContent } = c.req.valid("query");
 
     const writeup = await db.query.writeups.findFirst({
       where: (writeups, { eq }) => eq(writeups.id, id),
       columns: {
-        content: false,
         categoryId: false,
         createdBy: false,
         password: false,
@@ -175,6 +178,7 @@ const router = new Hono<Env>()
 
     const formattedWriteup = {
       ...writeup,
+      content: includeContent ? writeup.content : undefined,
       tags: writeup.writeupToTags.map((wt) => wt.tag),
       writeupToTags: undefined,
     };

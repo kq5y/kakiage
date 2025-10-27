@@ -6,7 +6,7 @@ import ReactDOM from "react-dom/client";
 import { AuthProvider, authService } from "./hooks/useAuth.tsx";
 import { routeTree } from "./routeTree.gen.ts";
 
-import "./styles.css";
+import "./assets/styles.scss";
 
 const queryClient = new QueryClient({
   defaultOptions: {
