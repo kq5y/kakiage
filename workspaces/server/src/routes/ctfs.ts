@@ -9,6 +9,12 @@ import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
+const ctfSearchQuerySchema = z.object({
+  pageSize: z.number().min(1).max(100).optional(),
+  page: z.number().min(1).optional(),
+  sortKey: z.enum(["startAt", "endAt", "createdAt"]).optional(),
+  sortOrder: z.enum(["asc", "desc"]).optional(),
+});
 const ctfBodySchema = z.object({
   name: z.string().min(1, "Name is required"),
   url: z.url(),
@@ -17,9 +23,17 @@ const ctfBodySchema = z.object({
 });
 
 const router = new Hono<Env>()
-  .get("/", async (c) => {
+  .get("/", withValidates({ query: ctfSearchQuerySchema }), async (c) => {
     const db = getDB(c.env.DB);
-    const list = await db.query.ctfs.findMany();
+    const { pageSize, page, sortKey, sortOrder } = c.req.valid("query");
+
+    const list = await db.query.ctfs.findMany({
+      limit: pageSize || 10,
+      offset: ((page || 1) - 1) * (pageSize || 10),
+      orderBy: (ctfs, { desc, asc }) => [
+        sortOrder === "asc" ? asc(ctfs[sortKey || "startAt"]) : desc(ctfs[sortKey || "startAt"])
+      ]
+    });
     return c.json(success(list), 200);
   })
   .post("/", withAuth(true), withValidates({ json: ctfBodySchema }), async (c) => {
