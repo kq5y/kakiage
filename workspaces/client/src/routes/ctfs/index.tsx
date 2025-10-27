@@ -23,7 +23,7 @@ function CtfsPage() {
     error,
   } = useQuery({
     queryKey: ["ctfs"],
-    queryFn: getCtfs,
+    queryFn: () => getCtfs({}),
   });
 
   const { user } = useAuth();

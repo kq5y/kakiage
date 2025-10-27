@@ -75,8 +75,8 @@ export const deleteCategory = async (id: number) => {
 
 /* ctfs */
 
-export const getCtfs = async () => {
-  const res = await apiClient.api.v1.ctfs.$get();
+export const getCtfs = async (query: InferRequestType<typeof apiClient.api.v1.ctfs.$get>["query"]) => {
+  const res = await apiClient.api.v1.ctfs.$get({ query });
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success)
