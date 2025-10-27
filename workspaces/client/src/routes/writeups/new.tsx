@@ -48,7 +48,7 @@ function NewWriteupPage() {
 
   const { data: ctfs } = useQuery({
     queryKey: ["ctfs"],
-    queryFn: getCtfs,
+    queryFn: () => getCtfs({}),
   });
 
   useEffect(() => {
