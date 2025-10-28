@@ -3,10 +3,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { getWriteups } from "@/libs/api";
 
 export const Route = createFileRoute("/writeups/")({
-  component: EditWriteupPage,
+  component: WriteupsListPage,
 });
 
-function EditWriteupPage() {
+function WriteupsListPage() {
   const {
     data: writeups,
     isLoading,
