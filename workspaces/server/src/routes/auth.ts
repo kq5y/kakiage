@@ -9,6 +9,8 @@ import { inviteTokens, users } from "@/db/schema";
 import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from "@/libs/discord";
 import { withValidates } from "@/middlewares/validate";
 
+const SESSION_EXPIRE_SECONDS = 60 * 60 * 24 * 7; // 7 days
+
 const tokenFormSchema = z.object({
   inviteToken: z.string().optional(),
 });
@@ -65,7 +67,7 @@ const router = new Hono<Env>()
       if (user) {
         const session = await sign(
           {
-            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+            exp: Math.floor(Date.now() / 1000) + SESSION_EXPIRE_SECONDS,
             data: { id: user.id },
           },
           c.env.JWT_SECRET,
@@ -75,7 +77,7 @@ const router = new Hono<Env>()
         setCookie(c, "session", session, {
           httpOnly: true,
           sameSite: "lax",
-          maxAge: 60 * 60 * 24,
+          maxAge: SESSION_EXPIRE_SECONDS,
         });
 
         return c.redirect(makeAppUrl());
@@ -116,7 +118,7 @@ const router = new Hono<Env>()
 
         const session = await sign(
           {
-            exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+            exp: Math.floor(Date.now() / 1000) + SESSION_EXPIRE_SECONDS,
             data: { id: discordUser.id },
           },
           c.env.JWT_SECRET,
@@ -126,7 +128,7 @@ const router = new Hono<Env>()
         setCookie(c, "session", session, {
           httpOnly: true,
           sameSite: "lax",
-          maxAge: 60 * 60 * 24,
+          maxAge: SESSION_EXPIRE_SECONDS,
         });
 
         return c.redirect("/");
