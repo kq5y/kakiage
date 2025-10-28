@@ -52,7 +52,7 @@ function CtfDetailPage() {
         <h1 className="text-3xl font-bold mb-3">{ctf.name}</h1>
         {isAdmin && (
           <Link
-            to={`/ctfs/$ctfId/edit`}
+            to="/ctfs/$ctfId/edit"
             params={{ ctfId }}
             className="px-5 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-700 transition-colors text-base"
           >
@@ -86,7 +86,7 @@ function CtfDetailPage() {
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-2xl font-bold mb-4">Writeups</h2>
         <Link
-          to={`/writeups/new`}
+          to="/writeups/new"
           search={{ ctfId: Number(ctfId) }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors text-base"
         >
@@ -110,7 +110,7 @@ function CtfDetailPage() {
                   {writeups.map((writeup) => (
                     <Link
                       key={writeup.id}
-                      to={`/writeups/$writeupId`}
+                      to="/writeups/$writeupId"
                       params={{ writeupId: writeup.id.toString() }}
                       className="block px-4 py-3 hover:bg-gray-50"
                     >

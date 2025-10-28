@@ -100,11 +100,18 @@ const router = new Hono<Env>()
         ),
       columns: {
         content: false,
+        ctfId: false,
         categoryId: false,
         createdBy: false,
         password: false,
       },
       with: {
+        ctf: {
+          columns: {
+            id: true,
+            name: true,
+          },
+        },
         category: true,
         createdByUser: true,
         writeupToTags: {

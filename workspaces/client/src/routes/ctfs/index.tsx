@@ -50,7 +50,7 @@ function CtfsPage() {
         {ctfs?.map((ctf) => (
           <Link
             key={ctf.id}
-            to={`/ctfs/$ctfId`}
+            to="/ctfs/$ctfId"
             params={{ ctfId: ctf.id.toString() }}
             className="block p-3 border border-gray-200 border-solid rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all"
           >
