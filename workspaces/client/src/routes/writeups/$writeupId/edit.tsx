@@ -152,7 +152,7 @@ function EditWriteupPage() {
   if (isLoadingWriteup) return <div>Loading writeup...</div>;
 
   return (
-    <div className="max-w-dvw w-full flex-grow flex flex-col">
+    <div className="max-w-dvw w-full flex-1 min-h-0 flex flex-col">
       <form onSubmit={handleSubmit} className="space-y-6 mb-2">
         <div className="mx-2 space-y-1">
           <div className="flex items-center justify-between space-x-2">
@@ -162,7 +162,7 @@ function EditWriteupPage() {
               value={formData.title}
               onChange={handleChange}
               required
-              className="w-full text-xl font-semibold p-2 border border-transparent focus:border-blue-400 rounded-lg outline-none transition-all duration-200"
+              className="w-full text-xl font-semibold shadow p-2 border border-transparent focus:border-blue-400 rounded-lg outline-none transition-all duration-200"
             />
             <button
               type="submit"
