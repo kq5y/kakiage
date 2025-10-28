@@ -19,6 +19,10 @@ const app = new Hono<Env>()
   .route("/api/v1/writeups", writeupsRouter)
   .notFound((c) => {
     return c.json(error("Not Found"), 404);
+  })
+  .onError((err, c) => {
+    console.error("Unhandled error:", err);
+    return c.json(error("Internal Server Error"), 500);
   });
 
 export default app;
