@@ -76,8 +76,9 @@ function NewWriteupPage() {
       ...formData,
       ctfId: Number(formData.ctfId),
       categoryId: Number(formData.categoryId),
-      points: Number(formData.points),
-      solvers: Number(formData.solvers),
+      points: formData.points ? Number(formData.points) : undefined,
+      solvers: formData.solvers ? Number(formData.solvers) : undefined,
+      password: formData.password ? formData.password : undefined,
     });
   };
 
