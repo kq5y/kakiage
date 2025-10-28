@@ -27,14 +27,11 @@ function WriteupsListPage() {
 
       <div className="space-y-2">
         {writeups?.map((writeup) => (
-          <Link
-            key={writeup.id}
-            to="/writeups/$writeupId"
-            params={{ writeupId: writeup.id.toString() }}
-            className="block px-4 py-3 hover:bg-gray-50"
-          >
+          <div key={writeup.id} className="block px-4 py-3 hover:bg-gray-50">
             <div className="flex justify-between items-center">
-              <h3 className="font-medium">{writeup.title}</h3>
+              <Link to="/writeups/$writeupId" params={{ writeupId: writeup.id.toString() }}>
+                <h3 className="font-medium hover:underline">{writeup.title}</h3>
+              </Link>
               <div className="text-sm text-gray-500">
                 by {writeup.createdByUser.name || "Unknown"} • {new Date(writeup.createdAt).toLocaleDateString()}
               </div>
@@ -58,7 +55,7 @@ function WriteupsListPage() {
                 ))}
               </div>
             )}
-          </Link>
+          </div>
         ))}
       </div>
 
