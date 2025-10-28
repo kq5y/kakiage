@@ -44,9 +44,9 @@ function WriteupDetailPage() {
 
   return (
     <div className="max-w-xl w-full">
-      <div className="mb-4">
+      <div>
         <div className="flex justify-between items-center mb-2">
-          <h1 className="text-3xl font-bold mb-3">{writeup.title}</h1>
+          <h1 className="text-3xl font-bold">{writeup.title}</h1>
           {canEdit && (
             <Link
               to={`/writeups/$writeupId/edit`}
@@ -70,28 +70,26 @@ function WriteupDetailPage() {
           )}
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-1 mb-2">
           <Link
             to={`/ctfs/$ctfId`}
             params={{ ctfId: writeup.ctf.id.toString() }}
-            className="text-sm px-3 py-1 bg-blue-100 text-blue-800 rounded-full hover:bg-blue-200"
+            className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
           >
-            {writeup.ctf?.name || "Unknown CTF"}
+            {writeup.ctf.name}
           </Link>
 
-          <span className="text-sm px-3 py-1 bg-purple-100 text-purple-800 rounded-full">
-            {writeup.category?.name || "Uncategorized"}
-          </span>
+          <span className="text-sm px-2 py-1 bg-purple-100 text-purple-800 rounded">{writeup.category.name}</span>
 
           {writeup.tags?.map((tag) => (
-            <span key={tag.id} className="text-sm px-3 py-1 bg-gray-100 text-gray-800 rounded-full">
+            <span key={tag.id} className="text-sm px-2 py-1 bg-gray-100 text-gray-800 rounded">
               {tag.name}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="prose max-w-none">
+      <div className="max-w-none">
         {/** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */}
         <div className="article" dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
       </div>
