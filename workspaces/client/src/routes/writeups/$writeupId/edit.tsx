@@ -4,7 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 
 import MarkdownEditor from "@/components/MarkdownEditor";
 import { useAuth } from "@/hooks/useAuth";
-import { getCategories, getWriteup, updateWriteup, updateWriteupContent, uploadImage } from "@/libs/api";
+import {
+  addWriteupTag,
+  getCategories,
+  getWriteup,
+  getWriteupTags,
+  removeWriteupTag,
+  updateWriteup,
+  updateWriteupContent,
+  uploadImage,
+} from "@/libs/api";
 
 export const Route = createFileRoute("/writeups/$writeupId/edit")({
   component: EditWriteupPage,
@@ -28,10 +37,10 @@ function EditWriteupPage() {
   const [formData, setFormData] = useState({
     title: "",
     categoryId: "",
-    tagIds: [] as string[],
   });
 
   const [content, setContent] = useState("");
+  const [newTagName, setNewTagName] = useState("");
   const [originalAuthorId, setOriginalAuthorId] = useState("");
 
   const { data: writeup, isLoading: isLoadingWriteup } = useQuery({
@@ -44,7 +53,6 @@ function EditWriteupPage() {
     setFormData({
       title: writeup.title,
       categoryId: String(writeup.category.id),
-      tagIds: writeup.tags?.map((tag) => String(tag.id)) || [],
     });
     setContent(writeup.content || "");
     setOriginalAuthorId(writeup.createdByUser.id);
@@ -53,6 +61,11 @@ function EditWriteupPage() {
   const { data: categories } = useQuery({
     queryKey: ["categories"],
     queryFn: getCategories,
+  });
+
+  const { data: tags } = useQuery({
+    queryKey: ["writeups", writeupId, "tags"],
+    queryFn: () => getWriteupTags(Number(writeupId)),
   });
 
   useEffect(() => {
@@ -92,6 +105,21 @@ function EditWriteupPage() {
     },
   });
 
+  const addTagMutation = useMutation({
+    mutationFn: (tagName: string) => addWriteupTag(Number(writeupId), { name: tagName }),
+    onSuccess: async (_data, _variables, _onMutateResult, context) => {
+      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
+      setNewTagName("");
+    },
+  });
+
+  const removeTagMutation = useMutation({
+    mutationFn: (tagId: number) => removeWriteupTag(Number(writeupId), { id: tagId }),
+    onSuccess: async (_data, _variables, _onMutateResult, context) => {
+      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
+    },
+  });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -106,12 +134,27 @@ function EditWriteupPage() {
     updateWriteupMutation.mutate(formData);
   };
 
+  const handleNewTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && newTagName.trim() !== "") {
+      e.preventDefault();
+      if (!addTagMutation.isPending) {
+        addTagMutation.mutate(newTagName.trim());
+      }
+    }
+  };
+
+  const handleRemoveTag = (tagId: number) => {
+    if (!removeTagMutation.isPending) {
+      removeTagMutation.mutate(tagId);
+    }
+  };
+
   if (isLoadingWriteup) return <div>Loading writeup...</div>;
 
   return (
     <div className="max-w-dvw w-full flex-grow flex flex-col">
       <form onSubmit={handleSubmit} className="space-y-6 mb-2">
-        <div className="mx-2 space-y-2">
+        <div className="mx-2 space-y-1">
           <div className="flex items-center justify-between space-x-2">
             <input
               type="text"
@@ -130,20 +173,52 @@ function EditWriteupPage() {
             </button>
           </div>
 
-          <div>
-            <select
-              name="categoryId"
-              value={formData.categoryId}
-              onChange={handleChange}
-              required
-              className="px-3 py-2 border rounded-md"
-            >
-              {categories?.map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
+          <div className="flex items-center space-x-1">
+            <div className="p-1">
+              <select
+                name="categoryId"
+                value={formData.categoryId}
+                onChange={handleChange}
+                required
+                className="px-2 py-1 border rounded-md"
+              >
+                {categories?.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 p-1 border rounded-md flex-grow">
+              {tags?.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700"
+                >
+                  {tag.name}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveTag(tag.id)}
+                    disabled={removeTagMutation.isPending}
+                    className="ml-1 text-white bg-red-600 rounded-full px-1 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-red-300"
+                  >
+                    &times;
+                  </button>
+                </span>
               ))}
-            </select>
+              {tags && tags.length < 10 && (
+                <input
+                  type="text"
+                  name="newTag"
+                  value={newTagName}
+                  onChange={(e) => setNewTagName(e.target.value)}
+                  onKeyDown={handleNewTagKeyDown}
+                  disabled={addTagMutation.isPending}
+                  placeholder="Add tag"
+                  className="px-2 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[100px]"
+                />
+              )}
+            </div>
           </div>
         </div>
       </form>
