@@ -1,3 +1,5 @@
+import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
+import rehypeExpressiveCode from "rehype-expressive-code";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -10,6 +12,13 @@ const processor = unified()
   .use(remarkGfm)
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeSanitize)
+  .use(rehypeExpressiveCode, {
+    themes: ["github-light"],
+    plugins: [pluginLineNumbers()],
+    shiki: {
+      engine: "javascript",
+    },
+  })
   .use(rehypeStringify);
 
 export async function markdownToHtml(markdown: string): Promise<string> {
