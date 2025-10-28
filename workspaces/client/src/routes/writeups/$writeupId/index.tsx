@@ -49,7 +49,7 @@ function WriteupDetailPage() {
           <h1 className="text-3xl font-bold">{writeup.title}</h1>
           {canEdit && (
             <Link
-              to={`/writeups/$writeupId/edit`}
+              to="/writeups/$writeupId/edit"
               params={{ writeupId }}
               className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-base"
             >
@@ -72,7 +72,7 @@ function WriteupDetailPage() {
 
         <div className="flex flex-wrap gap-1 mb-2">
           <Link
-            to={`/ctfs/$ctfId`}
+            to="/ctfs/$ctfId"
             params={{ ctfId: writeup.ctf.id.toString() }}
             className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
           >

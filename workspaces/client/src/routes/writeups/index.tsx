@@ -39,7 +39,7 @@ function WriteupsListPage() {
             {writeup.tags && writeup.tags.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 <Link
-                  to={`/ctfs/$ctfId`}
+                  to="/ctfs/$ctfId"
                   params={{ ctfId: writeup.ctf.id.toString() }}
                   className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
                 >
