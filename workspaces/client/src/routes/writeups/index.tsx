@@ -36,25 +36,23 @@ function WriteupsListPage() {
                 by {writeup.createdByUser.name || "Unknown"} • {new Date(writeup.createdAt).toLocaleDateString()}
               </div>
             </div>
-            {writeup.tags && writeup.tags.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1">
-                <Link
-                  to="/ctfs/$ctfId"
-                  params={{ ctfId: writeup.ctf.id.toString() }}
-                  className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
-                >
-                  {writeup.ctf.name}
-                </Link>
-                <span key={writeup.category.id} className="px-2 py-1 text-sm bg-purple-100 text-purple-800 rounded">
-                  {writeup.category.name}
+            <div className="mt-2 flex flex-wrap gap-1">
+              <Link
+                to="/ctfs/$ctfId"
+                params={{ ctfId: writeup.ctf.id.toString() }}
+                className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
+              >
+                {writeup.ctf.name}
+              </Link>
+              <span key={writeup.category.id} className="px-2 py-1 text-sm bg-purple-100 text-purple-800 rounded">
+                {writeup.category.name}
+              </span>
+              {writeup.tags.map((tag) => (
+                <span key={tag.id} className="px-2 py-1 text-sm bg-gray-200 text-gray-700 rounded">
+                  {tag.name}
                 </span>
-                {writeup.tags.map((tag) => (
-                  <span key={tag.id} className="px-2 py-1 text-sm bg-gray-200 text-gray-700 rounded">
-                    {tag.name}
-                  </span>
-                ))}
-              </div>
-            )}
+              ))}
+            </div>
           </div>
         ))}
       </div>
