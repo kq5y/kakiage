@@ -68,6 +68,20 @@ function WriteupDetailPage() {
               <span>Updated: {new Date(writeup.updatedAt).toLocaleDateString()}</span>
             </>
           )}
+          {writeup.points !== null && (
+            <>
+              <span className="mx-2">•</span>
+              <span>{writeup.points}pt</span>
+            </>
+          )}
+          {writeup.solvers !== null && (
+            <>
+              <span className="mx-2">•</span>
+              <span>
+                {writeup.solvers} solver{writeup.solvers !== 1 ? "s" : ""}
+              </span>
+            </>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">

@@ -59,7 +59,7 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
   };
 
   return (
-    <div className="flex-1 overflow-hidden w-full h-full grid grid-cols-2">
+    <div className="flex-1 overflow-hidden w-full min-h-0 grid grid-cols-2">
       <div className="w-full h-full border-r border-gray-300 overflow-hidden">
         <div className="w-full h-full flex flex-col">
           <div className="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-600">
@@ -78,7 +78,7 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
             name="content"
             value={value}
             onChange={handleTextChange}
-            className="w-full h-full flex-grow p-3 font-mono text-base leading-relaxed bg-white outline-none resize-none overflow-y-auto"
+            className="w-full flex-1 min-h-0 p-3 font-mono text-base leading-relaxed bg-white outline-none resize-none overflow-y-auto"
             spellCheck="false"
           />
         </div>
@@ -88,11 +88,13 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
           <div className="flex items-center justify-between p-3 bg-gray-100 border-b border-gray-200 text-sm font-medium text-gray-600">
             <span>Preview</span>
           </div>
-          <div
-            className="w-full h-full flex-grow p-3 overflow-y-auto max-w-none article"
-            // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized content
-            dangerouslySetInnerHTML={{ __html: renderedHtml }}
-          />
+          <div className="w-full flex-1 min-h-0 p-3 overflow-y-auto">
+            <div
+              className="w-full max-w-none article"
+              // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized content
+              dangerouslySetInnerHTML={{ __html: renderedHtml }}
+            />
+          </div>
         </div>
       </div>
     </div>
