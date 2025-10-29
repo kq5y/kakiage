@@ -20,6 +20,7 @@ export const getUploadSignData = (env: Bindings) => {
       signature: sig.signature,
       timestamp: sig.timestamp,
       apikey: env.CLOUDINARY_API_KEY,
+      eager: EAGER_TRANSFORMATION,
       folder: FOLDER_NAME,
     },
     url: `https://api.cloudinary.com/v1_1/${env.CLOUDINARY_CLOUD_NAME}/image/upload`
