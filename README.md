@@ -13,9 +13,9 @@ A web application for publishing CTF writeups
 - DISCORD_CLIENT_ID
 - DISCORD_CLIENT_SECRET
 - APP_DOMAIN
-- IMAGE_API_DOMAIN
-  [kq5y/go-image-api](https://github.com/kq5y/go-image-api)
-- IMAGE_API_KEY
+- CLOUDINARY_CLOUD_NAME
+- CLOUDINARY_API_KEY
+- CLOUDINARY_API_SECRET
 - TURSO_CONNECTION_URL
 - TURSO_AUTH_TOKEN
 
