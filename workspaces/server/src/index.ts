@@ -17,7 +17,7 @@ const app = new Hono<Env>()
   .route("/api/v1/ctfs", ctfsRouter)
   .route("/api/v1/images", imagesRouter)
   .route("/api/v1/writeups", writeupsRouter)
-  .notFound((c) => {
+  .notFound(c => {
     return c.json(error("Not Found"), 404);
   })
   .onError((err, c) => {

@@ -139,7 +139,7 @@ export function withValidates<
 
       if (target === "header" && schema instanceof z.ZodObject) {
         const schemaKeys = Object.keys(schema.shape);
-        const caseInsensitiveKeymap = Object.fromEntries(schemaKeys.map((key) => [key.toLowerCase(), key]));
+        const caseInsensitiveKeymap = Object.fromEntries(schemaKeys.map(key => [key.toLowerCase(), key]));
         const headerValue = value as Record<string, string>;
         value = Object.fromEntries(
           Object.entries(headerValue).map(([key, value2]) => [caseInsensitiveKeymap[key] || key, value2]),

@@ -1,11 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { useAuth } from "@/hooks/useAuth";
-import { getCtfs } from "@/libs/api";
+import { ctfsQueryOptions } from "@/queries/ctfs";
 
 export const Route = createFileRoute("/ctfs/")({
   component: CtfsPage,
+  loader: async ({ context }) => {
+    return context.queryClient.ensureQueryData(ctfsQueryOptions());
+  },
+  pendingComponent: () => <div>Loading CTFs...</div>,
+  errorComponent: ({ error }) => <div>Error loading CTFs: {error.message}</div>,
 });
 
 const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -17,20 +21,8 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
 };
 
 function CtfsPage() {
-  const {
-    data: ctfs,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["ctfs"],
-    queryFn: () => getCtfs({}),
-  });
-
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
-
-  if (isLoading) return <div>Loading CTFs...</div>;
-  if (error) return <div>Error loading CTFs: {error.message}</div>;
+  const { isAdmin } = useAuth();
+  const ctfs = Route.useLoaderData();
 
   return (
     <div className="max-w-lg w-full px-2">
@@ -47,11 +39,11 @@ function CtfsPage() {
       </div>
 
       <div className="space-y-2">
-        {ctfs?.map((ctf) => (
+        {ctfs.map(ctf => (
           <Link
             key={ctf.id}
             to="/ctfs/$ctfId"
-            params={{ ctfId: ctf.id.toString() }}
+            params={{ ctfId: ctf.id }}
             className="block p-3 border border-gray-200 border-solid rounded-lg shadow-sm hover:shadow-md hover:bg-gray-50 transition-all"
           >
             <h2 className="text-xl font-semibold mb-2">{ctf.name}</h2>
@@ -64,7 +56,7 @@ function CtfsPage() {
         ))}
       </div>
 
-      {ctfs?.length === 0 && (
+      {ctfs.length === 0 && (
         <div className="text-center py-12">
           <p className="text-gray-500">No CTF competitions found.</p>
         </div>

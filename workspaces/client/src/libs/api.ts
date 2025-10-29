@@ -26,7 +26,7 @@ export const getCategories = async () => {
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success)
-    return data.data.map((item) => ({
+    return data.data.map(item => ({
       ...item,
       createdAt: new Date(item.createdAt),
       updatedAt: new Date(item.updatedAt),
@@ -80,7 +80,7 @@ export const getCtfs = async (query: InferRequestType<typeof apiClient.api.v1.ct
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success)
-    return data.data.map((item) => ({
+    return data.data.map(item => ({
       ...item,
       createdAt: new Date(item.createdAt),
       updatedAt: new Date(item.updatedAt),
@@ -101,11 +101,11 @@ export const getCtfDetail = async (id: number) => {
       updatedAt: new Date(data.data.updatedAt),
       startAt: new Date(data.data.startAt),
       endAt: new Date(data.data.endAt),
-      writeups: (data.data.writeups ?? []).map((w) => ({
+      writeups: (data.data.writeups ?? []).map(w => ({
         ...w,
         createdAt: new Date(w.createdAt),
         updatedAt: new Date(w.updatedAt),
-        tags: (w.tags ?? []).map((wt) => ({
+        tags: (w.tags ?? []).map(wt => ({
           ...wt,
           createdAt: new Date(wt.createdAt),
           updatedAt: new Date(wt.updatedAt),
@@ -188,7 +188,7 @@ export const getTags = async () => {
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success)
-    return data.data.map((item) => ({
+    return data.data.map(item => ({
       ...item,
       createdAt: new Date(item.createdAt),
       updatedAt: new Date(item.updatedAt),
@@ -218,11 +218,11 @@ export const getWriteups = async (query: InferRequestType<typeof apiClient.api.v
   const res = await apiClient.api.v1.writeups.$get({ query });
   const data = await res.json();
   if (res.ok && data.success)
-    return data.data.map((w) => ({
+    return data.data.map(w => ({
       ...w,
       createdAt: new Date(w.createdAt),
       updatedAt: new Date(w.updatedAt),
-      tags: (w.tags ?? []).map((wt) => ({
+      tags: (w.tags ?? []).map(wt => ({
         ...wt,
         createdAt: new Date(wt.createdAt),
         updatedAt: new Date(wt.updatedAt),
@@ -266,7 +266,7 @@ export const getWriteup = async (id: number, includeContent: boolean = false) =>
       ...data.data,
       createdAt: new Date(data.data.createdAt),
       updatedAt: new Date(data.data.updatedAt),
-      tags: (data.data.tags ?? []).map((wt) => ({
+      tags: (data.data.tags ?? []).map(wt => ({
         ...wt,
         createdAt: new Date(wt.createdAt),
         updatedAt: new Date(wt.updatedAt),
@@ -295,7 +295,7 @@ export const getWriteupTags = async (id: number) => {
   const res = await apiClient.api.v1.writeups[":id"].tags.$get({ param: { id: id.toString() } });
   const data = await res.json();
   if (res.ok && data.success)
-    return data.data.map((item) => ({
+    return data.data.map(item => ({
       ...item,
       createdAt: new Date(item.createdAt),
       updatedAt: new Date(item.updatedAt),

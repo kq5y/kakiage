@@ -22,7 +22,7 @@ const writeupsSearchQuerySchema = z.object({
 const writeupQuerySchema = z.object({
   content: z
     .enum(["true", "false"])
-    .transform((value) => value === "true")
+    .transform(value => value === "true")
     .optional(),
 });
 const writeupCreateBodySchema = z.object({
@@ -60,12 +60,12 @@ const writeupPasswordHeaderSchema = z.object({
 async function getHash(text: string): Promise<string> {
   const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
   return Array.from(new Uint8Array(hashBuffer))
-    .map((b) => b.toString(16).padStart(2, "0"))
+    .map(b => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
 const router = new Hono<Env>()
-  .get("/", withValidates({ query: writeupsSearchQuerySchema }), async (c) => {
+  .get("/", withValidates({ query: writeupsSearchQuerySchema }), async c => {
     const db = getDB(c.env.DB);
     const { q, categoryId, tag, pageSize, page, sortKey, sortOrder } = c.req.valid("query");
 
@@ -80,7 +80,7 @@ const router = new Hono<Env>()
       const writeupsByTagRecords = await db.query.writeupToTags.findMany({
         where: (writeupToTags, { eq }) => eq(writeupToTags.tagId, tagRecord.id),
       });
-      writeupIds = writeupsByTagRecords.map((record) => record.writeupId);
+      writeupIds = writeupsByTagRecords.map(record => record.writeupId);
       if (writeupIds.length === 0) {
         return c.json(error("No writeups found for this tag"), 404);
       }
@@ -122,14 +122,14 @@ const router = new Hono<Env>()
       },
     });
 
-    const formattedWriteups = writeupsList.map((w) => ({
+    const formattedWriteups = writeupsList.map(w => ({
       ...w,
-      tags: w.writeupToTags.map((wt) => wt.tag),
+      tags: w.writeupToTags.map(wt => wt.tag),
       writeupToTags: undefined,
     }));
     return c.json(success(formattedWriteups), 200);
   })
-  .post("/", withAuth(true), withValidates({ json: writeupCreateBodySchema }), async (c) => {
+  .post("/", withAuth(true), withValidates({ json: writeupCreateBodySchema }), async c => {
     const db = getDB(c.env.DB);
     const { title, slug, ctfId, categoryId, points, solvers, password } = c.req.valid("json");
     const user = c.get("user");
@@ -157,7 +157,7 @@ const router = new Hono<Env>()
       201,
     );
   })
-  .get("/:id", withValidates({ param: idParamSchema, query: writeupQuerySchema }), async (c) => {
+  .get("/:id", withValidates({ param: idParamSchema, query: writeupQuerySchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const { content: includeContent } = c.req.valid("query");
@@ -189,13 +189,13 @@ const router = new Hono<Env>()
     const formattedWriteup = {
       ...writeup,
       content: includeContent ? writeup.content : undefined,
-      tags: writeup.writeupToTags.map((wt) => wt.tag),
+      tags: writeup.writeupToTags.map(wt => wt.tag),
       writeupToTags: undefined,
     };
 
     return c.json(success(formattedWriteup), 200);
   })
-  .get("/:id/tags", withValidates({ param: idParamSchema }), async (c) => {
+  .get("/:id/tags", withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
 
@@ -219,10 +219,10 @@ const router = new Hono<Env>()
       return c.json(error("Writeup not found"), 404);
     }
 
-    const writeupTags = writeup.writeupToTags.map((wt) => wt.tag);
+    const writeupTags = writeup.writeupToTags.map(wt => wt.tag);
     return c.json(success(writeupTags), 200);
   })
-  .post("/:id/tags", withAuth(true), withValidates({ param: idParamSchema, json: writeupTagPostSchema }), async (c) => {
+  .post("/:id/tags", withAuth(true), withValidates({ param: idParamSchema, json: writeupTagPostSchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const { name } = c.req.valid("json");
@@ -257,7 +257,7 @@ const router = new Hono<Env>()
     "/:id/tags",
     withAuth(true),
     withValidates({ param: idParamSchema, json: writeupTagDeleteSchema }),
-    async (c) => {
+    async c => {
       const db = getDB(c.env.DB);
       const id = Number(c.req.valid("param").id);
       const { id: tagId } = c.req.valid("json");
@@ -287,7 +287,7 @@ const router = new Hono<Env>()
     "/:id/content",
     withAuth(false),
     withValidates({ param: idParamSchema, header: writeupPasswordHeaderSchema }),
-    async (c) => {
+    async c => {
       const db = getDB(c.env.DB);
       const user = c.get("user");
       const id = Number(c.req.valid("param").id);
@@ -327,7 +327,7 @@ const router = new Hono<Env>()
         html = await markdownToHtml(writeup.content);
         const cacheResponse = new Response(html, {
           headers: {
-            'Cache-Control': 'public, max-age=3600',
+            "Cache-Control": "public, max-age=3600",
           },
         });
         c.executionCtx.waitUntil(cache.put(cacheKey, cacheResponse));
@@ -336,7 +336,7 @@ const router = new Hono<Env>()
       return c.json(success(html), 200);
     },
   )
-  .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async (c) => {
+  .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const { title, categoryId, points, solvers, password } = c.req.valid("json");
@@ -381,7 +381,7 @@ const router = new Hono<Env>()
     "/:id/content",
     withAuth(true),
     withValidates({ param: idParamSchema, json: writeupContentSchema }),
-    async (c) => {
+    async c => {
       const db = getDB(c.env.DB);
       const id = Number(c.req.valid("param").id);
       const { content } = c.req.valid("json");
@@ -419,7 +419,7 @@ const router = new Hono<Env>()
       );
     },
   )
-  .delete("/:id", withAuth(true), withValidates({ param: idParamSchema }), async (c) => {
+  .delete("/:id", withAuth(true), withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const user = c.get("user");

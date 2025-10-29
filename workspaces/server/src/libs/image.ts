@@ -32,5 +32,5 @@ export async function convertImageFromBuffer(
 export async function hashArrayBufferToHex(buffer: ArrayBuffer): Promise<string> {
   const hashBuf = await crypto.subtle.digest("SHA-256", buffer);
   const hashArr = Array.from(new Uint8Array(hashBuf));
-  return hashArr.map((b) => b.toString(16).padStart(2, "0")).join("");
+  return hashArr.map(b => b.toString(16).padStart(2, "0")).join("");
 }

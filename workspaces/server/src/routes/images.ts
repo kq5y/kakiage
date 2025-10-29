@@ -15,11 +15,11 @@ const idParamSchema = z.object({
   id: z.uuid(),
 });
 const imageFormSchema = z.object({
-  image: z.instanceof(File).refine((file) => file.size > 0 && file.size < MAX_SIZE && file.type.startsWith("image/")),
+  image: z.instanceof(File).refine(file => file.size > 0 && file.size < MAX_SIZE && file.type.startsWith("image/")),
 });
 
 const router = new Hono<Env>()
-  .post("/upload", withAuth(true), withValidates({ form: imageFormSchema }), async (c) => {
+  .post("/upload", withAuth(true), withValidates({ form: imageFormSchema }), async c => {
     const user = c.get("user");
     const db = getDB(c.env.DB);
 
@@ -79,7 +79,7 @@ const router = new Hono<Env>()
     const imagePath = new URL(c.req.url).pathname.replace("/upload", `/${id}`);
     return c.json(success({ id: id, path: imagePath }), 201, { Location: imagePath });
   })
-  .get("/:id", withValidates({ param: idParamSchema }), async (c) => {
+  .get("/:id", withValidates({ param: idParamSchema }), async c => {
     const id = c.req.valid("param").id;
 
     const cacheKey = new Request(`${c.req.url}`);

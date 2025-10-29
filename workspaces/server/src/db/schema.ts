@@ -68,7 +68,7 @@ export const writeups = sqliteTable(
     content: text("content").notNull(),
     ...commonDatetimes,
   },
-  (table) => [unique().on(table.ctfId, table.slug)],
+  table => [unique().on(table.ctfId, table.slug)],
 );
 export type Writeup = typeof writeups.$inferSelect;
 
@@ -83,7 +83,7 @@ export const writeupToTags = sqliteTable(
       .references(() => tags.id),
     ...commonDatetimes,
   },
-  (table) => [primaryKey({ columns: [table.writeupId, table.tagId] })],
+  table => [primaryKey({ columns: [table.writeupId, table.tagId] })],
 );
 export type WriteupToTag = typeof writeupToTags.$inferSelect;
 

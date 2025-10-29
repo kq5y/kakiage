@@ -27,13 +27,13 @@ const makeAppUrl = (error?: string): string => {
 };
 
 const router = new Hono<Env>()
-  .post("/login", withValidates({ form: tokenFormSchema }, makeAppUrl), async (c) => {
+  .post("/login", withValidates({ form: tokenFormSchema }, makeAppUrl), async c => {
     const inviteToken = c.req.valid("form").inviteToken || "";
 
     const redirectUri = makeRedirectUrl(c.env, inviteToken);
     return c.redirect(redirectUri);
   })
-  .get("/callback", withValidates({ query: callbackQuerySchema }, makeAppUrl), async (c) => {
+  .get("/callback", withValidates({ query: callbackQuerySchema }, makeAppUrl), async c => {
     const { code, state } = c.req.valid("query");
 
     let inviteToken: string | undefined;
@@ -138,7 +138,7 @@ const router = new Hono<Env>()
       return c.redirect(makeAppUrl("Authentication failed"));
     }
   })
-  .get("/logout", async (c) => {
+  .get("/logout", async c => {
     deleteCookie(c, "session", {
       httpOnly: true,
       sameSite: "lax",

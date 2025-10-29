@@ -1,9 +1,10 @@
 import type { Category } from "@kakiage/server/rpc";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { createCategory, deleteCategory, getCategories, updateCategory } from "@/libs/api";
+import { createCategory, deleteCategory, updateCategory } from "@/libs/api";
+import { categoriesQueryOptions } from "@/queries/categories";
 
 export const Route = createFileRoute("/categories/")({
   component: CategoriesPage,
@@ -20,6 +21,11 @@ export const Route = createFileRoute("/categories/")({
 
     return {};
   },
+  loader: ({ context }) => {
+    return context.queryClient.ensureQueryData(categoriesQueryOptions);
+  },
+  pendingComponent: () => <div>Loading categories...</div>,
+  errorComponent: ({ error }) => <div>Error loading categories: {error.message}</div>,
 });
 
 function CategoryForm<T>({
@@ -114,15 +120,7 @@ function CategoryForm<T>({
 }
 
 function CategoriesPage() {
-  const queryClient = useQueryClient();
-  const {
-    data: categories,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories,
-  });
+  const categories = Route.useLoaderData();
 
   const [formMode, setFormMode] = useState<"add" | "edit" | "closed">("closed");
 
@@ -131,24 +129,24 @@ function CategoriesPage() {
 
   const createCategoryMutation = useMutation({
     mutationFn: createCategory,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: (_data, _variables, _onMutateResult, context) => {
+      context.client.invalidateQueries({ queryKey: ["categories"] });
       setNewCategory({ name: "", color: "" });
     },
   });
 
   const updateCategoryMutation = useMutation({
     mutationFn: (category: Category) => updateCategory(category.id, category),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: (_data, _variables, _onMutateResult, context) => {
+      context.client.invalidateQueries({ queryKey: ["categories"] });
       setEditingCategory(null);
     },
   });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: (_data, _variables, _onMutateResult, context) => {
+      context.client.invalidateQueries({ queryKey: ["categories"] });
     },
   });
 
@@ -167,12 +165,12 @@ function CategoriesPage() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setEditingCategory((prev) => (prev ? { ...prev, [name]: value } : null));
+    setEditingCategory(prev => (prev ? { ...prev, [name]: value } : null));
   };
 
   const handleNewCategoryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewCategory((prev) => ({ ...prev, [name]: value }));
+    setNewCategory(prev => ({ ...prev, [name]: value }));
   };
 
   const confirmDelete = (category: Category) => {
@@ -180,9 +178,6 @@ function CategoriesPage() {
       deleteCategoryMutation.mutate(category.id);
     }
   };
-
-  if (isLoading) return <div>Loading categories...</div>;
-  if (error) return <div>Error loading categories: {error.message}</div>;
 
   return (
     <div className="max-w-lg w-full px-2">
@@ -241,14 +236,14 @@ function CategoriesPage() {
             </tr>
           </thead>
           <tbody>
-            {categories?.length === 0 && (
+            {categories.length === 0 && (
               <tr>
                 <td colSpan={4} className="p-4 text-center text-gray-500">
                   No categories available.
                 </td>
               </tr>
             )}
-            {categories?.map((category) => (
+            {categories.map(category => (
               <>
                 <tr
                   key={category.id}

@@ -1,8 +1,10 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { createWriteup, getCategories, getCtfs } from "@/libs/api";
+import { createWriteup } from "@/libs/api";
+import { categoriesQueryOptions } from "@/queries/categories";
+import { ctfsQueryOptions } from "@/queries/ctfs";
 
 export const Route = createFileRoute("/writeups/new")({
   component: NewWriteupPage,
@@ -25,49 +27,39 @@ export const Route = createFileRoute("/writeups/new")({
       ctfId: (search.ctfId as number) || undefined,
     };
   },
+  loader: async ({ context }) => {
+    const ctfs = await context.queryClient.ensureQueryData(ctfsQueryOptions());
+    const categories = await context.queryClient.ensureQueryData(categoriesQueryOptions);
+    return { ctfs, categories };
+  },
 });
 
 function NewWriteupPage() {
   const navigate = useNavigate();
+  const { ctfs, categories } = Route.useLoaderData();
   const { ctfId: ctfIdFromSearch } = Route.useSearch();
 
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
     ctfId: ctfIdFromSearch ? ctfIdFromSearch.toString() : "",
-    categoryId: "",
+    categoryId: categories.length ? categories[0].id.toString() : "",
     points: "",
     solvers: "",
     password: "",
   });
 
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories,
-  });
-
-  const { data: ctfs } = useQuery({
-    queryKey: ["ctfs"],
-    queryFn: () => getCtfs({}),
-  });
-
-  useEffect(() => {
-    if (categories?.length && !formData.categoryId) {
-      setFormData((prev) => ({ ...prev, categoryId: categories[0].id.toString() }));
-    }
-  }, [categories, formData.categoryId]);
-
   const createWriteupMutation = useMutation({
     mutationFn: createWriteup,
     onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId.toString()] });
-      navigate({ to: `/writeups/$writeupId/edit`, params: { writeupId: data.id.toString() } });
+      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId] });
+      navigate({ to: "/writeups/$writeupId/edit", params: { writeupId: data.id } });
     },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -133,7 +125,7 @@ function NewWriteupPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="">Select CTF</option>
-                {ctfs?.map((ctf) => (
+                {ctfs.map(ctf => (
                   <option key={ctf.id} value={ctf.id}>
                     {ctf.name}
                   </option>
@@ -152,7 +144,7 @@ function NewWriteupPage() {
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {categories?.map((category) => (
+                {categories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>

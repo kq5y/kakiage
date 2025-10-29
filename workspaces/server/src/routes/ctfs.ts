@@ -23,7 +23,7 @@ const ctfBodySchema = z.object({
 });
 
 const router = new Hono<Env>()
-  .get("/", withValidates({ query: ctfSearchQuerySchema }), async (c) => {
+  .get("/", withValidates({ query: ctfSearchQuerySchema }), async c => {
     const db = getDB(c.env.DB);
     const { pageSize, page, sortKey, sortOrder } = c.req.valid("query");
 
@@ -36,7 +36,7 @@ const router = new Hono<Env>()
     });
     return c.json(success(list), 200);
   })
-  .post("/", withAuth(true), withValidates({ json: ctfBodySchema }), async (c) => {
+  .post("/", withAuth(true), withValidates({ json: ctfBodySchema }), async c => {
     const db = getDB(c.env.DB);
     const { name, url, startAt, endAt } = c.req.valid("json");
     const [ctf] = await db
@@ -50,7 +50,7 @@ const router = new Hono<Env>()
       .returning();
     return c.json(success(ctf), 201);
   })
-  .get("/:id", withValidates({ param: idParamSchema }), async (c) => {
+  .get("/:id", withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const ctf = await db.query.ctfs.findFirst({
@@ -80,15 +80,15 @@ const router = new Hono<Env>()
     }
     const ctfWithTags = {
       ...ctf,
-      writeups: (ctf?.writeups ?? []).map((w) => ({
+      writeups: (ctf?.writeups ?? []).map(w => ({
         ...w,
-        tags: (w.writeupToTags ?? []).map((wt) => wt.tag),
+        tags: (w.writeupToTags ?? []).map(wt => wt.tag),
         writeupToTags: undefined,
       })),
     };
     return c.json(success(ctfWithTags), 200);
   })
-  .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: ctfBodySchema }), async (c) => {
+  .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: ctfBodySchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const { name, url, startAt, endAt } = c.req.valid("json");
@@ -107,7 +107,7 @@ const router = new Hono<Env>()
     }
     return c.json(success(ctf), 200);
   })
-  .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async (c) => {
+  .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const deleted = await db.delete(ctfs).where(eq(ctfs.id, id)).returning();

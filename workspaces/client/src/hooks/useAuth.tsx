@@ -31,7 +31,7 @@ class AuthService {
 
   private notify = () => {
     this.snapshot = this.getSnapshotValues();
-    this.listeners.forEach((listener) => void listener());
+    this.listeners.forEach(listener => void listener());
   };
 
   subscribe = (listener: () => void): (() => void) => {
@@ -97,6 +97,7 @@ export const authService = new AuthService();
 
 type AuthContextType = {
   user: User | null;
+  isAdmin: boolean;
   isLoading: boolean;
   error: Error | null;
   logout: () => Promise<void>;
@@ -115,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value: AuthContextType = {
     user,
+    isAdmin: user?.role === "admin",
     isLoading,
     error,
     logout: authService.logout,

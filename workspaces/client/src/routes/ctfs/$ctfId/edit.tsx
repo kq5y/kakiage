@@ -1,11 +1,15 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { getCtfDetail, updateCtf } from "@/libs/api";
+import { updateCtf } from "@/libs/api";
+import { ctfDetailQueryOptions } from "@/queries/ctfs";
 
 export const Route = createFileRoute("/ctfs/$ctfId/edit")({
   component: EditCtfPage,
+  params: {
+    parse: ({ ctfId }) => ({ ctfId: Number(ctfId) }),
+  },
   beforeLoad: async ({ context, params }) => {
     await context.auth.ensureLoaded();
 
@@ -19,49 +23,35 @@ export const Route = createFileRoute("/ctfs/$ctfId/edit")({
 
     return {};
   },
+  loader: async ({ context, params }) => {
+    return context.queryClient.ensureQueryData(ctfDetailQueryOptions(params.ctfId));
+  },
+  pendingComponent: () => <div>Loading CTF details...</div>,
+  errorComponent: ({ error }) => <div>Error loading CTF: {error.message}</div>,
 });
 
 function EditCtfPage() {
-  const { ctfId } = Route.useParams();
   const navigate = useNavigate();
+
+  const ctf = Route.useLoaderData();
   const [formData, setFormData] = useState({
-    name: "",
-    startAt: "",
-    endAt: "",
-    url: "",
+    name: ctf.name,
+    startAt: ctf.startAt.toISOString().slice(0, 16),
+    endAt: ctf.endAt.toISOString().slice(0, 16),
+    url: ctf.url || "",
   });
-
-  const {
-    data: ctf,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["ctfs", ctfId],
-    queryFn: () => getCtfDetail(Number(ctfId)),
-  });
-
-  useEffect(() => {
-    if (ctf) {
-      setFormData({
-        name: ctf.name,
-        startAt: ctf.startAt.toISOString().slice(0, 16),
-        endAt: ctf.endAt.toISOString().slice(0, 16),
-        url: ctf.url || "",
-      });
-    }
-  }, [ctf]);
 
   const updateCtfMutation = useMutation({
-    mutationFn: (data: Parameters<typeof updateCtf>[1]) => updateCtf(Number(ctfId), data),
+    mutationFn: (data: Parameters<typeof updateCtf>[1]) => updateCtf(ctf.id, data),
     onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs", ctfId] });
-      navigate({ to: `/ctfs/$ctfId`, params: { ctfId } });
+      await context.client.invalidateQueries({ queryKey: ["ctfs", ctf.id] });
+      navigate({ to: "/ctfs/$ctfId", params: { ctfId: ctf.id } });
     },
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -72,9 +62,6 @@ function EditCtfPage() {
       endAt: new Date(formData.endAt).getTime(),
     });
   };
-
-  if (isLoading) return <div>Loading CTF details...</div>;
-  if (error) return <div>Error loading CTF: {error.message}</div>;
 
   return (
     <div className="max-w-lg w-full px-2">
@@ -147,7 +134,7 @@ function EditCtfPage() {
         <div className="flex justify-end items-center space-x-3 pt-2">
           <button
             type="button"
-            onClick={() => navigate({ to: "/ctfs/$ctfId", params: { ctfId } })}
+            onClick={() => navigate({ to: "/ctfs/$ctfId", params: { ctfId: ctf.id } })}
             className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors text-base"
           >
             Cancel
