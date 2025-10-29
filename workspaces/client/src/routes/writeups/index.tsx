@@ -20,7 +20,7 @@ function WriteupsListPage() {
   if (error) return <div>Error loading writeups: {error.message}</div>;
 
   return (
-    <div className="max-w-lg w-full">
+    <div className="max-w-lg w-full px-2">
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold mb-3">Writeups</h1>
       </div>
