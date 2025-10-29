@@ -2,8 +2,9 @@ import { Hono } from "hono";
 
 import { getUploadSignData } from "@/libs/cloudinary";
 import { error, success } from "@/libs/response";
+import { withAuth } from "@/middlewares/auth";
 
-const router = new Hono<Env>().get("/sign", async c => {
+const router = new Hono<Env>().get("/sign", withAuth(true), async c => {
   try {
     const signData = await getUploadSignData(c.env);
     return c.json(success(signData), 200);
