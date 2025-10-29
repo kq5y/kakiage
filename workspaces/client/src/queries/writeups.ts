@@ -11,7 +11,7 @@ export const writeupsQueryOptions = () =>
 export const writeupQueryOptions = (writeupId: number, includeContent: boolean) =>
   queryOptions({
     queryKey: ["writeups", writeupId, { includeContent }],
-    queryFn: () => getWriteup(writeupId),
+    queryFn: () => getWriteup(writeupId, includeContent),
   });
 
 export const writeupTagsQueryOptions = (writeupId: number) =>
