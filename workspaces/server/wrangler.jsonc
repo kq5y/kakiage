@@ -3,6 +3,9 @@
   "name": "kakiage",
   "main": "src/index.ts",
   "compatibility_date": "2025-07-30",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
   "routes": [
     {
       "pattern": "w.kq5.jp",

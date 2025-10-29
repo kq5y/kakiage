@@ -1,9 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 import MarkdownEditor from "@/components/MarkdownEditor";
-import { addWriteupTag, removeWriteupTag, updateWriteup, updateWriteupContent, uploadImage } from "@/libs/api";
+import { addWriteupTag, removeWriteupTag, updateWriteup, updateWriteupContent } from "@/libs/api";
 import { categoriesQueryOptions } from "@/queries/categories";
 import { writeupQueryOptions, writeupTagsQueryOptions } from "@/queries/writeups";
 import { createPageTitle } from "@/utils/meta";
@@ -53,16 +53,6 @@ function EditWriteupPage() {
 
   const [content, setContent] = useState(writeup.content || "");
   const [newTagName, setNewTagName] = useState("");
-
-  const handleImageUpload = useCallback(async (file: File): Promise<string> => {
-    try {
-      const response = await uploadImage({ image: file });
-      return `/images/${response.id}`;
-    } catch (error) {
-      console.error("Failed to upload image:", error);
-      throw error;
-    }
-  }, []);
 
   const updateWriteupMutation = useMutation({
     mutationFn: (data: typeof formData) =>
@@ -201,7 +191,7 @@ function EditWriteupPage() {
         </div>
       </form>
 
-      <MarkdownEditor value={content} onChange={handleContentChange} onImageUpload={handleImageUpload} />
+      <MarkdownEditor value={content} onChange={handleContentChange} />
     </div>
   );
 }

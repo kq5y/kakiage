@@ -1,18 +1,21 @@
 import { markdownToHtml } from "@kakiage/processor";
 import { useEffect, useRef, useState } from "react";
 
+import { getImageUploadSign } from "@/libs/api";
+import { uploadImage } from "@/libs/cloudinary";
+
 import "@/assets/article.scss";
 
 interface MarkdownEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onImageUpload: (file: File) => Promise<string>;
 }
 
-export default function MarkdownEditor({ value, onChange, onImageUpload }: MarkdownEditorProps) {
+export default function MarkdownEditor({ value, onChange }: MarkdownEditorProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [renderedHtml, setRenderedHtml] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     (async () => {
@@ -32,15 +35,17 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
+    if (!textareaRef.current) return;
 
     const file = files[0];
     setIsUploading(true);
 
     try {
-      const imageUrl = await onImageUpload(file);
+      const signData = await getImageUploadSign();
+      const imageUrl = await uploadImage(file, signData);
 
-      const textArea = document.querySelector("textarea");
-      const cursorPos = textArea?.selectionStart || value.length;
+      const textArea = textareaRef.current;
+      const cursorPos = textArea.selectionStart || value.length;
       const textBefore = value.substring(0, cursorPos);
       const textAfter = value.substring(cursorPos);
 
@@ -75,6 +80,7 @@ export default function MarkdownEditor({ value, onChange, onImageUpload }: Markd
             <input ref={fileInputRef} type="file" hidden accept="image/*" onChange={handleImageUpload} />
           </div>
           <textarea
+            ref={textareaRef}
             name="content"
             value={value}
             onChange={handleTextChange}

@@ -171,15 +171,13 @@ export const deleteCtf = async (id: number) => {
 
 /* images */
 
-export const uploadImage = async (payload: InferRequestType<typeof apiClient.api.v1.images.upload.$post>["form"]) => {
-  const res = await apiClient.api.v1.images.upload.$post({ form: payload });
+export const getImageUploadSign = async () => {
+  const res = await apiClient.api.v1.images.sign.$get();
   const data = await res.json();
   if (res.ok && data.success) return data.data;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
   throw new ApiError("Failed to fetch", res.status);
-};
-
-export const getImageUrl = (id: string) => `/api/v1/images/${id}`;
+}
 
 /* tags */
 
