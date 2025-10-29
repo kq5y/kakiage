@@ -315,9 +315,8 @@ const router = new Hono<Env>()
 
       const cache = caches.default;
       const updatedAtTimestamp = writeup.updatedAt.getTime();
-      const cacheUrl = new URL(c.req.url);
-      cacheUrl.pathname = `/cache/writeup-html/${id}/${updatedAtTimestamp}`;
-      const cacheKey = new Request(cacheUrl.toString());
+      const cacheUrl = new URL(`/cache/writeup-html/${id}/${updatedAtTimestamp}`, c.req.url);
+      const cacheKey = new Request(cacheUrl.href);
 
       const response = await cache.match(cacheKey);
       let html: string;
