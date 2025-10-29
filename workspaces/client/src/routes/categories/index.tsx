@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { createCategory, deleteCategory, updateCategory } from "@/libs/api";
 import { categoriesQueryOptions } from "@/queries/categories";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/categories/")({
   component: CategoriesPage,
@@ -24,6 +25,9 @@ export const Route = createFileRoute("/categories/")({
   loader: ({ context }) => {
     return context.queryClient.ensureQueryData(categoriesQueryOptions);
   },
+  head: () => ({
+    meta: [{ title: createPageTitle("Manage Categories") }],
+  }),
   pendingComponent: () => <div>Loading categories...</div>,
   errorComponent: ({ error }) => <div>Error loading categories: {error.message}</div>,
 });
@@ -181,7 +185,6 @@ function CategoriesPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
-      <title>Manage Categories - kakiage</title>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold mb-3">Manage Categories</h1>
         <button

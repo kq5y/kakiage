@@ -6,6 +6,7 @@ import MarkdownEditor from "@/components/MarkdownEditor";
 import { addWriteupTag, removeWriteupTag, updateWriteup, updateWriteupContent, uploadImage } from "@/libs/api";
 import { categoriesQueryOptions } from "@/queries/categories";
 import { writeupQueryOptions, writeupTagsQueryOptions } from "@/queries/writeups";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/$writeupId/edit")({
   component: EditWriteupPage,
@@ -33,6 +34,9 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
     const tags = await context.queryClient.ensureQueryData(writeupTagsQueryOptions(params.writeupId));
     return { writeup, categories, tags };
   },
+  head: ctx => ({
+    meta: [{ title: createPageTitle(ctx.loaderData?.writeup.title || "") }],
+  }),
   pendingComponent: () => <div>Loading...</div>,
   errorComponent: ({ error }) => <div>Error: {(error as Error).message}</div>,
 });
@@ -127,7 +131,6 @@ function EditWriteupPage() {
 
   return (
     <div className="max-w-dvw w-full flex-1 min-h-0 flex flex-col">
-      <title>{writeup.title} - kakiage</title>
       <form onSubmit={handleSubmit} className="space-y-6 mb-2">
         <div className="mx-2 space-y-1">
           <div className="flex items-center justify-between space-x-2">

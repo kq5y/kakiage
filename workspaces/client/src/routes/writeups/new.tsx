@@ -5,6 +5,7 @@ import { useState } from "react";
 import { createWriteup } from "@/libs/api";
 import { categoriesQueryOptions } from "@/queries/categories";
 import { ctfsQueryOptions } from "@/queries/ctfs";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/new")({
   component: NewWriteupPage,
@@ -32,6 +33,9 @@ export const Route = createFileRoute("/writeups/new")({
     const categories = await context.queryClient.ensureQueryData(categoriesQueryOptions);
     return { ctfs, categories };
   },
+  head: () => ({
+    meta: [{ title: createPageTitle("Create New Writeup") }],
+  }),
 });
 
 function NewWriteupPage() {
@@ -76,7 +80,6 @@ function NewWriteupPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
-      <title>Create New Writeup - kakiage</title>
       <h1 className="text-3xl font-bold mb-3">Create New Writeup</h1>
 
       {createWriteupMutation.isError && (

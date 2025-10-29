@@ -2,12 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { useAuth } from "@/hooks/useAuth";
 import { ctfsQueryOptions } from "@/queries/ctfs";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/ctfs/")({
   component: CtfsPage,
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     return context.queryClient.ensureQueryData(ctfsQueryOptions());
   },
+  head: () => ({
+    meta: [{ title: createPageTitle("CTF Competitions") }],
+  }),
   pendingComponent: () => <div>Loading CTFs...</div>,
   errorComponent: ({ error }) => <div>Error loading CTFs: {error.message}</div>,
 });
@@ -26,7 +30,6 @@ function CtfsPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
-      <title>CTF Competitions - kakiage</title>
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold mb-3">CTF Competitions</h1>
         {isAdmin && (

@@ -2,6 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
   component: HomePage,
+  head: () => ({
+    meta: [{ title: "kakiage" }],
+  }),
 });
 
 function HomePage() {
