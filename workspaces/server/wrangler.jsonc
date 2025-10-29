@@ -18,12 +18,6 @@
       "/api/*"
     ]
   },
-  "r2_buckets": [
-    {
-      "bucket_name": "kakiage-img",
-      "binding": "R2_IMG"
-    }
-  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
