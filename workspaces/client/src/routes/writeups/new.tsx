@@ -76,6 +76,7 @@ function NewWriteupPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
+      <title>Create New Writeup - kakiage</title>
       <h1 className="text-3xl font-bold mb-3">Create New Writeup</h1>
 
       {createWriteupMutation.isError && (

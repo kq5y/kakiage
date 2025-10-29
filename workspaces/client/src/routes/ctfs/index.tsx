@@ -26,6 +26,7 @@ function CtfsPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
+      <title>CTF Competitions - kakiage</title>
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold mb-3">CTF Competitions</h1>
         {isAdmin && (

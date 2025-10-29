@@ -127,6 +127,7 @@ function EditWriteupPage() {
 
   return (
     <div className="max-w-dvw w-full flex-1 min-h-0 flex flex-col">
+      <title>{writeup.title} - kakiage</title>
       <form onSubmit={handleSubmit} className="space-y-6 mb-2">
         <div className="mx-2 space-y-1">
           <div className="flex items-center justify-between space-x-2">
