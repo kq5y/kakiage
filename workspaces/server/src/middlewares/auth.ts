@@ -10,12 +10,12 @@ import { error, type JsonErrorResponse } from "@/libs/response";
 export type HasUser<L extends boolean = true, A extends boolean = false> = {
   Variables: {
     user: L extends true
-    ? A extends true
-    ? User & { role: "admin" }
-    : User
-    : A extends true
-    ? (User & { role: "admin" }) | null
-    : User | null;
+      ? A extends true
+        ? User & { role: "admin" }
+        : User
+      : A extends true
+        ? (User & { role: "admin" }) | null
+        : User | null;
   };
 };
 
