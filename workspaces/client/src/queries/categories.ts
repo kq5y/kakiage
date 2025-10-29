@@ -1,8 +1,8 @@
-import { queryOptions } from '@tanstack/react-query';
+import { queryOptions } from "@tanstack/react-query";
 
-import { getCategories } from '@/libs/api';
+import { getCategories } from "@/libs/api";
 
 export const categoriesQueryOptions = queryOptions({
-  queryKey: ['categories'],
+  queryKey: ["categories"],
   queryFn: getCategories,
 });

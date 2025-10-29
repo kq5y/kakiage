@@ -31,7 +31,7 @@ class AuthService {
 
   private notify = () => {
     this.snapshot = this.getSnapshotValues();
-    this.listeners.forEach((listener) => void listener());
+    this.listeners.forEach(listener => void listener());
   };
 
   subscribe = (listener: () => void): (() => void) => {

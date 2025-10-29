@@ -14,7 +14,7 @@ export const Route = createRootRouteWithContext<{
     const { isLoading } = useAuth();
 
     const isEditor = useLocation({
-      select: (location) => /\/writeups\/\d+\/edit/.test(location.pathname),
+      select: location => /\/writeups\/\d+\/edit/.test(location.pathname),
     });
 
     if (isLoading) {

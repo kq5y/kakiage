@@ -23,12 +23,12 @@ const handleCategoryDbError = (c: Context, e: unknown, action: "create" | "updat
 };
 
 const router = new Hono<Env>()
-  .get("/", async (c) => {
+  .get("/", async c => {
     const db = getDB(c.env.DB);
     const list = await db.query.categories.findMany();
     return c.json(success(list), 200);
   })
-  .post("/", withAuth(true, true), withValidates({ json: categoryBodySchema }), async (c) => {
+  .post("/", withAuth(true, true), withValidates({ json: categoryBodySchema }), async c => {
     const db = getDB(c.env.DB);
     const { name, color } = c.req.valid("json");
     try {
@@ -38,7 +38,7 @@ const router = new Hono<Env>()
       return handleCategoryDbError(c, e, "create");
     }
   })
-  .patch("/:id", withAuth(true, true), withValidates({ param: idParamSchema, json: categoryBodySchema }), async (c) => {
+  .patch("/:id", withAuth(true, true), withValidates({ param: idParamSchema, json: categoryBodySchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const { name, color } = c.req.valid("json");
@@ -52,7 +52,7 @@ const router = new Hono<Env>()
       return handleCategoryDbError(c, e, "update");
     }
   })
-  .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async (c) => {
+  .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();

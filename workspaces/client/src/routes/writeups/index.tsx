@@ -20,7 +20,7 @@ function WriteupsListPage() {
       </div>
 
       <div className="space-y-2">
-        {writeups.map((writeup) => (
+        {writeups.map(writeup => (
           <div key={writeup.id} className="block px-4 py-3 hover:bg-gray-50">
             <div className="flex justify-between items-center">
               <Link to="/writeups/$writeupId" params={{ writeupId: writeup.id }}>
@@ -41,7 +41,7 @@ function WriteupsListPage() {
               <span key={writeup.category.id} className="px-2 py-1 text-sm bg-purple-100 text-purple-800 rounded">
                 {writeup.category.name}
               </span>
-              {writeup.tags.map((tag) => (
+              {writeup.tags.map(tag => (
                 <span key={tag.id} className="px-2 py-1 text-sm bg-gray-200 text-gray-700 rounded">
                   {tag.name}
                 </span>

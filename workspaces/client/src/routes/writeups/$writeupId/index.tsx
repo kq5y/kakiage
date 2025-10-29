@@ -84,7 +84,7 @@ function WriteupDetailPage() {
 
           <span className="text-sm px-2 py-1 bg-purple-100 text-purple-800 rounded">{writeup.category.name}</span>
 
-          {writeup.tags.map((tag) => (
+          {writeup.tags.map(tag => (
             <span key={tag.id} className="text-sm px-2 py-1 bg-gray-100 text-gray-800 rounded">
               {tag.name}
             </span>

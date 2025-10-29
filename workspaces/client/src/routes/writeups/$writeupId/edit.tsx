@@ -98,7 +98,7 @@ function EditWriteupPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleContentChange = (value: string) => {
@@ -156,7 +156,7 @@ function EditWriteupPage() {
                 required
                 className="px-2 py-1 border rounded-md"
               >
-                {categories.map((category) => (
+                {categories.map(category => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
@@ -164,7 +164,7 @@ function EditWriteupPage() {
               </select>
             </div>
             <div className="flex flex-wrap items-center gap-2 p-1 border rounded-md flex-grow">
-              {tags.map((tag) => (
+              {tags.map(tag => (
                 <span
                   key={tag.id}
                   className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700"
@@ -185,7 +185,7 @@ function EditWriteupPage() {
                   type="text"
                   name="newTag"
                   value={newTagName}
-                  onChange={(e) => setNewTagName(e.target.value)}
+                  onChange={e => setNewTagName(e.target.value)}
                   onKeyDown={handleNewTagKeyDown}
                   disabled={addTagMutation.isPending}
                   placeholder="Add tag"

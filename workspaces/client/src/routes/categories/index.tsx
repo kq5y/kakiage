@@ -165,12 +165,12 @@ function CategoriesPage() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setEditingCategory((prev) => (prev ? { ...prev, [name]: value } : null));
+    setEditingCategory(prev => (prev ? { ...prev, [name]: value } : null));
   };
 
   const handleNewCategoryChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewCategory((prev) => ({ ...prev, [name]: value }));
+    setNewCategory(prev => ({ ...prev, [name]: value }));
   };
 
   const confirmDelete = (category: Category) => {
@@ -243,7 +243,7 @@ function CategoriesPage() {
                 </td>
               </tr>
             )}
-            {categories.map((category) => (
+            {categories.map(category => (
               <>
                 <tr
                   key={category.id}

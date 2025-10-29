@@ -100,7 +100,7 @@ function CtfDetailPage() {
               <div key={categoryId} className="border rounded-lg overflow-hidden">
                 <div className="bg-gray-100 px-4 py-3 font-medium">{categoryName}</div>
                 <div className="divide-y">
-                  {writeups.map((writeup) => (
+                  {writeups.map(writeup => (
                     <Link
                       key={writeup.id}
                       to="/writeups/$writeupId"
@@ -115,7 +115,7 @@ function CtfDetailPage() {
                       </div>
                       {writeup.tags.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
-                          {writeup.tags.map((tag) => (
+                          {writeup.tags.map(tag => (
                             <span key={tag.id} className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">
                               {tag.name}
                             </span>

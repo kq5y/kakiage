@@ -39,7 +39,7 @@ function CtfsPage() {
       </div>
 
       <div className="space-y-2">
-        {ctfs.map((ctf) => (
+        {ctfs.map(ctf => (
           <Link
             key={ctf.id}
             to="/ctfs/$ctfId"
