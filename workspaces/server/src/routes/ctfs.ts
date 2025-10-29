@@ -50,7 +50,7 @@ const router = new Hono<Env>()
       .returning();
     return c.json(success(ctf), 201);
   })
-  .get("/:id", withAuth(true), withValidates({ param: idParamSchema }), async (c) => {
+  .get("/:id", withValidates({ param: idParamSchema }), async (c) => {
     const db = getDB(c.env.DB);
     const id = Number(c.req.valid("param").id);
     const ctf = await db.query.ctfs.findFirst({
