@@ -65,6 +65,7 @@ function EditCtfPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
+      <title>{ctf.name} - kakiage</title>
       <h1 className="text-3xl font-bold mb-3">Edit CTF</h1>
 
       {updateCtfMutation.isError && (

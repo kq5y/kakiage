@@ -33,6 +33,7 @@ function WriteupDetailPage() {
   const canEdit = user?.id === writeup.createdByUser.id || isAdmin;
   return (
     <div className="max-w-xl w-full px-2">
+      <title>{writeup.title} - kakiage</title>
       <div>
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-3xl font-bold">{writeup.title}</h1>

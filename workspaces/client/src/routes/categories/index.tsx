@@ -181,6 +181,7 @@ function CategoriesPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
+      <title>Manage Categories - kakiage</title>
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold mb-3">Manage Categories</h1>
         <button
