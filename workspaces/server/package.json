@@ -27,18 +27,17 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20251014.0",
     "@types/node": "^24.9.2",
     "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.5",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
-    "wireit": "^0.14.12",
-    "wrangler": "^4.44.0"
+    "vercel": "^48.6.7",
+    "wireit": "^0.14.12"
   },
   "wireit": {
     "build:rpc": {
-      "command": "tsup ./src/rpc.ts --dts --format esm --tsconfig ./tsconfig.cloudflare.json",
+      "command": "tsup ./src/rpc.ts --dts --format esm --tsconfig ./tsconfig.vercel.json",
       "files": [
         "src"
       ],
@@ -50,7 +49,7 @@
       ]
     },
     "watch:rpc": {
-      "command": "tsup ./src/rpc.ts --watch --dts --format esm --tsconfig ./tsconfig.cloudflare.json",
+      "command": "tsup ./src/rpc.ts --watch --dts --format esm --tsconfig ./tsconfig.vercel.json",
       "service": {
         "readyWhen": {
           "lineMatches": ".*DTS.*Build success in \\d+.*"
@@ -64,7 +63,7 @@
       ]
     },
     "dev": {
-      "command": "wrangler dev",
+      "command": "vercel dev",
       "service": true,
       "dependencies": [
         "watch:rpc",
@@ -74,24 +73,14 @@
       "files": [
         "../client/dist",
         "src",
-        "wrangler.jsonc"
+        "vercel.json"
       ]
     },
     "deploy": {
-      "command": "wrangler deploy --minify",
+      "command": "vercel deploy",
       "files": [
         "dist",
-        "wrangler.jsonc"
-      ],
-      "dependencies": [
-        "../../:build"
-      ]
-    },
-    "deploy:preview": {
-      "command": "wrangler versions upload --minify",
-      "files": [
-        "dist",
-        "wrangler.jsonc"
+        "vercel.json"
       ],
       "dependencies": [
         "../../:build"
