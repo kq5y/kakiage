@@ -21,7 +21,7 @@ const imageFormSchema = z.object({
 const router = new Hono<Env>()
   .post("/upload", withAuth(true), withValidates({ form: imageFormSchema }), async c => {
     const user = c.get("user");
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
 
     const form = c.req.valid("form");
     const file = form.image;
@@ -89,7 +89,7 @@ const router = new Hono<Env>()
       return cached;
     }
 
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const imageRow = await db.query.images.findFirst({ where: eq(images.id, id) });
     if (!imageRow) return c.json(error("Image not found"), 404);
 

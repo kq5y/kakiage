@@ -59,7 +59,7 @@ const router = new Hono<Env>()
         return c.redirect(makeAppUrl("Failed to get Discord user"));
       }
 
-      const db = getDB(c.env.DB);
+      const db = getDB(c.env);
       const user = await db.query.users.findFirst({
         where: (users, { eq }) => eq(users.id, discordUser.id),
       });
@@ -112,7 +112,7 @@ const router = new Hono<Env>()
           db.update(inviteTokens).set({ used: 1 }).where(eq(inviteTokens.token, inviteToken)),
         ]);
 
-        if (!txResult || txResult.length !== 2 || !txResult[1].success) {
+        if (!txResult || txResult.length !== 2 || txResult[1].rowsAffected !== 1) {
           return c.redirect(makeAppUrl("Failed to create user or update invite token"));
         }
 

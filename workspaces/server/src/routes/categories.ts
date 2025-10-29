@@ -24,12 +24,12 @@ const handleCategoryDbError = (c: Context, e: unknown, action: "create" | "updat
 
 const router = new Hono<Env>()
   .get("/", async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const list = await db.query.categories.findMany();
     return c.json(success(list), 200);
   })
   .post("/", withAuth(true, true), withValidates({ json: categoryBodySchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const { name, color } = c.req.valid("json");
     try {
       const [category] = await db.insert(categories).values({ name, color }).returning();
@@ -39,7 +39,7 @@ const router = new Hono<Env>()
     }
   })
   .patch("/:id", withAuth(true, true), withValidates({ param: idParamSchema, json: categoryBodySchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
     const { name, color } = c.req.valid("json");
     try {
@@ -53,7 +53,7 @@ const router = new Hono<Env>()
     }
   })
   .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
     const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();
     if (deleted.length === 0) {

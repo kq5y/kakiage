@@ -8,8 +8,9 @@
     "deploy:preview": "wireit",
     "build:rpc": "wireit",
     "watch:rpc": "wireit",
-    "db:migrate": "wireit",
-    "db:apply": "wireit"
+    "db:generate": "wireit",
+    "db:migrate:dev": "wireit",
+    "db:migrate:prod": "wireit"
   },
   "exports": {
     "./rpc": {
@@ -19,12 +20,15 @@
   },
   "dependencies": {
     "@kakiage/processor": "workspace:*",
+    "@libsql/client": "^0.15.15",
     "drizzle-orm": "^0.44.6",
     "hono": "^4.10.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20251014.0",
+    "@types/node": "^24.9.2",
+    "dotenv": "^17.2.3",
     "drizzle-kit": "^0.31.5",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
@@ -33,7 +37,7 @@
   },
   "wireit": {
     "build:rpc": {
-      "command": "tsup ./src/rpc.ts --dts --format esm",
+      "command": "tsup ./src/rpc.ts --dts --format esm --tsconfig ./tsconfig.cloudflare.json",
       "files": [
         "src"
       ],
@@ -45,7 +49,7 @@
       ]
     },
     "watch:rpc": {
-      "command": "tsup ./src/rpc.ts --watch --dts --format esm",
+      "command": "tsup ./src/rpc.ts --watch --dts --format esm --tsconfig ./tsconfig.cloudflare.json",
       "service": {
         "readyWhen": {
           "lineMatches": ".*DTS.*Build success in \\d+.*"
@@ -92,11 +96,20 @@
         "../../:build"
       ]
     },
-    "db:migrate": {
-      "command": "drizzle-kit generate --dialect sqlite --out migrations --schema src/db/schema.ts"
+    "db:generate": {
+      "command": "drizzle-kit generate"
     },
-    "db:apply": {
-      "command": "wrangler d1 migrations apply kakiage-db"
+    "db:migrate:dev": {
+      "command": "drizzle-kit migrate",
+      "env": {
+        "ENV": "development"
+      }
+    },
+    "db:migrate:prod": {
+      "command": "drizzle-kit migrate",
+      "env": {
+        "ENV": "production"
+      }
     }
   }
 }

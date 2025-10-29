@@ -1,5 +1,4 @@
 type Bindings = {
-  DB: D1Database;
   R2_IMG: R2Bucket;
   JWT_SECRET: string;
   DISCORD_CLIENT_ID: string;
@@ -7,6 +6,8 @@ type Bindings = {
   APP_DOMAIN: string;
   IMAGE_API_DOMAIN: string;
   IMAGE_API_KEY: string;
+  TURSO_CONNECTION_URL: string;
+  TURSO_AUTH_TOKEN: string;
 };
 
 type Env = { Bindings: Bindings };
