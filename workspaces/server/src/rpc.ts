@@ -1,6 +1,6 @@
 import { type DetailedError, hc, type InferRequestType, parseResponse } from "hono/client";
 
-import type { Category, CTF, Image, InviteToken, Role, Tag, User, Writeup, WriteupToTag } from "@/db/schema";
+import type { Category, CTF, InviteToken, Role, Tag, User, Writeup, WriteupToTag } from "@/db/schema";
 
 import type app from "@/index";
 
@@ -8,4 +8,4 @@ export { parseResponse, type DetailedError, type InferRequestType };
 
 export const hcWithType = (...args: Parameters<typeof hc>) => hc<typeof app>(...args);
 
-export type { Category, CTF, Image, InviteToken, Role, Tag, User, Writeup, WriteupToTag };
+export type { Category, CTF, InviteToken, Role, Tag, User, Writeup, WriteupToTag };
