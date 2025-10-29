@@ -5,16 +5,19 @@ import { useAuth } from "@/hooks/useAuth";
 import { writeupContentQueryOptions, writeupQueryOptions } from "@/queries/writeups";
 
 import "@/assets/article.scss";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/$writeupId/")({
   component: WriteupDetailPage,
   params: {
     parse: ({ writeupId }) => ({ writeupId: Number(writeupId) }),
   },
-  loader: async ({ params, context }) => {
-    const writeup = await context.queryClient.ensureQueryData(writeupQueryOptions(params.writeupId, false));
-    return { writeup };
+  loader: ({ params, context }) => {
+    return context.queryClient.ensureQueryData(writeupQueryOptions(params.writeupId, false));
   },
+  head: ctx => ({
+    meta: [{ title: createPageTitle(ctx.loaderData?.title || "") }],
+  }),
   pendingComponent: () => <div>Loading writeup...</div>,
   errorComponent: ({ error }) => <div>Error loading writeup: {error.message}</div>,
 });
@@ -22,7 +25,7 @@ export const Route = createFileRoute("/writeups/$writeupId/")({
 function WriteupDetailPage() {
   const { writeupId } = Route.useParams();
   const { user, isAdmin } = useAuth();
-  const { writeup } = Route.useLoaderData();
+  const writeup = Route.useLoaderData();
 
   const {
     data: content,
@@ -33,7 +36,6 @@ function WriteupDetailPage() {
   const canEdit = user?.id === writeup.createdByUser.id || isAdmin;
   return (
     <div className="max-w-xl w-full px-2">
-      <title>{writeup.title} - kakiage</title>
       <div>
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-3xl font-bold">{writeup.title}</h1>

@@ -1,12 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { writeupsQueryOptions } from "@/queries/writeups";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/")({
   component: WriteupsListPage,
-  loader: async ({ context }) => {
+  loader: ({ context }) => {
     return context.queryClient.ensureQueryData(writeupsQueryOptions());
   },
+  head: () => ({
+    meta: [{ title: createPageTitle("Writeups") }],
+  }),
   pendingComponent: () => <div>Loading writeups...</div>,
   errorComponent: ({ error }) => <div>Error loading writeups: {error.message}</div>,
 });
@@ -15,7 +19,6 @@ function WriteupsListPage() {
   const writeups = Route.useLoaderData();
   return (
     <div className="max-w-lg w-full px-2">
-      <title>Writeups - kakiage</title>
       <div className="flex justify-between items-center mb-2">
         <h1 className="text-3xl font-bold mb-3">Writeups</h1>
       </div>

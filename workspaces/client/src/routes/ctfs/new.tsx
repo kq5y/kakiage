@@ -3,6 +3,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { createCtf } from "@/libs/api";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/ctfs/new")({
   component: NewCtfPage,
@@ -19,6 +20,9 @@ export const Route = createFileRoute("/ctfs/new")({
 
     return {};
   },
+  head: () => ({
+    meta: [{ title: createPageTitle("Create New CTF") }],
+  }),
 });
 
 function NewCtfPage() {
@@ -54,7 +58,6 @@ function NewCtfPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
-      <title>Create New CTF - kakiage</title>
       <h1 className="text-3xl font-bold mb-3">Create New CTF</h1>
 
       {createCtfMutation.isError && (

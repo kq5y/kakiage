@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { updateCtf } from "@/libs/api";
 import { ctfDetailQueryOptions } from "@/queries/ctfs";
+import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/ctfs/$ctfId/edit")({
   component: EditCtfPage,
@@ -23,9 +24,12 @@ export const Route = createFileRoute("/ctfs/$ctfId/edit")({
 
     return {};
   },
-  loader: async ({ context, params }) => {
+  loader: ({ context, params }) => {
     return context.queryClient.ensureQueryData(ctfDetailQueryOptions(params.ctfId));
   },
+  head: ctx => ({
+    meta: [{ title: createPageTitle(ctx.loaderData?.name || "") }],
+  }),
   pendingComponent: () => <div>Loading CTF details...</div>,
   errorComponent: ({ error }) => <div>Error loading CTF: {error.message}</div>,
 });
@@ -65,7 +69,6 @@ function EditCtfPage() {
 
   return (
     <div className="max-w-lg w-full px-2">
-      <title>{ctf.name} - kakiage</title>
       <h1 className="text-3xl font-bold mb-3">Edit CTF</h1>
 
       {updateCtfMutation.isError && (

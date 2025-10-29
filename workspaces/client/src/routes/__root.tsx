@@ -1,5 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, Outlet, useLocation } from "@tanstack/react-router";
+import { createRootRouteWithContext, HeadContent, Outlet, useLocation } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { Footer } from "@/components/layout/Footer";
@@ -10,6 +10,7 @@ export const Route = createRootRouteWithContext<{
   auth: typeof authService;
   queryClient: QueryClient;
 }>()({
+  head: () => ({ meta: [{ title: "kakiage" }] }),
   component: () => {
     const { isLoading } = useAuth();
 
@@ -22,14 +23,17 @@ export const Route = createRootRouteWithContext<{
     }
 
     return (
-      <div className={`flex flex-col ${isEditor ? "overflow-hidden h-dvh" : "min-h-screen"}`}>
-        <Header />
-        <main className="flex-1 min-h-0 flex flex-col items-center py-2">
-          <Outlet />
-        </main>
-        <Footer />
-        <TanStackRouterDevtools />
-      </div>
+      <>
+        <HeadContent />
+        <div className={`flex flex-col ${isEditor ? "overflow-hidden h-dvh" : "min-h-screen"}`}>
+          <Header />
+          <main className="flex-1 min-h-0 flex flex-col items-center py-2">
+            <Outlet />
+          </main>
+          <Footer />
+          <TanStackRouterDevtools />
+        </div>
+      </>
     );
   },
 });
