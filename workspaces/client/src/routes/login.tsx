@@ -56,11 +56,11 @@ function LoginPage() {
     setInviteToken(e.target.value);
   };
   return (
-    <div className="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden my-8">
+    <div className="max-w-md w-full bg-white rounded-xl shadow-2xl overflow-hidden px-2 my-8">
       <div className="bg-gray-50 py-3 px-4 border-b border-gray-200">
         <h1 className="text-3xl font-bold text-center">kakiage</h1>
       </div>
-      <div className="px-6 p-b-4 space-y-2">
+      <div className="px-6 pb-4 space-y-2">
         {error && (
           <div
             className="bg-red-100 border-0 border-l-4 border-red-500 border-solid text-red-700 px-4 py-1 rounded-md"

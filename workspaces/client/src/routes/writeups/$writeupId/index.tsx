@@ -37,13 +37,12 @@ function WriteupDetailPage() {
   const isAdmin = user?.role === "admin";
   const canEdit = isAuthor || isAdmin;
 
-  if (isLoadingWriteup || isLoadingContent) return <div>Loading writeup...</div>;
+  if (isLoadingWriteup) return <div>Loading writeup...</div>;
   if (writeupError) return <div>Error loading writeup: {writeupError.message}</div>;
-  if (contentError) return <div>Error loading content: {contentError.message}</div>;
   if (!writeup) return <div>Writeup not found</div>;
 
   return (
-    <div className="max-w-xl w-full">
+    <div className="max-w-xl w-full px-2">
       <div>
         <div className="flex justify-between items-center mb-2">
           <h1 className="text-3xl font-bold">{writeup.title}</h1>
@@ -58,7 +57,7 @@ function WriteupDetailPage() {
           )}
         </div>
 
-        <div className="flex items-center text-sm text-gray-600 mb-2">
+        <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2">
           <span>By {writeup.createdByUser.name || "Unknown"}</span>
           <span className="mx-2">•</span>
           <span>{new Date(writeup.createdAt).toLocaleDateString()}</span>
@@ -104,8 +103,14 @@ function WriteupDetailPage() {
       </div>
 
       <div className="max-w-none">
-        {/** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */}
-        <div className="article" dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
+        {isLoadingContent ? (
+          <div>Loading content...</div>
+        ) : contentError ? (
+          <div>Error loading content: {contentError.message}</div>
+        ) : (
+          /** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */
+          <div className="article" dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
+        )}
       </div>
     </div>
   );

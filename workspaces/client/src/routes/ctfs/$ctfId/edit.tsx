@@ -77,7 +77,7 @@ function EditCtfPage() {
   if (error) return <div>Error loading CTF: {error.message}</div>;
 
   return (
-    <div className="max-w-lg w-full">
+    <div className="max-w-lg w-full px-2">
       <h1 className="text-3xl font-bold mb-3">Edit CTF</h1>
 
       {updateCtfMutation.isError && (

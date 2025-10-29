@@ -185,7 +185,7 @@ function CategoriesPage() {
   if (error) return <div>Error loading categories: {error.message}</div>;
 
   return (
-    <div className="max-w-lg w-full">
+    <div className="max-w-lg w-full px-2">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold mb-3">Manage Categories</h1>
         <button

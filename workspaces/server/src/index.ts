@@ -21,7 +21,7 @@ const app = new Hono<Env>()
     return c.json(error("Not Found"), 404);
   })
   .onError((err, c) => {
-    console.error("Unhandled error:", err);
+    console.error("Unhandled error:", err, err.cause);
     return c.json(error("Internal Server Error"), 500);
   });
 
