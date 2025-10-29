@@ -66,7 +66,7 @@ async function getHash(text: string): Promise<string> {
 
 const router = new Hono<Env>()
   .get("/", withValidates({ query: writeupsSearchQuerySchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const { q, categoryId, tag, pageSize, page, sortKey, sortOrder } = c.req.valid("query");
 
     let writeupIds: number[] | undefined;
@@ -130,7 +130,7 @@ const router = new Hono<Env>()
     return c.json(success(formattedWriteups), 200);
   })
   .post("/", withAuth(true), withValidates({ json: writeupCreateBodySchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const { title, slug, ctfId, categoryId, points, solvers, password } = c.req.valid("json");
     const user = c.get("user");
 
@@ -158,7 +158,7 @@ const router = new Hono<Env>()
     );
   })
   .get("/:id", withValidates({ param: idParamSchema, query: writeupQuerySchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
     const { content: includeContent } = c.req.valid("query");
 
@@ -196,7 +196,7 @@ const router = new Hono<Env>()
     return c.json(success(formattedWriteup), 200);
   })
   .get("/:id/tags", withValidates({ param: idParamSchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
 
     const writeup = await db.query.writeups.findFirst({
@@ -223,7 +223,7 @@ const router = new Hono<Env>()
     return c.json(success(writeupTags), 200);
   })
   .post("/:id/tags", withAuth(true), withValidates({ param: idParamSchema, json: writeupTagPostSchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
     const { name } = c.req.valid("json");
     const user = c.get("user");
@@ -258,7 +258,7 @@ const router = new Hono<Env>()
     withAuth(true),
     withValidates({ param: idParamSchema, json: writeupTagDeleteSchema }),
     async c => {
-      const db = getDB(c.env.DB);
+      const db = getDB(c.env);
       const id = Number(c.req.valid("param").id);
       const { id: tagId } = c.req.valid("json");
       const user = c.get("user");
@@ -288,7 +288,7 @@ const router = new Hono<Env>()
     withAuth(false),
     withValidates({ param: idParamSchema, header: writeupPasswordHeaderSchema }),
     async c => {
-      const db = getDB(c.env.DB);
+      const db = getDB(c.env);
       const user = c.get("user");
       const id = Number(c.req.valid("param").id);
       const password = c.req.valid("header")["x-password"];
@@ -337,7 +337,7 @@ const router = new Hono<Env>()
     },
   )
   .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
     const { title, categoryId, points, solvers, password } = c.req.valid("json");
     const user = c.get("user");
@@ -382,7 +382,7 @@ const router = new Hono<Env>()
     withAuth(true),
     withValidates({ param: idParamSchema, json: writeupContentSchema }),
     async c => {
-      const db = getDB(c.env.DB);
+      const db = getDB(c.env);
       const id = Number(c.req.valid("param").id);
       const { content } = c.req.valid("json");
       const user = c.get("user");
@@ -420,7 +420,7 @@ const router = new Hono<Env>()
     },
   )
   .delete("/:id", withAuth(true), withValidates({ param: idParamSchema }), async c => {
-    const db = getDB(c.env.DB);
+    const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
     const user = c.get("user");
 

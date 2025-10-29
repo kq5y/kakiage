@@ -1,9 +1,12 @@
-import { drizzle } from "drizzle-orm/d1";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 
 import * as schema from "./schema";
 
-export const getDB = (DB: D1Database) => {
-  return drizzle(DB, {
-    schema,
+export const getDB = (env: Bindings) => {
+  const client = createClient({
+    url: env.TURSO_CONNECTION_URL,
+    authToken: env.TURSO_AUTH_TOKEN,
   });
+  return drizzle(client, { schema });
 };

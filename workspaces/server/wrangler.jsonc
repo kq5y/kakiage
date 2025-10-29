@@ -18,13 +18,6 @@
       "/api/*"
     ]
   },
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "kakiage-db",
-      "database_id": "28045659-569e-4cde-91f4-951c6588fc7e",
-    }
-  ],
   "r2_buckets": [
     {
       "bucket_name": "kakiage-img",
