@@ -26,17 +26,18 @@ interface UploadImageResponse {
   api_key: string;
   eager: {
     bytes: number;
-    format: string; height: number;
+    format: string;
+    height: number;
     url: string;
     secure_url: string;
     transformation: string;
     width: number;
-  }[]
+  }[];
 }
 interface UploadImageErrorResponse {
   error: {
     message: string;
-  }
+  };
 }
 
 export const uploadImage = async (file: File, signData: SignDataType) => {
@@ -54,11 +55,11 @@ export const uploadImage = async (file: File, signData: SignDataType) => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json() as UploadImageErrorResponse;
+    const errorData = (await response.json()) as UploadImageErrorResponse;
     throw new Error(`Failed to upload image: ${errorData.error.message}`);
   }
 
-  const data = await response.json() as UploadImageResponse;
+  const data = (await response.json()) as UploadImageResponse;
   if (data.eager.length > 0) {
     return data.eager[0].secure_url;
   }

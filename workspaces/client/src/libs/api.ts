@@ -177,7 +177,7 @@ export const getImageUploadSign = async () => {
   if (res.ok && data.success) return data.data;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
   throw new ApiError("Failed to fetch", res.status);
-}
+};
 
 /* tags */
 
