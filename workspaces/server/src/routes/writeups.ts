@@ -313,7 +313,27 @@ const router = new Hono<Env>()
         }
       }
 
-      const html = await markdownToHtml(writeup.content);
+      const cache = caches.default;
+      const updatedAtTimestamp = writeup.updatedAt.getTime();
+      const cacheUrl = new URL(c.req.url);
+      cacheUrl.pathname = `/cache/writeup-html/${id}/${updatedAtTimestamp}`;
+      const cacheKey = new Request(cacheUrl.toString());
+
+      const response = await cache.match(cacheKey);
+      let html: string;
+
+      if (response) {
+        html = await response.text();
+      } else {
+        html = await markdownToHtml(writeup.content);
+        const cacheResponse = new Response(html, {
+          headers: {
+            'Cache-Control': 'public, max-age=3600',
+          },
+        });
+        c.executionCtx.waitUntil(cache.put(cacheKey, cacheResponse));
+      }
+
       return c.json(success(html), 200);
     },
   )
