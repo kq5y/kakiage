@@ -37,9 +37,8 @@ function WriteupDetailPage() {
   const isAdmin = user?.role === "admin";
   const canEdit = isAuthor || isAdmin;
 
-  if (isLoadingWriteup || isLoadingContent) return <div>Loading writeup...</div>;
+  if (isLoadingWriteup) return <div>Loading writeup...</div>;
   if (writeupError) return <div>Error loading writeup: {writeupError.message}</div>;
-  if (contentError) return <div>Error loading content: {contentError.message}</div>;
   if (!writeup) return <div>Writeup not found</div>;
 
   return (
@@ -104,8 +103,14 @@ function WriteupDetailPage() {
       </div>
 
       <div className="max-w-none">
-        {/** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */}
-        <div className="article" dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
+        {isLoadingContent ? (
+          <div>Loading content...</div>
+        ) : contentError ? (
+          <div>Error loading content: {contentError.message}</div>
+        ) : (
+          /** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */
+          <div className="article" dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
+        )}
       </div>
     </div>
   );
