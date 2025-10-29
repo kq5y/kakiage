@@ -1,11 +1,18 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { useAuth } from "@/hooks/useAuth";
-import { getCtfDetail } from "@/libs/api";
+import { ctfDetailQueryOptions } from "@/queries/ctfs";
 
 export const Route = createFileRoute("/ctfs/$ctfId/")({
   component: CtfDetailPage,
+  params: {
+    parse: ({ ctfId }) => ({ ctfId: Number(ctfId) }),
+  },
+  loader: async ({ context, params }) => {
+    return context.queryClient.ensureQueryData(ctfDetailQueryOptions(params.ctfId));
+  },
+  pendingComponent: () => <div>Loading CTF details...</div>,
+  errorComponent: ({ error }) => <div>Error loading CTF: {error.message}</div>,
 });
 
 const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
@@ -17,24 +24,10 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
 };
 
 function CtfDetailPage() {
-  const { ctfId } = Route.useParams();
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+  const { isAdmin } = useAuth();
+  const ctf = Route.useLoaderData();
 
-  const {
-    data: ctf,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["ctfs", ctfId],
-    queryFn: () => getCtfDetail(Number(ctfId)),
-  });
-
-  if (isLoading) return <div>Loading CTF details...</div>;
-  if (error) return <div>Error loading CTF: {error.message}</div>;
-  if (!ctf) return <div>CTF not found</div>;
-
-  const writeupsByCategory = ctf.writeups?.reduce(
+  const writeupsByCategory = ctf.writeups.reduce(
     (acc, writeup) => {
       const categoryId = writeup.category.id;
       if (!acc[categoryId]) {
@@ -53,7 +46,7 @@ function CtfDetailPage() {
         {isAdmin && (
           <Link
             to="/ctfs/$ctfId/edit"
-            params={{ ctfId }}
+            params={{ ctfId: ctf.id }}
             className="px-5 py-2 bg-gray-600 text-white rounded-lg shadow hover:bg-gray-700 transition-colors text-base"
           >
             Edit
@@ -87,7 +80,7 @@ function CtfDetailPage() {
         <h2 className="text-2xl font-bold mb-4">Writeups</h2>
         <Link
           to="/writeups/new"
-          search={{ ctfId: Number(ctfId) }}
+          search={{ ctfId: ctf.id }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors text-base"
         >
           Add
@@ -111,17 +104,16 @@ function CtfDetailPage() {
                     <Link
                       key={writeup.id}
                       to="/writeups/$writeupId"
-                      params={{ writeupId: writeup.id.toString() }}
+                      params={{ writeupId: writeup.id }}
                       className="block px-4 py-3 hover:bg-gray-50"
                     >
                       <div className="flex justify-between items-center">
                         <h3 className="font-medium">{writeup.title}</h3>
                         <div className="text-sm text-gray-500">
-                          by {writeup.createdByUser.name || "Unknown"} •{" "}
-                          {new Date(writeup.createdAt).toLocaleDateString()}
+                          by {writeup.createdByUser.name} • {new Date(writeup.createdAt).toLocaleDateString()}
                         </div>
                       </div>
-                      {writeup.tags && writeup.tags.length > 0 && (
+                      {writeup.tags.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
                           {writeup.tags.map((tag) => (
                             <span key={tag.id} className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded">

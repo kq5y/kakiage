@@ -34,7 +34,7 @@ function NewCtfPage() {
     mutationFn: createCtf,
     onSuccess: async (data, _variables, _onMutateResult, context) => {
       await context.client.invalidateQueries({ queryKey: ["ctfs"] });
-      navigate({ to: `/ctfs/$ctfId`, params: { ctfId: data.id.toString() } });
+      navigate({ to: "/ctfs/$ctfId", params: { ctfId: data.id } });
     },
   });
 

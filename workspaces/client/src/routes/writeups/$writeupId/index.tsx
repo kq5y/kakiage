@@ -2,45 +2,35 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { useAuth } from "@/hooks/useAuth";
-import { getWriteup, getWriteupContent } from "@/libs/api";
+import { writeupContentQueryOptions, writeupQueryOptions } from "@/queries/writeups";
 
 import "@/assets/article.scss";
 
 export const Route = createFileRoute("/writeups/$writeupId/")({
   component: WriteupDetailPage,
+  params: {
+    parse: ({ writeupId }) => ({ writeupId: Number(writeupId) }),
+  },
+  loader: async ({ params, context }) => {
+    const writeup = await context.queryClient.ensureQueryData(writeupQueryOptions(params.writeupId, false));
+    return { writeup };
+  },
+  pendingComponent: () => <div>Loading writeup...</div>,
+  errorComponent: ({ error }) => <div>Error loading writeup: {error.message}</div>,
 });
 
 function WriteupDetailPage() {
   const { writeupId } = Route.useParams();
-  const { user } = useAuth();
-
-  const {
-    data: writeup,
-    isLoading: isLoadingWriteup,
-    error: writeupError,
-  } = useQuery({
-    queryKey: ["writeups", writeupId, { includeContent: false }],
-    queryFn: () => getWriteup(Number(writeupId)),
-  });
+  const { user, isAdmin } = useAuth();
+  const { writeup } = Route.useLoaderData();
 
   const {
     data: content,
     isLoading: isLoadingContent,
     error: contentError,
-  } = useQuery({
-    queryKey: ["writeups", writeupId, "content"],
-    queryFn: () => getWriteupContent(Number(writeupId)),
-    enabled: !!writeup,
-  });
+  } = useQuery(writeupContentQueryOptions(writeupId));
 
-  const isAuthor = user?.id === writeup?.createdByUser.id;
-  const isAdmin = user?.role === "admin";
-  const canEdit = isAuthor || isAdmin;
-
-  if (isLoadingWriteup) return <div>Loading writeup...</div>;
-  if (writeupError) return <div>Error loading writeup: {writeupError.message}</div>;
-  if (!writeup) return <div>Writeup not found</div>;
-
+  const canEdit = user?.id === writeup.createdByUser.id || isAdmin;
   return (
     <div className="max-w-xl w-full px-2">
       <div>
@@ -86,7 +76,7 @@ function WriteupDetailPage() {
         <div className="flex flex-wrap gap-1 mb-2">
           <Link
             to="/ctfs/$ctfId"
-            params={{ ctfId: writeup.ctf.id.toString() }}
+            params={{ ctfId: writeup.ctf.id }}
             className="text-sm px-2 py-1 bg-blue-100 text-blue-800 rounded hover:bg-blue-200"
           >
             {writeup.ctf.name}
@@ -94,7 +84,7 @@ function WriteupDetailPage() {
 
           <span className="text-sm px-2 py-1 bg-purple-100 text-purple-800 rounded">{writeup.category.name}</span>
 
-          {writeup.tags?.map((tag) => (
+          {writeup.tags.map((tag) => (
             <span key={tag.id} className="text-sm px-2 py-1 bg-gray-100 text-gray-800 rounded">
               {tag.name}
             </span>

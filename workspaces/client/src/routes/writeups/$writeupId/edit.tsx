@@ -1,22 +1,17 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
 import MarkdownEditor from "@/components/MarkdownEditor";
-import { useAuth } from "@/hooks/useAuth";
-import {
-  addWriteupTag,
-  getCategories,
-  getWriteup,
-  getWriteupTags,
-  removeWriteupTag,
-  updateWriteup,
-  updateWriteupContent,
-  uploadImage,
-} from "@/libs/api";
+import { addWriteupTag, removeWriteupTag, updateWriteup, updateWriteupContent, uploadImage } from "@/libs/api";
+import { categoriesQueryOptions } from "@/queries/categories";
+import { writeupQueryOptions, writeupTagsQueryOptions } from "@/queries/writeups";
 
 export const Route = createFileRoute("/writeups/$writeupId/edit")({
   component: EditWriteupPage,
+  params: {
+    parse: ({ writeupId }) => ({ writeupId: Number(writeupId) }),
+  },
   beforeLoad: async ({ context }) => {
     await context.auth.ensureLoaded();
 
@@ -27,52 +22,33 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
 
     return {};
   },
+  loader: async ({ params, context }) => {
+    const writeup = await context.queryClient.ensureQueryData(writeupQueryOptions(params.writeupId, true));
+    const user = context.auth.getUser();
+    if (user && user.id !== writeup.createdByUser.id && user.role !== "admin") {
+      throw redirect({ to: "/writeups/$writeupId", params: { writeupId: params.writeupId } });
+    }
+
+    const categories = await context.queryClient.ensureQueryData(categoriesQueryOptions);
+    const tags = await context.queryClient.ensureQueryData(writeupTagsQueryOptions(params.writeupId));
+    return { writeup, categories, tags };
+  },
+  pendingComponent: () => <div>Loading...</div>,
+  errorComponent: ({ error }) => <div>Error: {(error as Error).message}</div>,
 });
 
 function EditWriteupPage() {
   const { writeupId } = Route.useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { writeup, categories, tags } = Route.useLoaderData();
 
   const [formData, setFormData] = useState({
-    title: "",
-    categoryId: "",
+    title: writeup.title,
+    categoryId: String(writeup.category.id),
   });
 
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(writeup.content || "");
   const [newTagName, setNewTagName] = useState("");
-  const [originalAuthorId, setOriginalAuthorId] = useState("");
-
-  const { data: writeup, isLoading: isLoadingWriteup } = useQuery({
-    queryKey: ["writeups", writeupId, { includeContent: true }],
-    queryFn: () => getWriteup(Number(writeupId), true),
-  });
-
-  useEffect(() => {
-    if (!writeup) return;
-    setFormData({
-      title: writeup.title,
-      categoryId: String(writeup.category.id),
-    });
-    setContent(writeup.content || "");
-    setOriginalAuthorId(writeup.createdByUser.id);
-  }, [writeup]);
-
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
-    queryFn: getCategories,
-  });
-
-  const { data: tags } = useQuery({
-    queryKey: ["writeups", writeupId, "tags"],
-    queryFn: () => getWriteupTags(Number(writeupId)),
-  });
-
-  useEffect(() => {
-    if (user && originalAuthorId && user.id !== originalAuthorId && user.role !== "admin") {
-      navigate({ to: `/writeups/$writeupId`, params: { writeupId } });
-    }
-  }, [user, originalAuthorId, writeupId, navigate]);
 
   const handleImageUpload = useCallback(async (file: File): Promise<string> => {
     try {
@@ -86,27 +62,27 @@ function EditWriteupPage() {
 
   const updateWriteupMutation = useMutation({
     mutationFn: (data: typeof formData) =>
-      updateWriteup(Number(writeupId), {
+      updateWriteup(writeupId, {
         ...data,
         categoryId: Number(data.categoryId),
       }),
     onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId.toString()] });
+      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId] });
       await context.client.invalidateQueries({ queryKey: ["writeups", writeupId] });
       updateContentMutation.mutate(content);
     },
   });
 
   const updateContentMutation = useMutation({
-    mutationFn: (content: string) => updateWriteupContent(Number(writeupId), { content }),
+    mutationFn: (content: string) => updateWriteupContent(writeupId, { content }),
     onSuccess: async (_data, _variables, _onMutateResult, context) => {
       await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "content"] });
-      navigate({ to: `/writeups/$writeupId`, params: { writeupId } });
+      navigate({ to: "/writeups/$writeupId", params: { writeupId } });
     },
   });
 
   const addTagMutation = useMutation({
-    mutationFn: (tagName: string) => addWriteupTag(Number(writeupId), { name: tagName }),
+    mutationFn: (tagName: string) => addWriteupTag(writeupId, { name: tagName }),
     onSuccess: async (_data, _variables, _onMutateResult, context) => {
       await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
       setNewTagName("");
@@ -114,7 +90,7 @@ function EditWriteupPage() {
   });
 
   const removeTagMutation = useMutation({
-    mutationFn: (tagId: number) => removeWriteupTag(Number(writeupId), { id: tagId }),
+    mutationFn: (tagId: number) => removeWriteupTag(writeupId, { id: tagId }),
     onSuccess: async (_data, _variables, _onMutateResult, context) => {
       await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
     },
@@ -149,8 +125,6 @@ function EditWriteupPage() {
     }
   };
 
-  if (isLoadingWriteup) return <div>Loading writeup...</div>;
-
   return (
     <div className="max-w-dvw w-full flex-1 min-h-0 flex flex-col">
       <form onSubmit={handleSubmit} className="space-y-6 mb-2">
@@ -182,7 +156,7 @@ function EditWriteupPage() {
                 required
                 className="px-2 py-1 border rounded-md"
               >
-                {categories?.map((category) => (
+                {categories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>
@@ -190,7 +164,7 @@ function EditWriteupPage() {
               </select>
             </div>
             <div className="flex flex-wrap items-center gap-2 p-1 border rounded-md flex-grow">
-              {tags?.map((tag) => (
+              {tags.map((tag) => (
                 <span
                   key={tag.id}
                   className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700"
@@ -206,7 +180,7 @@ function EditWriteupPage() {
                   </button>
                 </span>
               ))}
-              {tags && tags.length < 10 && (
+              {tags.length < 10 && (
                 <input
                   type="text"
                   name="newTag"
