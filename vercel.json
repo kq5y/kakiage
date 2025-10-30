@@ -4,10 +4,19 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "workspaces/client/dist",
   "installCommand": "pnpm install",
+  "functions": {
+    "workspaces/server/src/index.ts": {
+      "maxDuration": 10
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/workspaces/server/src"
+      "destination": "/workspaces/server/src/index"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }
