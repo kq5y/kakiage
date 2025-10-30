@@ -1,13 +1,15 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { env } from "hono/adapter";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { sign } from "hono/jwt";
 import { z } from "zod";
 
-import { getDB } from "@/db/client";
-import { inviteTokens, users } from "@/db/schema";
-import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from "@/libs/discord";
-import { withValidates } from "@/middlewares/validate";
+import { getDB } from "../db/client.js";
+import { inviteTokens, users } from "../db/schema.js";
+import { getAvatarUrl, getDiscordToken, getDiscordUser, makeRedirectUrl } from "../libs/discord.js";
+import { withValidates } from "../middlewares/validate.js";
+import type { Env } from "../types.js";
 
 const SESSION_EXPIRE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
@@ -30,7 +32,7 @@ const router = new Hono<Env>()
   .post("/login", withValidates({ form: tokenFormSchema }, makeAppUrl), async c => {
     const inviteToken = c.req.valid("form").inviteToken || "";
 
-    const redirectUri = makeRedirectUrl(c.env, inviteToken);
+    const redirectUri = makeRedirectUrl(env(c), inviteToken);
     return c.redirect(redirectUri);
   })
   .get("/callback", withValidates({ query: callbackQuerySchema }, makeAppUrl), async c => {
@@ -49,7 +51,7 @@ const router = new Hono<Env>()
     }
 
     try {
-      const token = await getDiscordToken(c.env, code);
+      const token = await getDiscordToken(env(c), code);
       if (!token) {
         return c.redirect(makeAppUrl("Failed to get Discord token"));
       }
@@ -59,7 +61,9 @@ const router = new Hono<Env>()
         return c.redirect(makeAppUrl("Failed to get Discord user"));
       }
 
-      const db = getDB(c.env);
+      const environment = env(c);
+
+      const db = getDB(environment);
       const user = await db.query.users.findFirst({
         where: (users, { eq }) => eq(users.id, discordUser.id),
       });
@@ -70,7 +74,7 @@ const router = new Hono<Env>()
             exp: Math.floor(Date.now() / 1000) + SESSION_EXPIRE_SECONDS,
             data: { id: user.id },
           },
-          c.env.JWT_SECRET,
+          environment.JWT_SECRET,
           "HS256",
         );
 
@@ -121,7 +125,7 @@ const router = new Hono<Env>()
             exp: Math.floor(Date.now() / 1000) + SESSION_EXPIRE_SECONDS,
             data: { id: discordUser.id },
           },
-          c.env.JWT_SECRET,
+          environment.JWT_SECRET,
           "HS256",
         );
 

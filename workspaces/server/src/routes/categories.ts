@@ -1,12 +1,14 @@
 import { DrizzleQueryError, eq } from "drizzle-orm";
 import { type Context, Hono } from "hono";
+import { env } from "hono/adapter";
 import { z } from "zod";
 
-import { getDB } from "@/db/client";
-import { categories } from "@/db/schema";
-import { error, success } from "@/libs/response";
-import { withAuth } from "@/middlewares/auth";
-import { withValidates } from "@/middlewares/validate";
+import { getDB } from "../db/client.js";
+import { categories } from "../db/schema.js";
+import { error, success } from "../libs/response.js";
+import { withAuth } from "../middlewares/auth.js";
+import { withValidates } from "../middlewares/validate.js";
+import type { Env } from "../types.js";
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
 const categoryBodySchema = z.object({
@@ -24,12 +26,12 @@ const handleCategoryDbError = (c: Context, e: unknown, action: "create" | "updat
 
 const router = new Hono<Env>()
   .get("/", async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const list = await db.query.categories.findMany();
     return c.json(success(list), 200);
   })
   .post("/", withAuth(true, true), withValidates({ json: categoryBodySchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const { name, color } = c.req.valid("json");
     try {
       const [category] = await db.insert(categories).values({ name, color }).returning();
@@ -39,7 +41,7 @@ const router = new Hono<Env>()
     }
   })
   .patch("/:id", withAuth(true, true), withValidates({ param: idParamSchema, json: categoryBodySchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const id = Number(c.req.valid("param").id);
     const { name, color } = c.req.valid("json");
     try {
@@ -53,7 +55,7 @@ const router = new Hono<Env>()
     }
   })
   .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const id = Number(c.req.valid("param").id);
     const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();
     if (deleted.length === 0) {

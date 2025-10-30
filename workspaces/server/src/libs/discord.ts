@@ -1,3 +1,5 @@
+import type { Bindings } from "../types.js";
+
 export const makeRedirectUrl = (env: Bindings, inviteToken: string) => {
   const url = new URL("https://discord.com/oauth2/authorize");
   url.searchParams.set("client_id", env.DISCORD_CLIENT_ID);
@@ -31,17 +33,17 @@ export const getDiscordToken = async (env: Bindings, code: string) => {
   });
 
   if (!response.ok) {
-    console.log(await response.text(), env.DISCORD_CLIENT_ID, env.DISCORD_CLIENT_SECRET);
+    console.log(await response.text());
     throw new Error(`Failed to fetch Discord token: ${response.statusText}`);
   }
 
-  const data = await response.json<{
+  const data = (await response.json()) as {
     access_token: string;
     token_type: string;
     expires_in: number;
     refresh_token: string;
     scope: string;
-  }>();
+  };
   return data.access_token;
 };
 
@@ -57,11 +59,11 @@ export const getDiscordUser = async (token: string) => {
     throw new Error(`Failed to fetch Discord user: ${response.statusText}`);
   }
 
-  const data = await response.json<{
+  const data = (await response.json()) as {
     id: string;
     username: string;
     avatar: string | null;
     verified: boolean;
-  }>();
+  };
   return data;
 };

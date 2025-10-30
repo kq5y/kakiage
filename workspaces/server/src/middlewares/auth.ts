@@ -1,21 +1,23 @@
 import type { Input } from "hono";
+import { env } from "hono/adapter";
 import { deleteCookie, getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
 import { verify } from "hono/jwt";
 
-import { getDB } from "@/db/client";
-import type { User } from "@/db/schema";
-import { error, type JsonErrorResponse } from "@/libs/response";
+import { getDB } from "../db/client.js";
+import type { User } from "../db/schema.js";
+import { error, type JsonErrorResponse } from "../libs/response.js";
+import type { Env } from "../types.js";
 
 export type HasUser<L extends boolean = true, A extends boolean = false> = {
   Variables: {
     user: L extends true
-      ? A extends true
-        ? User & { role: "admin" }
-        : User
-      : A extends true
-        ? (User & { role: "admin" }) | null
-        : User | null;
+    ? A extends true
+    ? User & { role: "admin" }
+    : User
+    : A extends true
+    ? (User & { role: "admin" }) | null
+    : User | null;
   };
 };
 
@@ -36,7 +38,7 @@ export function withAuth<
     let userId: string | null = null;
     if (token) {
       try {
-        const decoded = await verify(token, c.env.JWT_SECRET, "HS256");
+        const decoded = await verify(token, env(c).JWT_SECRET, "HS256");
         userId = (decoded.data as { id?: string })?.id ?? null;
       } catch (err) {
         console.error("JWT verification failed:", err);
@@ -50,7 +52,7 @@ export function withAuth<
 
     let user: User | null = null;
     if (userId) {
-      const db = getDB(c.env);
+      const db = getDB(env(c));
       user =
         (await db.query.users.findFirst({
           where: (users, { eq }) => eq(users.id, userId),

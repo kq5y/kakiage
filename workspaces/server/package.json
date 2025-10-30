@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.9.2",
-    "dotenv": "^17.2.3",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.5",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
@@ -37,7 +37,7 @@
   },
   "wireit": {
     "build:rpc": {
-      "command": "tsup ./src/rpc.ts --dts --format esm --tsconfig ./tsconfig.vercel.json",
+      "command": "tsup ./src/rpc.ts --dts --format esm",
       "files": [
         "src"
       ],
@@ -49,7 +49,7 @@
       ]
     },
     "watch:rpc": {
-      "command": "tsup ./src/rpc.ts --watch --dts --format esm --tsconfig ./tsconfig.vercel.json",
+      "command": "tsup ./src/rpc.ts --watch --dts --format esm",
       "service": {
         "readyWhen": {
           "lineMatches": ".*DTS.*Build success in \\d+.*"
@@ -72,15 +72,13 @@
       ],
       "files": [
         "../client/dist",
-        "src",
-        "vercel.json"
+        "src"
       ]
     },
     "deploy": {
       "command": "vercel deploy",
       "files": [
-        "dist",
-        "vercel.json"
+        "dist"
       ],
       "dependencies": [
         "../../:build"
@@ -90,16 +88,10 @@
       "command": "drizzle-kit generate"
     },
     "db:migrate:dev": {
-      "command": "drizzle-kit migrate",
-      "env": {
-        "ENV": "development"
-      }
+      "command": "dotenv -e .env -- drizzle-kit migrate"
     },
     "db:migrate:prod": {
-      "command": "drizzle-kit migrate",
-      "env": {
-        "ENV": "production"
-      }
+      "command": "dotenv -e .env.production -- drizzle-kit migrate"
     }
   }
 }

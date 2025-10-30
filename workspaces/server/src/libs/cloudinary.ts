@@ -1,5 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 
+import type { Bindings } from "../types.js";
+
 const EAGER_TRANSFORMATION = "w_1000,c_limit,f_avif,q_auto";
 const FOLDER_NAME = "kakiage-img";
 

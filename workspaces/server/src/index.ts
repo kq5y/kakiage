@@ -1,13 +1,14 @@
 import { Hono } from "hono";
 
-import { error } from "@/libs/response";
-import { router as authRouter } from "@/routes/auth";
-import { router as categoriesRouter } from "@/routes/categories";
-import { router as ctfsRouter } from "@/routes/ctfs";
-import { router as imagesRouter } from "@/routes/images";
-import { router as tagsRouter } from "@/routes/tags";
-import { router as usersRouter } from "@/routes/users";
-import { router as writeupsRouter } from "@/routes/writeups";
+import { error } from "./libs/response.js";
+import { router as authRouter } from "./routes/auth.js";
+import { router as categoriesRouter } from "./routes/categories.js";
+import { router as ctfsRouter } from "./routes/ctfs.js";
+import { router as imagesRouter } from "./routes/images.js";
+import { router as tagsRouter } from "./routes/tags.js";
+import { router as usersRouter } from "./routes/users.js";
+import { router as writeupsRouter } from "./routes/writeups.js";
+import type { Env } from "./types.js";
 
 const app = new Hono<Env>()
   .route("/api/v1/auth", authRouter)

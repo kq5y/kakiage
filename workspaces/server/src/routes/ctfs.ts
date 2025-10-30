@@ -1,12 +1,14 @@
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { env } from "hono/adapter";
 import { z } from "zod";
 
-import { getDB } from "@/db/client";
-import { ctfs } from "@/db/schema";
-import { error, success } from "@/libs/response";
-import { withAuth } from "@/middlewares/auth";
-import { withValidates } from "@/middlewares/validate";
+import { getDB } from "../db/client.js";
+import { ctfs } from "../db/schema.js";
+import { error, success } from "../libs/response.js";
+import { withAuth } from "../middlewares/auth.js";
+import { withValidates } from "../middlewares/validate.js";
+import type { Env } from "../types.js";
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
 const ctfSearchQuerySchema = z.object({
@@ -24,7 +26,7 @@ const ctfBodySchema = z.object({
 
 const router = new Hono<Env>()
   .get("/", withValidates({ query: ctfSearchQuerySchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const { pageSize, page, sortKey, sortOrder } = c.req.valid("query");
 
     const list = await db.query.ctfs.findMany({
@@ -37,7 +39,7 @@ const router = new Hono<Env>()
     return c.json(success(list), 200);
   })
   .post("/", withAuth(true), withValidates({ json: ctfBodySchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const { name, url, startAt, endAt } = c.req.valid("json");
     const [ctf] = await db
       .insert(ctfs)
@@ -51,7 +53,7 @@ const router = new Hono<Env>()
     return c.json(success(ctf), 201);
   })
   .get("/:id", withValidates({ param: idParamSchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const id = Number(c.req.valid("param").id);
     const ctf = await db.query.ctfs.findFirst({
       where: eq(ctfs.id, id),
@@ -89,7 +91,7 @@ const router = new Hono<Env>()
     return c.json(success(ctfWithTags), 200);
   })
   .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: ctfBodySchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const id = Number(c.req.valid("param").id);
     const { name, url, startAt, endAt } = c.req.valid("json");
     const [ctf] = await db
@@ -108,7 +110,7 @@ const router = new Hono<Env>()
     return c.json(success(ctf), 200);
   })
   .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async c => {
-    const db = getDB(c.env);
+    const db = getDB(env(c));
     const id = Number(c.req.valid("param").id);
     const deleted = await db.delete(ctfs).where(eq(ctfs.id, id)).returning();
     if (deleted.length === 0) {

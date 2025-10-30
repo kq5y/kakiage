@@ -1,4 +1,4 @@
-type Bindings = {
+export type Bindings = {
   JWT_SECRET: string;
   DISCORD_CLIENT_ID: string;
   DISCORD_CLIENT_SECRET: string;
@@ -10,4 +10,4 @@ type Bindings = {
   TURSO_AUTH_TOKEN: string;
 };
 
-type Env = { Bindings: Bindings };
+export type Env = { Bindings: Bindings };

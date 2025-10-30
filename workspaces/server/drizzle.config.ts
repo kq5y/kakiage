@@ -1,10 +1,4 @@
-import dotenv from "dotenv";
 import { defineConfig } from "drizzle-kit";
-
-const currentEnv = process.env.ENV ?? "development";
-dotenv.config({
-  path: currentEnv === "production" ? ".prod.vars" : ".dev.vars",
-});
 
 const { TURSO_CONNECTION_URL, TURSO_AUTH_TOKEN } = process.env;
 

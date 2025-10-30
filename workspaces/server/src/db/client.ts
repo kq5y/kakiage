@@ -1,7 +1,8 @@
 import { createClient } from "@libsql/client";
 import { drizzle } from "drizzle-orm/libsql";
 
-import * as schema from "./schema";
+import type { Bindings } from "../types.js";
+import * as schema from "./schema.js";
 
 export const getDB = (env: Bindings) => {
   const client = createClient({
