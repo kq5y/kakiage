@@ -4,16 +4,6 @@
   "buildCommand": "pnpm run build",
   "outputDirectory": "workspaces/client/dist",
   "installCommand": "pnpm install",
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/workspaces/server/src/index"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "destination": "/index.html"
-    }
-  ],
   "builds": [
     {
       "src": "workspaces/server/src/index.ts",
