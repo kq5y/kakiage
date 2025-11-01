@@ -1,5 +1,5 @@
-import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
-import rehypeExpressiveCode from "rehype-expressive-code";
+import rehypeCodeTitles from "rehype-code-titles";
+import rehypePrism from "rehype-prism-plus";
 import rehypeSanitize from "rehype-sanitize";
 import rehypeStringify from "rehype-stringify";
 import remarkGfm from "remark-gfm";
@@ -12,13 +12,8 @@ const processor = unified()
   .use(remarkGfm)
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeSanitize)
-  .use(rehypeExpressiveCode, {
-    themes: ["github-light"],
-    plugins: [pluginLineNumbers()],
-    shiki: {
-      engine: "javascript",
-    },
-  })
+  .use(rehypeCodeTitles, { customClassName: "code-title" })
+  .use(rehypePrism, { ignoreMissing: true })
   .use(rehypeStringify);
 
 export async function markdownToHtml(markdown: string): Promise<string> {

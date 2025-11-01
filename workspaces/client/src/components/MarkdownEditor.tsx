@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { getImageUploadSign } from "@/libs/api";
 import { uploadImage } from "@/libs/cloudinary";
 
-import "@/assets/article.scss";
+import Article from "./Article";
 
 interface MarkdownEditorProps {
   value: string;
@@ -95,11 +95,7 @@ export default function MarkdownEditor({ value, onChange }: MarkdownEditorProps)
             <span>Preview</span>
           </div>
           <div className="w-full flex-1 min-h-0 p-3 overflow-y-auto">
-            <div
-              className="w-full max-w-none article"
-              // biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized content
-              dangerouslySetInnerHTML={{ __html: renderedHtml }}
-            />
+            <Article className="w-full max-w-none" value={renderedHtml} />
           </div>
         </div>
       </div>

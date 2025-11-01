@@ -1,10 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+import Article from "@/components/Article";
 import { useAuth } from "@/hooks/useAuth";
 import { writeupContentQueryOptions, writeupQueryOptions } from "@/queries/writeups";
-
-import "@/assets/article.scss";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/$writeupId/")({
@@ -101,8 +100,7 @@ function WriteupDetailPage() {
         ) : contentError ? (
           <div>Error loading content: {contentError.message}</div>
         ) : (
-          /** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */
-          <div className="article" dangerouslySetInnerHTML={{ __html: content || "<p>No content available</p>" }} />
+          <Article value={content || "<p>No content available</p>"} />
         )}
       </div>
     </div>

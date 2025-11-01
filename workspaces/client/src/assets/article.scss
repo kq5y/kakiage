@@ -144,6 +144,62 @@
     font-size: 0.875rem;
   }
 
+  pre:has(> code) {
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow: auto;
+    margin: 1.5rem 0;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 5px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 999px;
+    }
+
+    code {
+      display: block;
+      font-family: "Consolas", "Liberation Mono", "Courier New", monospace;
+      tab-size: 2;
+      white-space: pre;
+    }
+  }
+
+  .code-title {
+    margin-bottom: 0;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+    background-color: #f1f5f9;
+    color: #475569;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+    font-family: "Consolas", "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    border: 1px solid #ddd;
+    border-bottom: none;
+
+    +pre {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      margin-top: 0;
+      border-top: none;
+    }
+  }
+
   svg,
   img {
     margin: 1.5rem auto;
