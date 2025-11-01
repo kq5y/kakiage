@@ -147,7 +147,6 @@ function EditWriteupPageInner({ writeup, categories }: { writeup: WriteupDetail;
     mutationFn: (content: string) => updateWriteupContent(writeup.id, { content }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeup.id, true) });
-      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.content(writeup.id) });
       navigate({ to: "/writeups/$writeupId", params: { writeupId: writeup.id } });
     },
   });
