@@ -1,5 +1,5 @@
 import type { Category } from "@kakiage/server/rpc";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -124,6 +124,7 @@ function CategoryForm<T>({
 }
 
 function CategoriesPage() {
+  const queryClient = useQueryClient();
   const categories = Route.useLoaderData();
 
   const [formMode, setFormMode] = useState<"add" | "edit" | "closed">("closed");
@@ -133,24 +134,24 @@ function CategoriesPage() {
 
   const createCategoryMutation = useMutation({
     mutationFn: createCategory,
-    onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: categoriesQueryKeys.all });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
       setNewCategory({ name: "", color: "" });
     },
   });
 
   const updateCategoryMutation = useMutation({
     mutationFn: (category: Category) => updateCategory(category.id, category),
-    onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: categoriesQueryKeys.all });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
       setEditingCategory(null);
     },
   });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
-    onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: categoriesQueryKeys.all });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
     },
   });
 

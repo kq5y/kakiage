@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -39,6 +39,7 @@ export const Route = createFileRoute("/writeups/new")({
 });
 
 function NewWriteupPage() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { ctfs, categories } = Route.useLoaderData();
   const { ctfId: ctfIdFromSearch } = Route.useSearch();
@@ -55,8 +56,8 @@ function NewWriteupPage() {
 
   const createWriteupMutation = useMutation({
     mutationFn: createWriteup,
-    onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
+    onSuccess: async data => {
+      await queryClient.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
       navigate({ to: "/writeups/$writeupId/edit", params: { writeupId: data.id } });
     },
   });

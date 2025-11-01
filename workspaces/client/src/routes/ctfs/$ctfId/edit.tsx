@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -35,6 +35,7 @@ export const Route = createFileRoute("/ctfs/$ctfId/edit")({
 });
 
 function EditCtfPage() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const ctf = Route.useLoaderData();
@@ -47,8 +48,8 @@ function EditCtfPage() {
 
   const updateCtfMutation = useMutation({
     mutationFn: (data: Parameters<typeof updateCtf>[1]) => updateCtf(ctf.id, data),
-    onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ctfsQueryKeys.detail(ctf.id) });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ctfsQueryKeys.detail(ctf.id) });
       navigate({ to: "/ctfs/$ctfId", params: { ctfId: ctf.id } });
     },
   });

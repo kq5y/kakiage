@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -43,6 +43,7 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
 });
 
 function EditWriteupPage() {
+  const queryClient = useQueryClient();
   const { writeupId } = Route.useParams();
   const navigate = useNavigate();
   const { writeup, categories, tags } = Route.useLoaderData();
@@ -61,34 +62,34 @@ function EditWriteupPage() {
         ...data,
         categoryId: Number(data.categoryId),
       }),
-    onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
-      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeupId) });
+    onSuccess: async data => {
+      await queryClient.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeupId) });
       updateContentMutation.mutate(content);
     },
   });
 
   const updateContentMutation = useMutation({
     mutationFn: (content: string) => updateWriteupContent(writeupId, { content }),
-    onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeupId, true) });
-      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.content(writeupId) });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeupId, true) });
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.content(writeupId) });
       navigate({ to: "/writeups/$writeupId", params: { writeupId } });
     },
   });
 
   const addTagMutation = useMutation({
     mutationFn: (tagName: string) => addWriteupTag(writeupId, { name: tagName }),
-    onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
       setNewTagName("");
     },
   });
 
   const removeTagMutation = useMutation({
     mutationFn: (tagId: number) => removeWriteupTag(writeupId, { id: tagId }),
-    onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
     },
   });
 
