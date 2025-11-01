@@ -4,15 +4,15 @@ const FOLDER_NAME = "kakiage-img";
 const computeHash = async (input: string, algorithm: string = "SHA-1") => {
   const digest = await crypto.subtle.digest(algorithm, new TextEncoder().encode(input));
   return Array.from(new Uint8Array(digest))
-    .map((b) => b.toString(16).padStart(2, "0"))
+    .map(b => b.toString(16).padStart(2, "0"))
     .join("");
-}
+};
 
 const generateSignature = async (params: Record<string, string | number>, apiSecret: string) => {
   const sortedKeys = Object.keys(params).sort();
-  const toSign = sortedKeys.map((key) => `${key}=${params[key]}`).join("&") + apiSecret;
+  const toSign = sortedKeys.map(key => `${key}=${params[key]}`).join("&") + apiSecret;
   return await computeHash(toSign);
-}
+};
 
 const getSignature = async (env: Bindings) => {
   const timestamp = Math.round(Date.now() / 1000);

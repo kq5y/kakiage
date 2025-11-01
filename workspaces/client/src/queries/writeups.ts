@@ -4,7 +4,8 @@ import { getWriteup, getWriteupContent, getWriteups, getWriteupTags } from "@/li
 
 export const writeupsQueryKeys = {
   all: ["writeups"] as const,
-  detail: (writeupId: number, includeContent: boolean = false) => ["writeups", writeupId, ...(includeContent ? ["with-content"] : [])] as const,
+  detail: (writeupId: number, includeContent: boolean = false) =>
+    ["writeups", writeupId, ...(includeContent ? ["with-content"] : [])] as const,
   tags: (writeupId: number) => ["writeups", writeupId, "tags"] as const,
   content: (writeupId: number) => ["writeups", writeupId, "content"] as const,
 };
