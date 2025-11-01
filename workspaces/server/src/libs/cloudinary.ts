@@ -11,12 +11,12 @@ const computeHash = async (input: string, algorithm: string = "SHA-1") => {
 const generateSignature = async (params: Record<string, string | number>, apiSecret: string) => {
   const sortedKeys = Object.keys(params).sort();
   const toSign = sortedKeys.map((key) => `${key}=${params[key]}`).join("&") + apiSecret;
-  return computeHash(toSign);
+  return await computeHash(toSign);
 }
 
-const getSignature = (env: Bindings) => {
+const getSignature = async (env: Bindings) => {
   const timestamp = Math.round(Date.now() / 1000);
-  const signature = generateSignature(
+  const signature = await generateSignature(
     {
       timestamp,
       eager: EAGER_TRANSFORMATION,
@@ -27,8 +27,8 @@ const getSignature = (env: Bindings) => {
   return { timestamp, signature };
 };
 
-export const getUploadSignData = (env: Bindings) => {
-  const sig = getSignature(env);
+export const getUploadSignData = async (env: Bindings) => {
+  const sig = await getSignature(env);
   return {
     data: {
       signature: sig.signature,
