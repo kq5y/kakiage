@@ -29,8 +29,9 @@ export const Route = createFileRoute("/writeups/new")({
     };
   },
   loader: async ({ context }) => {
-    const ctfs = await context.queryClient.ensureQueryData(ctfsQueryOptions());
-    const categories = await context.queryClient.ensureQueryData(categoriesQueryOptions);
+    const ctfsPromise = context.queryClient.ensureQueryData(ctfsQueryOptions());
+    const categoriesPromise = context.queryClient.ensureQueryData(categoriesQueryOptions);
+    const [ctfs, categories] = await Promise.all([ctfsPromise, categoriesPromise]);
     return { ctfs, categories };
   },
   head: () => ({
