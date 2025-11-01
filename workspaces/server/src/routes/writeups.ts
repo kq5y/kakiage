@@ -8,6 +8,7 @@ import { tags, writeups, writeupToTags } from "@/db/schema";
 import { error, success } from "@/libs/response";
 import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
+import { getHashHex } from "@/utils/hash";
 
 const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
 const writeupsSearchQuerySchema = z.object({
@@ -56,13 +57,6 @@ const writeupTagDeleteSchema = z.object({
 const writeupPasswordHeaderSchema = z.object({
   "x-password": z.string().min(1).optional(),
 });
-
-async function getHash(text: string): Promise<string> {
-  const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(hashBuffer))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
-}
 
 const router = new Hono<Env>()
   .get("/", withValidates({ query: writeupsSearchQuerySchema }), async c => {
@@ -144,7 +138,7 @@ const router = new Hono<Env>()
         categoryId: categoryId,
         points: points,
         solvers: solvers,
-        password: password ? await getHash(password) : undefined,
+        password: password ? await getHashHex(password) : undefined,
         createdBy: user.id,
       })
       .returning();
@@ -306,7 +300,7 @@ const router = new Hono<Env>()
           if (!password) {
             return c.json(error("Unauthorized"), 403);
           }
-          const hash = await getHash(password);
+          const hash = await getHashHex(password);
           if (hash !== writeup.password) {
             return c.json(error("Unauthorized"), 403);
           }
@@ -361,7 +355,7 @@ const router = new Hono<Env>()
         categoryId,
         points,
         solvers,
-        password: password ? await getHash(password) : undefined,
+        password: password ? await getHashHex(password) : undefined,
       })
       .where(eq(writeups.id, id))
       .returning();
