@@ -19,11 +19,9 @@ export default function MarkdownEditor({ value, onChange }: MarkdownEditorProps)
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useDebounce(
-    () => {
-      (async () => {
-        const html = await markdownToHtml(value);
-        setRenderedHtml(html);
-      })();
+    async () => {
+      const html = await markdownToHtml(value);
+      setRenderedHtml(html);
     },
     500,
     [value],

@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { type DependencyList, useEffect, useRef } from "react";
 
-export function useDebounce(fn: (...rest: unknown[]) => unknown, ms = 300, deps: unknown[] = []) {
+export function useDebounce(fn: () => void, ms = 300, deps: DependencyList = []) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -17,6 +17,5 @@ export function useDebounce(fn: (...rest: unknown[]) => unknown, ms = 300, deps:
         clearTimeout(timeoutRef.current);
       }
     };
-    // biome-ignore lint/correctness/useExhaustiveDependencies: deps are managed by the caller
-  }, deps);
+  }, [...deps, ms, fn]);
 }
