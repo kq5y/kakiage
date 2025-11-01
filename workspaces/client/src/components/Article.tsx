@@ -10,6 +10,6 @@ interface ArticleProps {
 export default function Article({ value, className }: ArticleProps) {
   return (
     /** biome-ignore lint/security/noDangerouslySetInnerHtml: sanitized */
-    <div className={`article ${className}`} dangerouslySetInnerHTML={{ __html: value }} />
+    <div className={`article ${className || ""}`} dangerouslySetInnerHTML={{ __html: value }} />
   );
 }
