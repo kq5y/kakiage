@@ -1,10 +1,10 @@
 import type { Category } from "@kakiage/server/rpc";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { createCategory, deleteCategory, updateCategory } from "@/libs/api";
-import { categoriesQueryOptions } from "@/queries/categories";
+import { categoriesQueryKeys, categoriesQueryOptions } from "@/queries/categories";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/categories/")({
@@ -19,8 +19,6 @@ export const Route = createFileRoute("/categories/")({
     if (user.role !== "admin") {
       throw redirect({ to: "/" });
     }
-
-    return {};
   },
   loader: ({ context }) => {
     return context.queryClient.ensureQueryData(categoriesQueryOptions);
@@ -124,7 +122,8 @@ function CategoryForm<T>({
 }
 
 function CategoriesPage() {
-  const categories = Route.useLoaderData();
+  const queryClient = useQueryClient();
+  const { data: categories, isLoading, error } = useQuery(categoriesQueryOptions);
 
   const [formMode, setFormMode] = useState<"add" | "edit" | "closed">("closed");
 
@@ -133,24 +132,24 @@ function CategoriesPage() {
 
   const createCategoryMutation = useMutation({
     mutationFn: createCategory,
-    onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
       setNewCategory({ name: "", color: "" });
     },
   });
 
   const updateCategoryMutation = useMutation({
     mutationFn: (category: Category) => updateCategory(category.id, category),
-    onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
       setEditingCategory(null);
     },
   });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
-    onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: ["categories"] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoriesQueryKeys.all });
     },
   });
 
@@ -182,6 +181,9 @@ function CategoriesPage() {
       deleteCategoryMutation.mutate(category.id);
     }
   };
+
+  if (isLoading || !categories) return <div>Loading categories...</div>;
+  if (error) return <div>Error loading categories: {error.message}</div>;
 
   return (
     <div className="max-w-lg w-full px-2">

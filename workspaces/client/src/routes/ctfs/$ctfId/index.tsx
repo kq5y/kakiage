@@ -1,7 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useMemo } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
-import { ctfDetailQueryOptions } from "@/queries/ctfs";
+import { type CtfDetail, ctfDetailQueryOptions } from "@/queries/ctfs";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/ctfs/$ctfId/")({
@@ -27,21 +29,20 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
   minute: "2-digit",
 };
 
-function CtfDetailPage() {
+function CtfDetailPageInner({ ctf }: { ctf: CtfDetail }) {
   const { isAdmin } = useAuth();
-  const ctf = Route.useLoaderData();
 
-  const writeupsByCategory = ctf.writeups.reduce(
-    (acc, writeup) => {
-      const categoryId = writeup.category.id;
-      if (!acc[categoryId]) {
-        acc[categoryId] = [];
-      }
-      acc[categoryId].push(writeup);
-      return acc;
-    },
-    {} as Record<string, typeof ctf.writeups>,
-  );
+  const writeupsByCategory = useMemo(() => {
+    return ctf.writeups.reduce(
+      (acc, w) => {
+        const id = w.category.id;
+        if (!acc[id]) acc[id] = [];
+        acc[id].push(w);
+        return acc;
+      },
+      {} as Record<number, (typeof ctf.writeups)[number][]>,
+    );
+  }, [ctf.writeups]);
 
   return (
     <div className="max-w-lg w-full px-2">
@@ -136,4 +137,13 @@ function CtfDetailPage() {
       )}
     </div>
   );
+}
+
+function CtfDetailPage() {
+  const { ctfId } = Route.useParams();
+  const { data: ctf, isLoading, error } = useQuery(ctfDetailQueryOptions(ctfId));
+
+  if (isLoading || !ctf) return <div>Loading CTF details...</div>;
+  if (error) return <div>Error loading CTF: {(error as Error).message}</div>;
+  return <CtfDetailPageInner ctf={ctf} />;
 }

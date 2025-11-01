@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { useAuth } from "@/hooks/useAuth";
@@ -26,7 +27,10 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
 
 function CtfsPage() {
   const { isAdmin } = useAuth();
-  const ctfs = Route.useLoaderData();
+  const { data: ctfs, isLoading, error } = useQuery(ctfsQueryOptions());
+
+  if (isLoading || !ctfs) return <div>Loading CTFs...</div>;
+  if (error) return <div>Error loading CTFs: {error.message}</div>;
 
   return (
     <div className="max-w-lg w-full px-2">

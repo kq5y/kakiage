@@ -1,11 +1,17 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import MarkdownEditor from "@/components/MarkdownEditor";
 import { addWriteupTag, removeWriteupTag, updateWriteup, updateWriteupContent } from "@/libs/api";
-import { categoriesQueryOptions } from "@/queries/categories";
-import { writeupQueryOptions, writeupTagsQueryOptions } from "@/queries/writeups";
+import { type CategoryListItem, categoriesQueryOptions } from "@/queries/categories";
+import { ctfsQueryKeys } from "@/queries/ctfs";
+import {
+  type WriteupDetail,
+  writeupQueryOptions,
+  writeupsQueryKeys,
+  writeupTagsQueryOptions,
+} from "@/queries/writeups";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/$writeupId/edit")({
@@ -20,8 +26,6 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
     if (!user) {
       throw redirect({ to: "/login" });
     }
-
-    return {};
   },
   loader: async ({ params, context }) => {
     const writeup = await context.queryClient.ensureQueryData(writeupQueryOptions(params.writeupId, true));
@@ -31,8 +35,7 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
     }
 
     const categories = await context.queryClient.ensureQueryData(categoriesQueryOptions);
-    const tags = await context.queryClient.ensureQueryData(writeupTagsQueryOptions(params.writeupId));
-    return { writeup, categories, tags };
+    return { writeup, categories };
   },
   head: ctx => ({
     meta: [{ title: createPageTitle(ctx.loaderData?.writeup.title || "") }],
@@ -41,10 +44,82 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
   errorComponent: ({ error }) => <div>Error: {(error as Error).message}</div>,
 });
 
-function EditWriteupPage() {
-  const { writeupId } = Route.useParams();
+function WriteupTagEdit({ writeupId }: { writeupId: number }) {
+  const queryClient = useQueryClient();
+  const [newTagName, setNewTagName] = useState("");
+
+  const { data: tags, isLoading, error } = useQuery(writeupTagsQueryOptions(writeupId));
+
+  const addTagMutation = useMutation({
+    mutationFn: (tagName: string) => addWriteupTag(writeupId, { name: tagName }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
+      setNewTagName("");
+    },
+  });
+
+  const removeTagMutation = useMutation({
+    mutationFn: (tagId: number) => removeWriteupTag(writeupId, { id: tagId }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
+    },
+  });
+
+  const handleNewTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && newTagName.trim() !== "") {
+      e.preventDefault();
+      if (!addTagMutation.isPending) {
+        addTagMutation.mutate(newTagName.trim());
+      }
+    }
+  };
+
+  const handleRemoveTag = (tagId: number) => {
+    if (!removeTagMutation.isPending) {
+      removeTagMutation.mutate(tagId);
+    }
+  };
+
+  if (isLoading || !tags) return null;
+  if (error) return <div>Error loading tags: {error.message}</div>;
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 p-1 border rounded-md flex-grow">
+      {tags.map(tag => (
+        <span
+          key={tag.id}
+          className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700"
+        >
+          {tag.name}
+          <button
+            type="button"
+            onClick={() => handleRemoveTag(tag.id)}
+            disabled={removeTagMutation.isPending}
+            className="ml-1 text-white bg-red-600 rounded-full px-1 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-red-300"
+          >
+            &times;
+          </button>
+        </span>
+      ))}
+      {tags.length < 10 && (
+        <input
+          type="text"
+          name="newTag"
+          value={newTagName}
+          onChange={e => setNewTagName(e.target.value)}
+          onKeyDown={handleNewTagKeyDown}
+          disabled={addTagMutation.isPending}
+          placeholder="Add tag"
+          className="px-2 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[100px]"
+        />
+      )}
+    </div>
+  );
+}
+
+function EditWriteupPageInner({ writeup, categories }: { writeup: WriteupDetail; categories: CategoryListItem[] }) {
   const navigate = useNavigate();
-  const { writeup, categories, tags } = Route.useLoaderData();
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     title: writeup.title,
@@ -52,41 +127,26 @@ function EditWriteupPage() {
   });
 
   const [content, setContent] = useState(writeup.content || "");
-  const [newTagName, setNewTagName] = useState("");
 
   const updateWriteupMutation = useMutation({
     mutationFn: (data: typeof formData) =>
-      updateWriteup(writeupId, {
+      updateWriteup(writeup.id, {
         ...data,
         categoryId: Number(data.categoryId),
       }),
-    onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId] });
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId] });
+    onSuccess: async data => {
+      await queryClient.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeup.id) });
       updateContentMutation.mutate(content);
     },
   });
 
   const updateContentMutation = useMutation({
-    mutationFn: (content: string) => updateWriteupContent(writeupId, { content }),
-    onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "content"] });
-      navigate({ to: "/writeups/$writeupId", params: { writeupId } });
-    },
-  });
-
-  const addTagMutation = useMutation({
-    mutationFn: (tagName: string) => addWriteupTag(writeupId, { name: tagName }),
-    onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
-      setNewTagName("");
-    },
-  });
-
-  const removeTagMutation = useMutation({
-    mutationFn: (tagId: number) => removeWriteupTag(writeupId, { id: tagId }),
-    onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
+    mutationFn: (content: string) => updateWriteupContent(writeup.id, { content }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeup.id, true) });
+      await queryClient.invalidateQueries({ queryKey: writeupsQueryKeys.content(writeup.id) });
+      navigate({ to: "/writeups/$writeupId", params: { writeupId: writeup.id } });
     },
   });
 
@@ -102,21 +162,6 @@ function EditWriteupPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateWriteupMutation.mutate(formData);
-  };
-
-  const handleNewTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && newTagName.trim() !== "") {
-      e.preventDefault();
-      if (!addTagMutation.isPending) {
-        addTagMutation.mutate(newTagName.trim());
-      }
-    }
-  };
-
-  const handleRemoveTag = (tagId: number) => {
-    if (!removeTagMutation.isPending) {
-      removeTagMutation.mutate(tagId);
-    }
   };
 
   return (
@@ -157,36 +202,7 @@ function EditWriteupPage() {
                 ))}
               </select>
             </div>
-            <div className="flex flex-wrap items-center gap-2 p-1 border rounded-md flex-grow">
-              {tags.map(tag => (
-                <span
-                  key={tag.id}
-                  className="flex items-center bg-gray-200 rounded-full px-3 py-1 text-sm font-medium text-gray-700"
-                >
-                  {tag.name}
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveTag(tag.id)}
-                    disabled={removeTagMutation.isPending}
-                    className="ml-1 text-white bg-red-600 rounded-full px-1 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-red-300"
-                  >
-                    &times;
-                  </button>
-                </span>
-              ))}
-              {tags.length < 10 && (
-                <input
-                  type="text"
-                  name="newTag"
-                  value={newTagName}
-                  onChange={e => setNewTagName(e.target.value)}
-                  onKeyDown={handleNewTagKeyDown}
-                  disabled={addTagMutation.isPending}
-                  placeholder="Add tag"
-                  className="px-2 py-1 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[100px]"
-                />
-              )}
-            </div>
+            <WriteupTagEdit writeupId={writeup.id} />
           </div>
         </div>
       </form>
@@ -194,4 +210,20 @@ function EditWriteupPage() {
       <MarkdownEditor value={content} onChange={handleContentChange} />
     </div>
   );
+}
+
+function EditWriteupPage() {
+  const { writeupId } = Route.useParams();
+
+  const {
+    data: writeup,
+    isLoading: isWriteupLoading,
+    error: writeupError,
+  } = useQuery(writeupQueryOptions(writeupId, true));
+  const { data: categories, isLoading: isCategoriesLoading, error: categoriesError } = useQuery(categoriesQueryOptions);
+
+  if (isWriteupLoading || isCategoriesLoading || !writeup || !categories) return <div>Loading...</div>;
+  if (writeupError) return <div>Error loading writeup: {writeupError.message}</div>;
+  if (categoriesError) return <div>Error loading categories: {categoriesError.message}</div>;
+  return <EditWriteupPageInner writeup={writeup} categories={categories} />;
 }

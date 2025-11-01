@@ -1,10 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { createWriteup } from "@/libs/api";
-import { categoriesQueryOptions } from "@/queries/categories";
-import { ctfsQueryOptions } from "@/queries/ctfs";
+import { type CategoryListItem, categoriesQueryOptions } from "@/queries/categories";
+import { type CtfListItem, ctfsQueryKeys, ctfsQueryOptions } from "@/queries/ctfs";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/new")({
@@ -16,8 +16,6 @@ export const Route = createFileRoute("/writeups/new")({
     if (!user) {
       throw redirect({ to: "/login" });
     }
-
-    return {};
   },
   validateSearch: (
     search: Record<string, unknown>,
@@ -29,8 +27,9 @@ export const Route = createFileRoute("/writeups/new")({
     };
   },
   loader: async ({ context }) => {
-    const ctfs = await context.queryClient.ensureQueryData(ctfsQueryOptions());
-    const categories = await context.queryClient.ensureQueryData(categoriesQueryOptions);
+    const ctfsPromise = context.queryClient.ensureQueryData(ctfsQueryOptions());
+    const categoriesPromise = context.queryClient.ensureQueryData(categoriesQueryOptions);
+    const [ctfs, categories] = await Promise.all([ctfsPromise, categoriesPromise]);
     return { ctfs, categories };
   },
   head: () => ({
@@ -38,10 +37,17 @@ export const Route = createFileRoute("/writeups/new")({
   }),
 });
 
-function NewWriteupPage() {
+function NewWriteupPageInner({
+  ctfs,
+  categories,
+  ctfIdFromSearch,
+}: {
+  ctfs: CtfListItem[];
+  categories: CategoryListItem[];
+  ctfIdFromSearch?: number;
+}) {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { ctfs, categories } = Route.useLoaderData();
-  const { ctfId: ctfIdFromSearch } = Route.useSearch();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -55,8 +61,8 @@ function NewWriteupPage() {
 
   const createWriteupMutation = useMutation({
     mutationFn: createWriteup,
-    onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId] });
+    onSuccess: async data => {
+      await queryClient.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
       navigate({ to: "/writeups/$writeupId/edit", params: { writeupId: data.id } });
     },
   });
@@ -221,4 +227,15 @@ function NewWriteupPage() {
       </form>
     </div>
   );
+}
+
+function NewWriteupPage() {
+  const { ctfId: ctfIdFromSearch } = Route.useSearch();
+  const { data: ctfs, isLoading: isCtfsLoading, error: ctfsError } = useQuery(ctfsQueryOptions());
+  const { data: categories, isLoading: isCategoriesLoading, error: categoriesError } = useQuery(categoriesQueryOptions);
+
+  if (isCtfsLoading || isCategoriesLoading || !ctfs || !categories) return <div>Loading...</div>;
+  if (ctfsError) return <div>Error loading ctfs: {ctfsError.message}</div>;
+  if (categoriesError) return <div>Error loading categories: {categoriesError.message}</div>;
+  return <NewWriteupPageInner ctfs={ctfs} categories={categories} ctfIdFromSearch={ctfIdFromSearch} />;
 }
