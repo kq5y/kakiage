@@ -1,6 +1,7 @@
 import { markdownToHtml } from "@kakiage/processor";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { sign, verify } from "hono/jwt";
 import { z } from "zod";
 
 import { getDB } from "@/db/client";
@@ -54,8 +55,11 @@ const writeupTagPostSchema = z.object({
 const writeupTagDeleteSchema = z.object({
   id: z.number().min(1),
 });
-const writeupPasswordHeaderSchema = z.object({
-  "x-password": z.string().min(1).optional(),
+const writeupContentHeaderSchema = z.object({
+  authorization: z.string().optional(),
+});
+const writeupUnlockBodySchema = z.object({
+  password: z.string().min(1),
 });
 
 const router = new Hono<Env>()
@@ -161,7 +165,6 @@ const router = new Hono<Env>()
       columns: {
         categoryId: false,
         createdBy: false,
-        password: false,
         ctfId: false,
       },
       with: {
@@ -180,8 +183,10 @@ const router = new Hono<Env>()
       return c.json(error("Writeup not found"), 404);
     }
 
+    const { password: passwordHash, ...writeupWithoutPassword } = writeup;
     const formattedWriteup = {
-      ...writeup,
+      ...writeupWithoutPassword,
+      hasPassword: !!passwordHash,
       content: includeContent ? writeup.content : undefined,
       tags: writeup.writeupToTags.map(wt => wt.tag),
       writeupToTags: undefined,
@@ -277,15 +282,60 @@ const router = new Hono<Env>()
       return c.json(success(), 200);
     },
   )
+  .post("/:id/unlock", withValidates({ param: idParamSchema, json: writeupUnlockBodySchema }), async c => {
+    const db = getDB(c.env);
+    const id = Number(c.req.valid("param").id);
+    const { password } = c.req.valid("json");
+
+    const writeup = await db.query.writeups.findFirst({
+      where: (writeups, { eq }) => eq(writeups.id, id),
+    });
+
+    if (!writeup) {
+      return c.json(error("Writeup not found"), 404);
+    }
+
+    if (!writeup.password) {
+      return c.json(error("Writeup is not password protected"), 400);
+    }
+
+    const hash = await getHashHex(password);
+    if (hash !== writeup.password) {
+      return c.json(error("Unauthorized"), 401);
+    }
+
+    const exp = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
+    const token = await sign(
+      {
+        exp,
+        data: {
+          type: "writeup-unlock",
+          writeupId: id,
+        },
+      },
+      c.env.JWT_SECRET,
+      "HS256",
+    );
+
+    const response = c.json(
+      success({
+        token,
+        expiresAt: new Date(exp * 1000).toISOString(),
+      }),
+      200,
+    );
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  })
   .get(
     "/:id/content",
     withAuth(false),
-    withValidates({ param: idParamSchema, header: writeupPasswordHeaderSchema }),
+    withValidates({ param: idParamSchema, header: writeupContentHeaderSchema }),
     async c => {
       const db = getDB(c.env);
       const user = c.get("user");
       const id = Number(c.req.valid("param").id);
-      const password = c.req.valid("header")["x-password"];
+      const authorization = c.req.valid("header").authorization;
 
       const writeup = await db.query.writeups.findFirst({
         where: (writeups, { eq }) => eq(writeups.id, id),
@@ -296,14 +346,26 @@ const router = new Hono<Env>()
       }
 
       if (writeup.password) {
-        if (!(user && (user.id === writeup.createdBy || user.role === "admin"))) {
-          if (!password) {
-            return c.json(error("Unauthorized"), 403);
+        let hasValidUnlockToken = false;
+        if (authorization?.startsWith("Bearer ")) {
+          const token = authorization.slice("Bearer ".length).trim();
+          if (token) {
+            try {
+              const payload = await verify(token, c.env.JWT_SECRET, "HS256");
+              const data = payload.data as { type?: string; writeupId?: number };
+              if (data.type === "writeup-unlock" && data.writeupId === id) {
+                hasValidUnlockToken = true;
+              }
+            } catch (err) {
+              console.error("JWT verification failed(writeup):", err);
+              return c.json(error("Unauthorized"), 401);
+            }
           }
-          const hash = await getHashHex(password);
-          if (hash !== writeup.password) {
-            return c.json(error("Unauthorized"), 403);
-          }
+        }
+
+        const isPrivilegedUser = user && (user.id === writeup.createdBy || user.role === "admin");
+        if (!hasValidUnlockToken && !isPrivilegedUser) {
+          return c.json(error("Unauthorized"), 401);
         }
       }
 
