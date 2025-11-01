@@ -34,10 +34,8 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
       throw redirect({ to: "/writeups/$writeupId", params: { writeupId: params.writeupId } });
     }
 
-    const categoriesPromise = context.queryClient.ensureQueryData(categoriesQueryOptions);
-    const tagsPromise = context.queryClient.ensureQueryData(writeupTagsQueryOptions(params.writeupId));
-    const [categories, tags] = await Promise.all([categoriesPromise, tagsPromise]);
-    return { writeup, categories, tags };
+    const categories = await context.queryClient.ensureQueryData(categoriesQueryOptions);
+    return { writeup, categories };
   },
   head: ctx => ({
     meta: [{ title: createPageTitle(ctx.loaderData?.writeup.title || "") }],

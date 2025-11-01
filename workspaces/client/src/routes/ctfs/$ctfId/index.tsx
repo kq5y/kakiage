@@ -40,7 +40,7 @@ function CtfDetailPageInner({ ctf }: { ctf: CtfDetail }) {
         acc[id].push(w);
         return acc;
       },
-      {} as Record<number, typeof ctf.writeups>,
+      {} as Record<number, (typeof ctf.writeups)[number][]>,
     );
   }, [ctf.writeups]);
 
