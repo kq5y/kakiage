@@ -282,7 +282,7 @@ function CategoriesPage() {
                   <tr className="border-b border-gray-200">
                     <td colSpan={4} className="p-0 bg-gray-50">
                       <CategoryForm
-                        data={category}
+                        data={editingCategory}
                         mode="edit"
                         handleChange={handleEditChange}
                         handleSubmit={handleUpdateSubmit}
@@ -291,7 +291,7 @@ function CategoriesPage() {
                           setFormMode("closed");
                           setEditingCategory(null);
                         }}
-                        onDelete={() => confirmDelete(category)}
+                        onDelete={() => confirmDelete(editingCategory)}
                         deleteMutation={deleteCategoryMutation}
                       />
                     </td>
