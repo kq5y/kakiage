@@ -1,6 +1,7 @@
 import { markdownToHtml } from "@kakiage/processor";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
+import { useDebounce } from "@/hooks/useDebounce";
 import { getImageUploadSign } from "@/libs/api";
 import { uploadImage } from "@/libs/cloudinary";
 
@@ -17,12 +18,14 @@ export default function MarkdownEditor({ value, onChange }: MarkdownEditorProps)
   const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    (async () => {
+  useDebounce(
+    async () => {
       const html = await markdownToHtml(value);
       setRenderedHtml(html);
-    })();
-  }, [value]);
+    },
+    500,
+    [value],
+  );
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
