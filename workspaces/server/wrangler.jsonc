@@ -2,10 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kakiage",
   "main": "src/index.ts",
-  "compatibility_date": "2025-07-30",
-  "compatibility_flags": [
-    "nodejs_compat"
-  ],
+  "compatibility_date": "2025-09-15",
   "routes": [
     {
       "pattern": "w.kq5.jp",

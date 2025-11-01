@@ -21,7 +21,6 @@
   "dependencies": {
     "@kakiage/processor": "workspace:*",
     "@libsql/client": "^0.15.15",
-    "cloudinary": "^2.8.0",
     "drizzle-orm": "^0.44.6",
     "hono": "^4.10.2",
     "zod": "^4.1.12"
