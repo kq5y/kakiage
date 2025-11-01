@@ -3,6 +3,7 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { createCtf } from "@/libs/api";
+import { ctfsQueryKeys } from "@/queries/ctfs";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/ctfs/new")({
@@ -37,7 +38,7 @@ function NewCtfPage() {
   const createCtfMutation = useMutation({
     mutationFn: createCtf,
     onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs"] });
+      await context.client.invalidateQueries({ queryKey: ctfsQueryKeys.all });
       navigate({ to: "/ctfs/$ctfId", params: { ctfId: data.id } });
     },
   });

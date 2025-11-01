@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { createWriteup } from "@/libs/api";
 import { categoriesQueryOptions } from "@/queries/categories";
-import { ctfsQueryOptions } from "@/queries/ctfs";
+import { ctfsQueryKeys, ctfsQueryOptions } from "@/queries/ctfs";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/new")({
@@ -56,7 +56,7 @@ function NewWriteupPage() {
   const createWriteupMutation = useMutation({
     mutationFn: createWriteup,
     onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId] });
+      await context.client.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
       navigate({ to: "/writeups/$writeupId/edit", params: { writeupId: data.id } });
     },
   });

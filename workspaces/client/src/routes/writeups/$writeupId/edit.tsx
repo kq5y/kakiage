@@ -5,7 +5,8 @@ import { useState } from "react";
 import MarkdownEditor from "@/components/MarkdownEditor";
 import { addWriteupTag, removeWriteupTag, updateWriteup, updateWriteupContent } from "@/libs/api";
 import { categoriesQueryOptions } from "@/queries/categories";
-import { writeupQueryOptions, writeupTagsQueryOptions } from "@/queries/writeups";
+import { ctfsQueryKeys } from "@/queries/ctfs";
+import { writeupQueryOptions, writeupsQueryKeys, writeupTagsQueryOptions } from "@/queries/writeups";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/$writeupId/edit")({
@@ -61,8 +62,8 @@ function EditWriteupPage() {
         categoryId: Number(data.categoryId),
       }),
     onSuccess: async (data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["ctfs", data.ctfId] });
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId] });
+      await context.client.invalidateQueries({ queryKey: ctfsQueryKeys.detail(data.ctfId) });
+      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeupId) });
       updateContentMutation.mutate(content);
     },
   });
@@ -70,7 +71,8 @@ function EditWriteupPage() {
   const updateContentMutation = useMutation({
     mutationFn: (content: string) => updateWriteupContent(writeupId, { content }),
     onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "content"] });
+      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.detail(writeupId, true) });
+      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.content(writeupId) });
       navigate({ to: "/writeups/$writeupId", params: { writeupId } });
     },
   });
@@ -78,7 +80,7 @@ function EditWriteupPage() {
   const addTagMutation = useMutation({
     mutationFn: (tagName: string) => addWriteupTag(writeupId, { name: tagName }),
     onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
+      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
       setNewTagName("");
     },
   });
@@ -86,7 +88,7 @@ function EditWriteupPage() {
   const removeTagMutation = useMutation({
     mutationFn: (tagId: number) => removeWriteupTag(writeupId, { id: tagId }),
     onSuccess: async (_data, _variables, _onMutateResult, context) => {
-      await context.client.invalidateQueries({ queryKey: ["writeups", writeupId, "tags"] });
+      await context.client.invalidateQueries({ queryKey: writeupsQueryKeys.tags(writeupId) });
     },
   });
 

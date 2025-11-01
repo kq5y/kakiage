@@ -4,7 +4,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { createCategory, deleteCategory, updateCategory } from "@/libs/api";
-import { categoriesQueryOptions } from "@/queries/categories";
+import { categoriesQueryKeys, categoriesQueryOptions } from "@/queries/categories";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/categories/")({
@@ -134,7 +134,7 @@ function CategoriesPage() {
   const createCategoryMutation = useMutation({
     mutationFn: createCategory,
     onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: ["categories"] });
+      context.client.invalidateQueries({ queryKey: categoriesQueryKeys.all });
       setNewCategory({ name: "", color: "" });
     },
   });
@@ -142,7 +142,7 @@ function CategoriesPage() {
   const updateCategoryMutation = useMutation({
     mutationFn: (category: Category) => updateCategory(category.id, category),
     onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: ["categories"] });
+      context.client.invalidateQueries({ queryKey: categoriesQueryKeys.all });
       setEditingCategory(null);
     },
   });
@@ -150,7 +150,7 @@ function CategoriesPage() {
   const deleteCategoryMutation = useMutation({
     mutationFn: deleteCategory,
     onSuccess: (_data, _variables, _onMutateResult, context) => {
-      context.client.invalidateQueries({ queryKey: ["categories"] });
+      context.client.invalidateQueries({ queryKey: categoriesQueryKeys.all });
     },
   });
 
