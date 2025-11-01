@@ -19,8 +19,6 @@ export const Route = createFileRoute("/categories/")({
     if (user.role !== "admin") {
       throw redirect({ to: "/" });
     }
-
-    return {};
   },
   loader: ({ context }) => {
     return context.queryClient.ensureQueryData(categoriesQueryOptions);

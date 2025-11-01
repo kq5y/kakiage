@@ -17,8 +17,6 @@ export const Route = createFileRoute("/login")({
     if (user) {
       throw redirect({ to: "/" });
     }
-
-    return {};
   },
   validateSearch: (search: Record<string, unknown>): LoginSearchParams => {
     return {

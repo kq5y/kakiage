@@ -21,8 +21,6 @@ export const Route = createFileRoute("/ctfs/$ctfId/edit")({
     if (user.role !== "admin") {
       throw redirect({ to: "/ctfs/$ctfId", params: { ctfId: params.ctfId } });
     }
-
-    return {};
   },
   loader: ({ context, params }) => {
     return context.queryClient.ensureQueryData(ctfDetailQueryOptions(params.ctfId));

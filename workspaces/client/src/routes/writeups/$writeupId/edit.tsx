@@ -21,8 +21,6 @@ export const Route = createFileRoute("/writeups/$writeupId/edit")({
     if (!user) {
       throw redirect({ to: "/login" });
     }
-
-    return {};
   },
   loader: async ({ params, context }) => {
     const writeup = await context.queryClient.ensureQueryData(writeupQueryOptions(params.writeupId, true));

@@ -16,8 +16,6 @@ export const Route = createFileRoute("/writeups/new")({
     if (!user) {
       throw redirect({ to: "/login" });
     }
-
-    return {};
   },
   validateSearch: (
     search: Record<string, unknown>,

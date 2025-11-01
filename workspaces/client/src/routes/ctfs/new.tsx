@@ -18,8 +18,6 @@ export const Route = createFileRoute("/ctfs/new")({
     if (user.role !== "admin") {
       throw redirect({ to: "/ctfs" });
     }
-
-    return {};
   },
   head: () => ({
     meta: [{ title: createPageTitle("Create New CTF") }],
