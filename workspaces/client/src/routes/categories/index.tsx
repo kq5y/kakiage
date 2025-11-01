@@ -1,5 +1,5 @@
 import type { Category } from "@kakiage/server/rpc";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 
@@ -123,7 +123,7 @@ function CategoryForm<T>({
 
 function CategoriesPage() {
   const queryClient = useQueryClient();
-  const categories = Route.useLoaderData();
+  const { data: categories, isLoading, error } = useQuery(categoriesQueryOptions);
 
   const [formMode, setFormMode] = useState<"add" | "edit" | "closed">("closed");
 
@@ -181,6 +181,9 @@ function CategoriesPage() {
       deleteCategoryMutation.mutate(category.id);
     }
   };
+
+  if (isLoading || !categories) return <div>Loading categories...</div>;
+  if (error) return <div>Error loading categories: {error.message}</div>;
 
   return (
     <div className="max-w-lg w-full px-2">

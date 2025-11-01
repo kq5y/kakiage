@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { updateCtf } from "@/libs/api";
-import { ctfDetailQueryOptions, ctfsQueryKeys } from "@/queries/ctfs";
+import { type CtfDetail, ctfDetailQueryOptions, ctfsQueryKeys } from "@/queries/ctfs";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/ctfs/$ctfId/edit")({
@@ -32,11 +32,10 @@ export const Route = createFileRoute("/ctfs/$ctfId/edit")({
   errorComponent: ({ error }) => <div>Error loading CTF: {error.message}</div>,
 });
 
-function EditCtfPage() {
+function EditCtfPageInner({ ctf }: { ctf: CtfDetail }) {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const ctf = Route.useLoaderData();
   const [formData, setFormData] = useState({
     name: ctf.name,
     startAt: ctf.startAt.toISOString().slice(0, 16),
@@ -154,4 +153,13 @@ function EditCtfPage() {
       </form>
     </div>
   );
+}
+
+function EditCtfPage() {
+  const { ctfId } = Route.useParams();
+  const { data: ctf, isLoading, error } = useQuery(ctfDetailQueryOptions(ctfId));
+
+  if (isLoading || !ctf) return <div>Loading CTF details...</div>;
+  if (error) return <div>Error loading CTF: {error.message}</div>;
+  return <EditCtfPageInner ctf={ctf} />;
 }

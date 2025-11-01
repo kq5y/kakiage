@@ -9,6 +9,10 @@ export const writeupsQueryKeys = {
   content: (writeupId: number) => ["writeups", writeupId, "content"] as const,
 };
 
+export type WriteupListItem = Awaited<ReturnType<typeof getWriteups>>[number];
+export type WriteupDetail = Awaited<ReturnType<typeof getWriteup>>;
+export type WriteupTag = Awaited<ReturnType<typeof getWriteupTags>>[number];
+
 export const writeupsQueryOptions = () =>
   queryOptions({
     queryKey: writeupsQueryKeys.all,

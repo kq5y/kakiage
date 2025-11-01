@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 
 import Article from "@/components/Article";
 import { useAuth } from "@/hooks/useAuth";
-import { writeupContentQueryOptions, writeupQueryOptions } from "@/queries/writeups";
+import { type WriteupDetail, writeupContentQueryOptions, writeupQueryOptions } from "@/queries/writeups";
 import { createPageTitle } from "@/utils/meta";
 
 export const Route = createFileRoute("/writeups/$writeupId/")({
@@ -21,16 +21,30 @@ export const Route = createFileRoute("/writeups/$writeupId/")({
   errorComponent: ({ error }) => <div>Error loading writeup: {error.message}</div>,
 });
 
-function WriteupDetailPage() {
-  const { writeupId } = Route.useParams();
-  const { user, isAdmin } = useAuth();
-  const writeup = Route.useLoaderData();
+function WriteupContentContainer({ writeup }: { writeup: WriteupDetail }) {
+  const { data: content, isLoading, error } = useQuery(writeupContentQueryOptions(writeup.id));
 
-  const {
-    data: content,
-    isLoading: isLoadingContent,
-    error: contentError,
-  } = useQuery(writeupContentQueryOptions(writeupId));
+  return (
+    <div className="max-w-none">
+      {isLoading ? (
+        <div>Loading content...</div>
+      ) : error ? (
+        <div>Error loading content: {error.message}</div>
+      ) : (
+        <Article value={content || "<p>No content available</p>"} />
+      )}
+    </div>
+  );
+}
+
+function WriteupDetailPage() {
+  const { user, isAdmin } = useAuth();
+
+  const { writeupId } = Route.useParams();
+  const { data: writeup, isLoading, error } = useQuery(writeupQueryOptions(writeupId, false));
+
+  if (isLoading || !writeup) return <div>Loading writeup...</div>;
+  if (error) return <div>Error loading writeup: {error.message}</div>;
 
   const canEdit = user?.id === writeup.createdByUser.id || isAdmin;
   return (
@@ -94,15 +108,7 @@ function WriteupDetailPage() {
         </div>
       </div>
 
-      <div className="max-w-none">
-        {isLoadingContent ? (
-          <div>Loading content...</div>
-        ) : contentError ? (
-          <div>Error loading content: {contentError.message}</div>
-        ) : (
-          <Article value={content || "<p>No content available</p>"} />
-        )}
-      </div>
+      <WriteupContentContainer writeup={writeup} />
     </div>
   );
 }

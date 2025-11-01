@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import { writeupsQueryOptions } from "@/queries/writeups";
@@ -16,7 +17,11 @@ export const Route = createFileRoute("/writeups/")({
 });
 
 function WriteupsListPage() {
-  const writeups = Route.useLoaderData();
+  const { data: writeups, isLoading, error } = useQuery(writeupsQueryOptions());
+
+  if (isLoading || !writeups) return <div>Loading writeups...</div>;
+  if (error) return <div>Error loading writeups: {(error as Error).message}</div>;
+
   return (
     <div className="max-w-lg w-full px-2">
       <div className="flex justify-between items-center mb-2">
