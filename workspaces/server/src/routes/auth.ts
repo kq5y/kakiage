@@ -78,6 +78,7 @@ const router = new Hono<Env>()
           httpOnly: true,
           sameSite: "lax",
           maxAge: SESSION_EXPIRE_SECONDS,
+          secure: c.env.APP_DOMAIN.startsWith("https://"),
         });
 
         return c.redirect(makeAppUrl());
