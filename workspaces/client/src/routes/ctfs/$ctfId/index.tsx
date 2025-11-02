@@ -30,7 +30,7 @@ const DATE_OPTIONS: Intl.DateTimeFormatOptions = {
 };
 
 function CtfDetailPageInner({ ctf }: { ctf: CtfDetail }) {
-  const { isAdmin } = useAuth();
+  const { user, isAdmin } = useAuth();
 
   const writeupsByCategory = useMemo(() => {
     return ctf.writeups.reduce(
@@ -83,13 +83,15 @@ function CtfDetailPageInner({ ctf }: { ctf: CtfDetail }) {
 
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-2xl font-bold mb-4">Writeups</h2>
-        <Link
-          to="/writeups/new"
-          search={{ ctfId: ctf.id }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors text-base"
-        >
-          Add
-        </Link>
+        {user && (
+          <Link
+            to="/writeups/new"
+            search={{ ctfId: ctf.id }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors text-base"
+          >
+            Add
+          </Link>
+        )}
       </div>
 
       {!writeupsByCategory || Object.keys(writeupsByCategory).length === 0 ? (
