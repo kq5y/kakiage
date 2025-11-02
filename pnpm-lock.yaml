@@ -63,9 +63,6 @@ importers:
       '@unocss/postcss':
         specifier: ^66.5.4
         version: 66.5.4(postcss@8.5.6)
-      '@unocss/preset-wind3':
-        specifier: ^66.5.4
-        version: 66.5.4
       rsbuild-plugin-html-minifier-terser:
         specifier: ^1.1.2
         version: 1.1.2(@rsbuild/core@1.5.17)
