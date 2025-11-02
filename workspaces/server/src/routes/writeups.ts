@@ -307,7 +307,7 @@ const router = new Hono<Env>()
 
     const hash = await getHashHex(password);
     if (hash !== writeup.password) {
-      return c.json(error("Unauthorized"), 401);
+      return c.json(error("Password is incorrect"), 401);
     }
 
     const exp = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour
