@@ -1,6 +1,6 @@
 import { hcWithType, type InferRequestType } from "@kakiage/server/rpc";
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status?: number;
   body?: unknown;
   constructor(message: string, status?: number) {
@@ -329,13 +329,28 @@ export const removeWriteupTag = async (
   throw new ApiError("Failed to fetch", res.status);
 };
 
-export const getWriteupContent = async (id: number, password?: string) => {
+export const getWriteupContent = async (id: number, token?: string) => {
+  const headers = token ? { authorization: `Bearer ${token}` } : {};
   const res = await apiClient.api.v1.writeups[":id"].content.$get({
     param: { id: id.toString() },
-    header: { "x-password": password },
+    header: headers,
   });
   const data = await res.json();
   if (res.ok && data.success) return data.data;
+  if (!data.success && data.message) throw new ApiError(data.message, res.status);
+  throw new ApiError("Failed to fetch", res.status);
+};
+
+export const unlockWriteup = async (id: number, password: string) => {
+  const res = await apiClient.api.v1.writeups[":id"].unlock.$post({
+    param: { id: id.toString() },
+    json: { password },
+  });
+  const data = await res.json();
+  if (res.ok && data.success) return {
+    token: data.data.token as string,
+    expiresAt: new Date(data.data.expiresAt),
+  };
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
   throw new ApiError("Failed to fetch", res.status);
 };

@@ -32,8 +32,8 @@ export const writeupTagsQueryOptions = (writeupId: number) =>
     queryFn: () => getWriteupTags(writeupId),
   });
 
-export const writeupContentQueryOptions = (writeupId: number) =>
+export const writeupContentQueryOptions = (writeupId: number, token?: string) =>
   queryOptions({
     queryKey: writeupsQueryKeys.content(writeupId),
-    queryFn: () => getWriteupContent(writeupId),
+    queryFn: () => getWriteupContent(writeupId, token),
   });

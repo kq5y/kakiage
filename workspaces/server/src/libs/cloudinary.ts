@@ -1,17 +1,12 @@
+import { getHashHex } from "@/utils/hash";
+
 const EAGER_TRANSFORMATION = "w_1000,c_limit,f_avif,q_auto";
 const FOLDER_NAME = "kakiage-img";
-
-const computeHash = async (input: string, algorithm: string = "SHA-1") => {
-  const digest = await crypto.subtle.digest(algorithm, new TextEncoder().encode(input));
-  return Array.from(new Uint8Array(digest))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
-};
 
 const generateSignature = async (params: Record<string, string | number>, apiSecret: string) => {
   const sortedKeys = Object.keys(params).sort();
   const toSign = sortedKeys.map(key => `${key}=${params[key]}`).join("&") + apiSecret;
-  return await computeHash(toSign);
+  return await getHashHex(toSign, "SHA-1");
 };
 
 const getSignature = async (env: Bindings) => {
