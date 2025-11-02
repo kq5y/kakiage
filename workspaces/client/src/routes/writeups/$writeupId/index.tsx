@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Article from "@/components/Article";
 import { useAuth } from "@/hooks/useAuth";
@@ -39,9 +39,11 @@ function WriteupContentContainer({
 }) {
   const { data: content, isLoading, error } = useQuery(writeupContentQueryOptions(writeup.id, token?.token));
 
-  if (error instanceof ApiError && error.status === 401 && token) {
-    setToken(null);
-  }
+  useEffect(() => {
+    if (error instanceof ApiError && error.status === 401 && token) {
+      setToken(null);
+    }
+  }, [error, token, setToken]);
 
   return (
     <div className="max-w-none">
@@ -59,7 +61,7 @@ function WriteupContentContainer({
 function WriteupContentArea({ writeup }: { writeup: WriteupDetail }) {
   const { user, isAdmin } = useAuth();
   const [password, setPassword] = useState("");
-  const [token, setToken] = useState<{ token: string; expiresAt: Date } | null>(null);
+  const [token, setToken] = useState<Token | null>(null);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [unlockError, setUnlockError] = useState<string | null>(null);
 
