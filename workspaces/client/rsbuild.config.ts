@@ -12,6 +12,7 @@ export default defineConfig({
   },
   html: {
     template: "./index.html",
+    title: "kakiage",
   },
   tools: {
     rspack: {
