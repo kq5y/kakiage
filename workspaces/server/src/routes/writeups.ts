@@ -155,10 +155,11 @@ const router = new Hono<Env>()
       201,
     );
   })
-  .get("/:id", withValidates({ param: idParamSchema, query: writeupQuerySchema }), async c => {
+  .get("/:id", withAuth(false), withValidates({ param: idParamSchema, query: writeupQuerySchema }), async c => {
     const db = getDB(c.env);
     const id = Number(c.req.valid("param").id);
     const { content: includeContent } = c.req.valid("query");
+    const user = c.get("user");
 
     const writeup = await db.query.writeups.findFirst({
       where: (writeups, { eq }) => eq(writeups.id, id),
@@ -181,6 +182,11 @@ const router = new Hono<Env>()
 
     if (!writeup) {
       return c.json(error("Writeup not found"), 404);
+    }
+
+    const isPrivilegedUser = user && (user.id === writeup.createdByUser.id || user.role === "admin");
+    if (writeup.password && !isPrivilegedUser && includeContent) {
+      return c.json(error("Unauthorized"), 401);
     }
 
     const { password: passwordHash, ...writeupWithoutPassword } = writeup;
