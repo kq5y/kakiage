@@ -1,6 +1,6 @@
 import { hcWithType, type InferRequestType } from "@kakiage/server/rpc";
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status?: number;
   body?: unknown;
   constructor(message: string, status?: number) {
