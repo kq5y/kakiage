@@ -31,7 +31,7 @@ export const getDiscordToken = async (env: Bindings, code: string) => {
   });
 
   if (!response.ok) {
-    console.log(await response.text(), env.DISCORD_CLIENT_ID, env.DISCORD_CLIENT_SECRET);
+    console.log(await response.text());
     throw new Error(`Failed to fetch Discord token: ${response.statusText}`);
   }
 
