@@ -52,7 +52,7 @@ export const updateCategory = async (
   id: number,
   payload: InferRequestType<(typeof apiClient.api.v1.categories)[":id"]["$patch"]>["json"],
 ) => {
-  const res = await apiClient.api.v1.categories[":id"].$patch({ param: { id: id.toString() }, json: payload });
+  const res = await apiClient.api.v1.categories[":id"].$patch({ param: { id }, json: payload });
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success)
@@ -66,7 +66,7 @@ export const updateCategory = async (
 };
 
 export const deleteCategory = async (id: number) => {
-  const res = await apiClient.api.v1.categories[":id"].$delete({ param: { id: id.toString() } });
+  const res = await apiClient.api.v1.categories[":id"].$delete({ param: { id } });
   const data = await res.json();
   if (res.ok && data.success) return data.success;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
@@ -91,7 +91,7 @@ export const getCtfs = async (query: InferRequestType<typeof apiClient.api.v1.ct
 };
 
 export const getCtfDetail = async (id: number) => {
-  const res = await apiClient.api.v1.ctfs[":id"].$get({ param: { id: id.toString() } });
+  const res = await apiClient.api.v1.ctfs[":id"].$get({ param: { id } });
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success)
@@ -146,7 +146,7 @@ export const updateCtf = async (
   id: number,
   payload: InferRequestType<(typeof apiClient.api.v1.ctfs)[":id"]["$patch"]>["json"],
 ) => {
-  const res = await apiClient.api.v1.ctfs[":id"].$patch({ param: { id: id.toString() }, json: payload });
+  const res = await apiClient.api.v1.ctfs[":id"].$patch({ param: { id }, json: payload });
   const data = await res.json();
   // TODO: replace zod parse
   if (res.ok && data.success)
@@ -162,7 +162,7 @@ export const updateCtf = async (
 };
 
 export const deleteCtf = async (id: number) => {
-  const res = await apiClient.api.v1.ctfs[":id"].$delete({ param: { id: id.toString() } });
+  const res = await apiClient.api.v1.ctfs[":id"].$delete({ param: { id } });
   const data = await res.json();
   if (res.ok && data.success) return data.success;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
@@ -255,7 +255,7 @@ export const createWriteup = async (payload: InferRequestType<typeof apiClient.a
 
 export const getWriteup = async (id: number, includeContent: boolean = false) => {
   const res = await apiClient.api.v1.writeups[":id"].$get({
-    param: { id: id.toString() },
+    param: { id },
     query: { content: includeContent ? "true" : undefined },
   });
   const data = await res.json();
@@ -290,7 +290,7 @@ export const getWriteup = async (id: number, includeContent: boolean = false) =>
 };
 
 export const getWriteupTags = async (id: number) => {
-  const res = await apiClient.api.v1.writeups[":id"].tags.$get({ param: { id: id.toString() } });
+  const res = await apiClient.api.v1.writeups[":id"].tags.$get({ param: { id } });
   const data = await res.json();
   if (res.ok && data.success)
     return data.data.map(item => ({
@@ -306,7 +306,7 @@ export const addWriteupTag = async (
   id: number,
   payload: InferRequestType<(typeof apiClient.api.v1.writeups)[":id"]["tags"]["$post"]>["json"],
 ) => {
-  const res = await apiClient.api.v1.writeups[":id"].tags.$post({ param: { id: id.toString() }, json: payload });
+  const res = await apiClient.api.v1.writeups[":id"].tags.$post({ param: { id }, json: payload });
   const data = await res.json();
   if (res.ok && data.success)
     return {
@@ -322,7 +322,7 @@ export const removeWriteupTag = async (
   id: number,
   payload: InferRequestType<(typeof apiClient.api.v1.writeups)[":id"]["tags"]["$delete"]>["json"],
 ) => {
-  const res = await apiClient.api.v1.writeups[":id"].tags.$delete({ param: { id: id.toString() }, json: payload });
+  const res = await apiClient.api.v1.writeups[":id"].tags.$delete({ param: { id }, json: payload });
   const data = await res.json();
   if (res.ok && data.success) return data.success;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
@@ -332,7 +332,7 @@ export const removeWriteupTag = async (
 export const getWriteupContent = async (id: number, token?: string) => {
   const headers = token ? { authorization: `Bearer ${token}` } : {};
   const res = await apiClient.api.v1.writeups[":id"].content.$get({
-    param: { id: id.toString() },
+    param: { id },
     header: headers,
   });
   const data = await res.json();
@@ -343,14 +343,15 @@ export const getWriteupContent = async (id: number, token?: string) => {
 
 export const unlockWriteup = async (id: number, password: string) => {
   const res = await apiClient.api.v1.writeups[":id"].unlock.$post({
-    param: { id: id.toString() },
+    param: { id },
     json: { password },
   });
   const data = await res.json();
-  if (res.ok && data.success) return {
-    token: data.data.token as string,
-    expiresAt: new Date(data.data.expiresAt),
-  };
+  if (res.ok && data.success)
+    return {
+      token: data.data.token as string,
+      expiresAt: new Date(data.data.expiresAt),
+    };
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
   throw new ApiError("Failed to fetch", res.status);
 };
@@ -359,7 +360,7 @@ export const updateWriteup = async (
   id: number,
   payload: InferRequestType<(typeof apiClient.api.v1.writeups)[":id"]["$patch"]>["json"],
 ) => {
-  const res = await apiClient.api.v1.writeups[":id"].$patch({ param: { id: id.toString() }, json: payload });
+  const res = await apiClient.api.v1.writeups[":id"].$patch({ param: { id }, json: payload });
   const data = await res.json();
   if (res.ok && data.success)
     return {
@@ -375,7 +376,7 @@ export const updateWriteupContent = async (
   id: number,
   payload: InferRequestType<(typeof apiClient.api.v1.writeups)[":id"]["content"]["$patch"]>["json"],
 ) => {
-  const res = await apiClient.api.v1.writeups[":id"].content.$patch({ param: { id: id.toString() }, json: payload });
+  const res = await apiClient.api.v1.writeups[":id"].content.$patch({ param: { id }, json: payload });
   const data = await res.json();
   if (res.ok && data.success)
     return {
@@ -388,7 +389,7 @@ export const updateWriteupContent = async (
 };
 
 export const deleteWriteup = async (id: number) => {
-  const res = await apiClient.api.v1.writeups[":id"].$delete({ param: { id: id.toString() } });
+  const res = await apiClient.api.v1.writeups[":id"].$delete({ param: { id } });
   const data = await res.json();
   if (res.ok && data.success) return data.success;
   if (!data.success && data.message) throw new ApiError(data.message, res.status);

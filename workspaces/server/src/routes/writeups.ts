@@ -1,6 +1,7 @@
 import { markdownToHtml } from "@kakiage/processor";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { etag } from "hono/etag";
 import { sign, verify } from "hono/jwt";
 import { z } from "zod";
 
@@ -11,7 +12,7 @@ import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
 import { getHashHex } from "@/utils/hash";
 
-const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
+const idParamSchema = z.object({ id: z.coerce.number().int().min(1) });
 const writeupsSearchQuerySchema = z.object({
   q: z.string().min(1).max(100).optional(),
   categoryId: z.number().min(1).optional(),
@@ -62,6 +63,8 @@ const writeupUnlockBodySchema = z.object({
   password: z.string().min(1),
 });
 
+const kvKeyForWriteup = (id: number, updatedAt: Date) => `writeup-html:${id}:${updatedAt.getTime()}`;
+
 const router = new Hono<Env>()
   .get("/", withValidates({ query: writeupsSearchQuerySchema }), async c => {
     const db = getDB(c.env);
@@ -80,7 +83,7 @@ const router = new Hono<Env>()
       });
       writeupIds = writeupsByTagRecords.map(record => record.writeupId);
       if (writeupIds.length === 0) {
-        return c.json(error("No writeups found for this tag"), 404);
+        return c.json(success([]), 200);
       }
     }
 
@@ -157,7 +160,7 @@ const router = new Hono<Env>()
   })
   .get("/:id", withAuth(false), withValidates({ param: idParamSchema, query: writeupQuerySchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { content: includeContent } = c.req.valid("query");
     const user = c.get("user");
 
@@ -202,7 +205,7 @@ const router = new Hono<Env>()
   })
   .get("/:id/tags", withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
 
     const writeup = await db.query.writeups.findFirst({
       where: (writeups, { eq }) => eq(writeups.id, id),
@@ -229,7 +232,7 @@ const router = new Hono<Env>()
   })
   .post("/:id/tags", withAuth(true), withValidates({ param: idParamSchema, json: writeupTagPostSchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { name } = c.req.valid("json");
     const user = c.get("user");
 
@@ -264,7 +267,7 @@ const router = new Hono<Env>()
     withValidates({ param: idParamSchema, json: writeupTagDeleteSchema }),
     async c => {
       const db = getDB(c.env);
-      const id = Number(c.req.valid("param").id);
+      const id = c.req.valid("param").id;
       const { id: tagId } = c.req.valid("json");
       const user = c.get("user");
 
@@ -290,7 +293,7 @@ const router = new Hono<Env>()
   )
   .post("/:id/unlock", withValidates({ param: idParamSchema, json: writeupUnlockBodySchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { password } = c.req.valid("json");
 
     const writeup = await db.query.writeups.findFirst({
@@ -337,10 +340,11 @@ const router = new Hono<Env>()
     "/:id/content",
     withAuth(false),
     withValidates({ param: idParamSchema, header: writeupContentHeaderSchema }),
+    etag(),
     async c => {
       const db = getDB(c.env);
       const user = c.get("user");
-      const id = Number(c.req.valid("param").id);
+      const id = c.req.valid("param").id;
       const authorization = c.req.valid("header").authorization;
 
       const writeup = await db.query.writeups.findFirst({
@@ -375,27 +379,18 @@ const router = new Hono<Env>()
         }
       }
 
-      const cache = caches.default;
-      const updatedAtTimestamp = writeup.updatedAt.getTime();
-      const cacheUrl = new URL(`/cache/writeup-html/${id}/${updatedAtTimestamp}`, c.req.url);
-      const cacheKey = new Request(cacheUrl.href);
-
-      const response = await cache.match(cacheKey);
-      let html: string;
-
-      if (response) {
-        html = await response.text();
-      } else {
+      const key = kvKeyForWriteup(id, writeup.updatedAt);
+      let html = await c.env.KV.get(key);
+      if (!html) {
         html = await markdownToHtml(writeup.content);
-        const cacheResponse = new Response(html, {
-          headers: {
-            "Cache-Control": "public, max-age=3600",
-          },
-        });
-        c.executionCtx.waitUntil(cache.put(cacheKey, cacheResponse));
+        await c.env.KV.put(key, html);
       }
 
-      return c.json(success(html), 200);
+      return c.json(success(html), 200, {
+        "Cache-Control": writeup.password
+          ? "private, max-age=0, must-revalidate"
+          : "public, max-age=3600, s-maxage=3600",
+      });
     },
   )
   .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async c => {
@@ -471,6 +466,10 @@ const router = new Hono<Env>()
       if (!writeup) {
         return c.json(error("Failed to update writeup"), 500);
       }
+
+      const html = await markdownToHtml(writeup.content);
+      const key = kvKeyForWriteup(id, writeup.updatedAt);
+      await c.env.KV.put(key, html);
 
       return c.json(
         success({

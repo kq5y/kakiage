@@ -8,7 +8,7 @@ import { error, success } from "@/libs/response";
 import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
 
-const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
+const idParamSchema = z.object({ id: z.coerce.number().int().min(1) });
 const ctfSearchQuerySchema = z.object({
   pageSize: z.number().min(1).max(100).optional(),
   page: z.number().min(1).optional(),
@@ -52,7 +52,7 @@ const router = new Hono<Env>()
   })
   .get("/:id", withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const ctf = await db.query.ctfs.findFirst({
       where: eq(ctfs.id, id),
       with: {
@@ -90,7 +90,7 @@ const router = new Hono<Env>()
   })
   .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: ctfBodySchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { name, url, startAt, endAt } = c.req.valid("json");
     const [ctf] = await db
       .update(ctfs)
@@ -109,7 +109,7 @@ const router = new Hono<Env>()
   })
   .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const deleted = await db.delete(ctfs).where(eq(ctfs.id, id)).returning();
     if (deleted.length === 0) {
       return c.json(error("CTF not found"), 404);
