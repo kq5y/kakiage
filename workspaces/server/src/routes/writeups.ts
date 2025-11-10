@@ -82,7 +82,7 @@ const router = new Hono<Env>()
       });
       writeupIds = writeupsByTagRecords.map(record => record.writeupId);
       if (writeupIds.length === 0) {
-        return c.json(error("No writeups found for this tag"), 404);
+        return c.json(success([]), 200);
       }
     }
 
