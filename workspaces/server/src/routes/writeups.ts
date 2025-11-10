@@ -387,7 +387,9 @@ const router = new Hono<Env>()
       }
 
       return c.json(success(html), 200, {
-        "Cache-Control": "private, max-age=0, must-revalidate",
+        "Cache-Control": writeup.password
+          ? "private, max-age=0, must-revalidate"
+          : "public, max-age=3600, s-maxage=3600",
       });
     },
   )
