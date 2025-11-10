@@ -1,6 +1,7 @@
 import { markdownToHtml } from "@kakiage/processor";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
+import { etag } from 'hono/etag';
 import { sign, verify } from "hono/jwt";
 import { z } from "zod";
 
@@ -339,6 +340,7 @@ const router = new Hono<Env>()
     "/:id/content",
     withAuth(false),
     withValidates({ param: idParamSchema, header: writeupContentHeaderSchema }),
+    etag(),
     async c => {
       const db = getDB(c.env);
       const user = c.get("user");
@@ -384,21 +386,8 @@ const router = new Hono<Env>()
         await c.env.KV.put(key, html);
       }
 
-      const etag = await getHashHex(html);
-      const inm = c.req.header("If-None-Match");
-      if (inm && inm === etag) {
-        return new Response(null, {
-          status: 304,
-          headers: {
-            ETag: etag,
-            "Cache-Control": "private, max-age=0, must-revalidate",
-          },
-        });
-      }
-
       return c.json(success(html), 200, {
-        ETag: etag,
-        "Cache-Control": "private, max-age=0, must-revalidate",
+        "Cache-Control": "private, max-age=0, must-revalidate"
       });
     },
   )
