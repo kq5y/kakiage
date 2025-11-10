@@ -347,10 +347,11 @@ export const unlockWriteup = async (id: number, password: string) => {
     json: { password },
   });
   const data = await res.json();
-  if (res.ok && data.success) return {
-    token: data.data.token as string,
-    expiresAt: new Date(data.data.expiresAt),
-  };
+  if (res.ok && data.success)
+    return {
+      token: data.data.token as string,
+      expiresAt: new Date(data.data.expiresAt),
+    };
   if (!data.success && data.message) throw new ApiError(data.message, res.status);
   throw new ApiError("Failed to fetch", res.status);
 };

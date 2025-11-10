@@ -1,7 +1,7 @@
 import { markdownToHtml } from "@kakiage/processor";
 import { and, eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { etag } from 'hono/etag';
+import { etag } from "hono/etag";
 import { sign, verify } from "hono/jwt";
 import { z } from "zod";
 
@@ -387,7 +387,7 @@ const router = new Hono<Env>()
       }
 
       return c.json(success(html), 200, {
-        "Cache-Control": "private, max-age=0, must-revalidate"
+        "Cache-Control": "private, max-age=0, must-revalidate",
       });
     },
   )
