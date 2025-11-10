@@ -12,7 +12,7 @@ import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
 import { getHashHex } from "@/utils/hash";
 
-const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
+const idParamSchema = z.object({ id: z.coerce.number().int().min(1) });
 const writeupsSearchQuerySchema = z.object({
   q: z.string().min(1).max(100).optional(),
   categoryId: z.number().min(1).optional(),
@@ -160,7 +160,7 @@ const router = new Hono<Env>()
   })
   .get("/:id", withAuth(false), withValidates({ param: idParamSchema, query: writeupQuerySchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { content: includeContent } = c.req.valid("query");
     const user = c.get("user");
 
@@ -205,7 +205,7 @@ const router = new Hono<Env>()
   })
   .get("/:id/tags", withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
 
     const writeup = await db.query.writeups.findFirst({
       where: (writeups, { eq }) => eq(writeups.id, id),
@@ -232,7 +232,7 @@ const router = new Hono<Env>()
   })
   .post("/:id/tags", withAuth(true), withValidates({ param: idParamSchema, json: writeupTagPostSchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { name } = c.req.valid("json");
     const user = c.get("user");
 
@@ -267,7 +267,7 @@ const router = new Hono<Env>()
     withValidates({ param: idParamSchema, json: writeupTagDeleteSchema }),
     async c => {
       const db = getDB(c.env);
-      const id = Number(c.req.valid("param").id);
+      const id = c.req.valid("param").id;
       const { id: tagId } = c.req.valid("json");
       const user = c.get("user");
 
@@ -293,7 +293,7 @@ const router = new Hono<Env>()
   )
   .post("/:id/unlock", withValidates({ param: idParamSchema, json: writeupUnlockBodySchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { password } = c.req.valid("json");
 
     const writeup = await db.query.writeups.findFirst({
@@ -344,7 +344,7 @@ const router = new Hono<Env>()
     async c => {
       const db = getDB(c.env);
       const user = c.get("user");
-      const id = Number(c.req.valid("param").id);
+      const id = c.req.valid("param").id;
       const authorization = c.req.valid("header").authorization;
 
       const writeup = await db.query.writeups.findFirst({

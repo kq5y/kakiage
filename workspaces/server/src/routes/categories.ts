@@ -8,7 +8,7 @@ import { error, success } from "@/libs/response";
 import { withAuth } from "@/middlewares/auth";
 import { withValidates } from "@/middlewares/validate";
 
-const idParamSchema = z.object({ id: z.string().regex(/^\d+$/, "ID must be numeric") });
+const idParamSchema = z.object({ id: z.coerce.number().int().min(1) });
 const categoryBodySchema = z.object({
   name: z.string().min(1, "Name is required"),
   color: z.string().regex(/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/, "Color must be a valid hex code"),
@@ -40,7 +40,7 @@ const router = new Hono<Env>()
   })
   .patch("/:id", withAuth(true, true), withValidates({ param: idParamSchema, json: categoryBodySchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const { name, color } = c.req.valid("json");
     try {
       const [category] = await db.update(categories).set({ name, color }).where(eq(categories.id, id)).returning();
@@ -54,7 +54,7 @@ const router = new Hono<Env>()
   })
   .delete("/:id", withAuth(true, true), withValidates({ param: idParamSchema }), async c => {
     const db = getDB(c.env);
-    const id = Number(c.req.valid("param").id);
+    const id = c.req.valid("param").id;
     const deleted = await db.delete(categories).where(eq(categories.id, id)).returning();
     if (deleted.length === 0) {
       return c.json(error("Category not found"), 404);
