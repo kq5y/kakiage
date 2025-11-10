@@ -62,6 +62,8 @@ const writeupUnlockBodySchema = z.object({
   password: z.string().min(1),
 });
 
+const kvKeyForWriteup = (id: number, updatedAt: Date) => `writeup-html:${id}:${updatedAt.getTime()}`;
+
 const router = new Hono<Env>()
   .get("/", withValidates({ query: writeupsSearchQuerySchema }), async c => {
     const db = getDB(c.env);
@@ -375,27 +377,29 @@ const router = new Hono<Env>()
         }
       }
 
-      const cache = caches.default;
-      const updatedAtTimestamp = writeup.updatedAt.getTime();
-      const cacheUrl = new URL(`/cache/writeup-html/${id}/${updatedAtTimestamp}`, c.req.url);
-      const cacheKey = new Request(cacheUrl.href);
-
-      const response = await cache.match(cacheKey);
-      let html: string;
-
-      if (response) {
-        html = await response.text();
-      } else {
+      const key = kvKeyForWriteup(id, writeup.updatedAt);
+      let html = await c.env.KV.get(key);
+      if (!html) {
         html = await markdownToHtml(writeup.content);
-        const cacheResponse = new Response(html, {
-          headers: {
-            "Cache-Control": "public, max-age=3600",
-          },
-        });
-        c.executionCtx.waitUntil(cache.put(cacheKey, cacheResponse));
+        await c.env.KV.put(key, html);
       }
 
-      return c.json(success(html), 200);
+      const etag = await getHashHex(html);
+      const inm = c.req.header("If-None-Match");
+      if (inm && inm === etag) {
+        return new Response(null, {
+          status: 304,
+          headers: {
+            ETag: etag,
+            "Cache-Control": "private, max-age=0, must-revalidate",
+          },
+        });
+      }
+
+      return c.json(success(html), 200, {
+        ETag: etag,
+        "Cache-Control": "private, max-age=0, must-revalidate",
+      });
     },
   )
   .patch("/:id", withAuth(true), withValidates({ param: idParamSchema, json: writeupUpdateBodySchema }), async c => {
@@ -471,6 +475,10 @@ const router = new Hono<Env>()
       if (!writeup) {
         return c.json(error("Failed to update writeup"), 500);
       }
+
+      const html = await markdownToHtml(writeup.content);
+      const key = kvKeyForWriteup(id, writeup.updatedAt);
+      await c.env.KV.put(key, html);
 
       return c.json(
         success({

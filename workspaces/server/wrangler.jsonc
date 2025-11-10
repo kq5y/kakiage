@@ -21,5 +21,11 @@
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
-  }
+  },
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "ed137d7468684165a134e9c8b633aa87",
+    }
+  ]
 }
